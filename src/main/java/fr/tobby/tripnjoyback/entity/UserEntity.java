@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.entity;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -10,6 +11,7 @@ import java.time.Instant;
 @Table(name  = "users")
 @Builder
 @Getter
+@NoArgsConstructor
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,10 +29,6 @@ public class UserEntity {
     @JoinColumn(name = "city_id")
     private CityEntity city;
     private Instant createdDate;
-
-    protected UserEntity()
-    {
-    }
 
     public UserEntity(Long id, String firstName, String lastName, String password, String email, Instant birthdate, GenderEntity gender, String profile_picture, CityEntity city, Instant createdDate) {
         this.id = id;
