@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.UserEntity;
+import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
@@ -25,10 +26,10 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public UserEntity createUser(UserCreationModel model)
+    public UserEntity createUser(UserCreationModel model) throws UserCreationException
     {
         if (userRepository.findByEmail(model.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email is already in use");
+            throw new UserCreationException("Email is already in use");
         }
         UserEntity userEntity = UserEntity.builder()
                 .firstName(model.getFirstname())
