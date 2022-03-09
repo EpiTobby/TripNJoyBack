@@ -26,9 +26,9 @@ public class TripnjoyBackApplication {
 
 			GenderEntity gender = genderRepository.findByValue("male").get();
 			System.out.println(gender.getId());
-			var city = cityRepository.save(new CityEntity("Paris"));
+			// var city = cityRepository.save(new CityEntity("Paris"));
 
-			userRepository.save(new UserEntity("coucou", "Robert", "passwd", "truc", Instant.now(), gender, "", city, null));
+			// userRepository.save(new UserEntity("coucou", "Robert", "passwd", "truc", Instant.now(), gender, "", city, null));
 
 			userRepository.findAll().forEach(user -> System.out.println(user.getId()));
 		};

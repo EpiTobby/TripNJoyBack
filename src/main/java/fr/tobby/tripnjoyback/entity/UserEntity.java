@@ -32,8 +32,8 @@ public class UserEntity {
     {
     }
 
-    public UserEntity(String firstName, String lastName, String password, String email, Instant birthdate, GenderEntity gender, String profile_picture, CityEntity city, Instant createdDate) {
-        this.id = null;
+    public UserEntity(Long id, String firstName, String lastName, String password, String email, Instant birthdate, GenderEntity gender, String profile_picture, CityEntity city, Instant createdDate) {
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.password = password;
