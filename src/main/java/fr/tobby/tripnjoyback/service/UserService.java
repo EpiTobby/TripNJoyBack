@@ -6,6 +6,8 @@ import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -17,13 +19,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final GenderRepository genderRepository;
     private final CityService cityService;
+    private final JavaMailSender mailSender;
 
     public UserService(UserRepository userRepository, GenderRepository genderRepository,
-                       final CityService cityService)
+                       final CityService cityService, final JavaMailSender mailSender)
     {
         this.userRepository = userRepository;
         this.genderRepository = genderRepository;
         this.cityService = cityService;
+        this.mailSender = mailSender;
     }
 
     public Iterable<UserEntity> getAll()
@@ -46,7 +50,18 @@ public class UserService {
                 .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                 .phoneNumber(model.getPhoneNumber())
                 .build();
+        sendSuccessMail(userEntity);
         return userRepository.save(userEntity);
+    }
+
+    private void sendSuccessMail(UserEntity user)
+    {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setFrom("tripnjoy.contact@gmail.com");
+        mailMessage.setTo(user.getEmail());
+        mailMessage.setSubject("Confirmation de la création de votre compte TripNJoy");
+        mailMessage.setText("Bonjour " + user.getFirstName() + ",\n\tBienvenue dans notre application.\nCordialement, l'équipe TripNJoy");
+        mailSender.send(mailMessage);
     }
 
     public Optional<UserEntity> findById(final long id)
