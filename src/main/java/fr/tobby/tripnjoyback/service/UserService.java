@@ -9,6 +9,7 @@ import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -46,6 +47,11 @@ public class UserService {
                 .phoneNumber(model.getPhoneNumber())
                 .build();
         return userRepository.save(userEntity);
+    }
+
+    public Optional<UserEntity> findById(final long id)
+    {
+        return userRepository.findById(id);
     }
 
     public UserEntity updatePhoneNumber(long userId, String phoneNumber)

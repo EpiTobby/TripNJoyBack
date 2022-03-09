@@ -31,6 +31,12 @@ public class UserController {
         return userService.createUser(model);
     }
 
+    @GetMapping("{id}")
+    public UserEntity getUserById(@PathVariable("id") final long userId)
+    {
+        return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+    }
+
     @PatchMapping("{id}/phone")
     public UserEntity UpdatePhoneNumber(@PathVariable("id") final long userId, String phoneNumber)
     {
