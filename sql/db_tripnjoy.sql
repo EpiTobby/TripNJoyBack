@@ -203,8 +203,8 @@ ALTER TABLE "expenses_members" ADD FOREIGN KEY ("expense_id") REFERENCES "expens
 
 ALTER TABLE "suggestions" ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
 
-INSERT INTO "genders" VALUES (0,"male");
+INSERT INTO "genders" (value) VALUES ('male');
 
-INSERT INTO "genders" VALUES (1,"female");
+INSERT INTO "genders" (value) VALUES ('female');
 
-INSERT INTO "genders" VALUES (2,"other");
+INSERT INTO "genders" (value) VALUES ('other');
