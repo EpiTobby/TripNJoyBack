@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
+import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
@@ -14,11 +15,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final GenderRepository genderRepository;
+    private final CityService cityService;
 
-    public UserService(UserRepository userRepository, GenderRepository genderRepository)
+    public UserService(UserRepository userRepository, GenderRepository genderRepository,
+                       final CityService cityService)
     {
         this.userRepository = userRepository;
         this.genderRepository = genderRepository;
+        this.cityService = cityService;
     }
 
     public Iterable<UserEntity> getAll()
@@ -38,8 +42,23 @@ public class UserService {
                 .email(model.getEmail())
                 .birthdate(model.getBirthDate())
                 .createdDate(Instant.now())
-                .gender(genderRepository.findByValue(model.getGender()).get())
+                .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
+                .phoneNumber(model.getPhoneNumber())
                 .build();
         return userRepository.save(userEntity);
+    }
+
+    public UserEntity updatePhoneNumber(long userId, String phoneNumber)
+    {
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        user.setPhoneNumber(phoneNumber);
+        return user;
+    }
+
+    public UserEntity updateCity(long userId, String city)
+    {
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        user.setCity(cityService.getOrAddCity(city));
+        return user;
     }
 }

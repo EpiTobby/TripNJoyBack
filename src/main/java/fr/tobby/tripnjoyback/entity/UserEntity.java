@@ -1,8 +1,6 @@
 package fr.tobby.tripnjoyback.entity;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -12,6 +10,7 @@ import java.time.Instant;
 @Builder
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,12 +25,15 @@ public class UserEntity {
     private GenderEntity gender;
     private String profile_picture;
     @ManyToOne
+    @Setter
     @JoinColumn(name = "city_id")
     private CityEntity city;
     private Instant createdDate;
+    @Setter
+    private String phoneNumber;
 
-    public UserEntity(Long id, String firstName, String lastName, String password, String email, Instant birthdate, GenderEntity gender, String profile_picture, CityEntity city, Instant createdDate) {
-        this.id = id;
+    public UserEntity(String firstName, String lastName, String password, String email, Instant birthdate, GenderEntity gender, String profile_picture, CityEntity city, Instant createdDate, String phoneNumber) {
+        this.id = null;
         this.firstName = firstName;
         this.lastName = lastName;
         this.password = password;
@@ -41,5 +43,6 @@ public class UserEntity {
         this.profile_picture = profile_picture;
         this.city = city;
         this.createdDate = createdDate;
+        this.phoneNumber = phoneNumber;
     }
 }

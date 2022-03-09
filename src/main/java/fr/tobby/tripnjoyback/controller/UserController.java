@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.controller;
 
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
+import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -30,10 +31,30 @@ public class UserController {
         return userService.createUser(model);
     }
 
+    @PatchMapping("{id}/phone")
+    public UserEntity UpdatePhoneNumber(@PathVariable("id") final long userId, String phoneNumber)
+    {
+        return userService.updatePhoneNumber(userId,phoneNumber);
+    }
+
+    @PatchMapping("{id}/city")
+    public UserEntity UpdateCityNumber(@PathVariable("id") final long userId, String city)
+    {
+        return userService.updateCity(userId,city);
+    }
+
     @ExceptionHandler(UserCreationException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String creationError(UserCreationException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(UserNotFoundException exception)
     {
         return exception.getMessage();
     }
