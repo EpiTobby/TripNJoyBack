@@ -42,11 +42,11 @@ public class UserService {
             throw new UserCreationException("Email is already in use");
         }
         UserEntity userEntity = UserEntity.builder()
-                .firstName(model.getFirstname())
-                .lastName(model.getLastname())
+                .firstname(model.getFirstname())
+                .lastname(model.getLastname())
                 .password(model.getPassword())
                 .email(model.getEmail())
-                .birthdate(model.getBirthDate())
+                .birthDate(model.getBirthDate())
                 .createdDate(Instant.now())
                 .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                 .phoneNumber(model.getPhoneNumber())
@@ -61,7 +61,7 @@ public class UserService {
         mailMessage.setFrom("tripnjoy.contact@gmail.com");
         mailMessage.setTo(user.getEmail());
         mailMessage.setSubject("Confirmation de la création de votre compte TripNJoy");
-        mailMessage.setText("Bonjour " + user.getFirstName() + ",\n\tBienvenue dans notre application.\nCordialement, l'équipe TripNJoy");
+        mailMessage.setText("Bonjour " + user.getFirstname() + ",\n\tBienvenue dans notre application.\nCordialement, l'équipe TripNJoy");
         mailSender.send(mailMessage);
     }
 

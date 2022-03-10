@@ -1,6 +1,5 @@
 package fr.tobby.tripnjoyback.model;
 
-import fr.tobby.tripnjoyback.entity.CityEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,13 +24,13 @@ public class UserModel {
     public static UserModel of(final UserEntity entity)
     {
         return new UserModel(
-                entity.getFirstName(),
-                entity.getLastName(),
+                entity.getFirstname(),
+                entity.getLastname(),
                 entity.getPassword(),
                 entity.getEmail(),
-                entity.getBirthdate(),
+                entity.getBirthDate(),
                 Gender.of(entity.getGender()),
-                entity.getProfile_picture(),
+                entity.getProfilePicture(),
                 CityModel.of(entity.getCity()),
                 entity.getCreatedDate(),
                 entity.getPhoneNumber()

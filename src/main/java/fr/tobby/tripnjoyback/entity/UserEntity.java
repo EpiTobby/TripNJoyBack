@@ -15,15 +15,15 @@ public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String firstName;
-    private String lastName;
+    private String firstname;
+    private String lastname;
     private String password;
     private String email;
-    private Instant birthdate;
+    private Instant birthDate;
     @ManyToOne()
     @JoinColumn(name = "gender_id")
     private GenderEntity gender;
-    private String profile_picture;
+    private String profilePicture;
     @ManyToOne
     @Setter
     @JoinColumn(name = "city_id")
@@ -32,15 +32,15 @@ public class UserEntity {
     @Setter
     private String phoneNumber;
 
-    public UserEntity(String firstName, String lastName, String password, String email, Instant birthdate, GenderEntity gender, String profile_picture, CityEntity city, Instant createdDate, String phoneNumber) {
+    public UserEntity(String firstname, String lastname, String password, String email, Instant birthDate, GenderEntity gender, String profilePicture, CityEntity city, Instant createdDate, String phoneNumber) {
         this.id = null;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.firstname = firstname;
+        this.lastname = lastname;
         this.password = password;
         this.email = email;
-        this.birthdate = birthdate;
+        this.birthDate = birthDate;
         this.gender = gender;
-        this.profile_picture = profile_picture;
+        this.profilePicture = profilePicture;
         this.city = city;
         this.createdDate = createdDate;
         this.phoneNumber = phoneNumber;
