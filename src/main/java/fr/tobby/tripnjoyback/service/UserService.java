@@ -10,6 +10,7 @@ import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -36,6 +37,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    @Transactional
     public UserModel createUser(UserCreationModel model) throws UserCreationException
     {
         if (userRepository.findByEmail(model.getEmail()).isPresent()) {
@@ -70,6 +72,7 @@ public class UserService {
         return userRepository.findById(id).map(UserModel::of);
     }
 
+    @Transactional
     public UserModel updatePhoneNumber(long userId, String phoneNumber) throws UserNotFoundException
     {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
@@ -77,6 +80,7 @@ public class UserService {
         return UserModel.of(user);
     }
 
+    @Transactional
     public UserModel updateCity(long userId, String city) throws UserNotFoundException
     {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
