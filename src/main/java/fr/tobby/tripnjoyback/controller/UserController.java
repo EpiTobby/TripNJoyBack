@@ -4,6 +4,7 @@ import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
+import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -26,25 +27,25 @@ public class UserController {
     }
 
     @PostMapping("")
-    public UserEntity create(@RequestBody UserCreationModel model)
+    public UserModel create(@RequestBody UserCreationModel model)
     {
         return userService.createUser(model);
     }
 
     @GetMapping("{id}")
-    public UserEntity getUserById(@PathVariable("id") final long userId)
+    public UserModel getUserById(@PathVariable("id") final long userId)
     {
         return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
     }
 
     @PatchMapping("{id}/phone")
-    public UserEntity UpdatePhoneNumber(@PathVariable("id") final long userId, String phoneNumber)
+    public UserModel UpdatePhoneNumber(@PathVariable("id") final long userId, String phoneNumber)
     {
         return userService.updatePhoneNumber(userId,phoneNumber);
     }
 
     @PatchMapping("{id}/city")
-    public UserEntity UpdateCityNumber(@PathVariable("id") final long userId, String city)
+    public UserModel UpdateCityNumber(@PathVariable("id") final long userId, String city)
     {
         return userService.updateCity(userId,city);
     }

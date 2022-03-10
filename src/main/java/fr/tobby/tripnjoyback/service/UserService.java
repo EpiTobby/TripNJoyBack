@@ -4,6 +4,7 @@ import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
+import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.mail.SimpleMailMessage;
@@ -35,7 +36,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public UserEntity createUser(UserCreationModel model) throws UserCreationException
+    public UserModel createUser(UserCreationModel model) throws UserCreationException
     {
         if (userRepository.findByEmail(model.getEmail()).isPresent()) {
             throw new UserCreationException("Email is already in use");
@@ -51,7 +52,7 @@ public class UserService {
                 .phoneNumber(model.getPhoneNumber())
                 .build();
         sendSuccessMail(userEntity);
-        return userRepository.save(userEntity);
+        return UserModel.of(userRepository.save(userEntity));
     }
 
     private void sendSuccessMail(UserEntity user)
@@ -64,22 +65,22 @@ public class UserService {
         mailSender.send(mailMessage);
     }
 
-    public Optional<UserEntity> findById(final long id)
+    public Optional<UserModel> findById(final long id)
     {
-        return userRepository.findById(id);
+        return userRepository.findById(id).map(UserModel::of);
     }
 
-    public UserEntity updatePhoneNumber(long userId, String phoneNumber)
+    public UserModel updatePhoneNumber(long userId, String phoneNumber) throws UserNotFoundException
     {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         user.setPhoneNumber(phoneNumber);
-        return user;
+        return UserModel.of(user);
     }
 
-    public UserEntity updateCity(long userId, String city)
+    public UserModel updateCity(long userId, String city) throws UserNotFoundException
     {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         user.setCity(cityService.getOrAddCity(city));
-        return user;
+        return UserModel.of(user);
     }
 }
