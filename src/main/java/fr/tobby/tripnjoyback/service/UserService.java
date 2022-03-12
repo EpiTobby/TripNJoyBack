@@ -9,6 +9,8 @@ import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ public class UserService {
     private final GenderRepository genderRepository;
     private final CityService cityService;
     private final JavaMailSender mailSender;
+    private final PasswordEncoder encoder;
 
     public UserService(UserRepository userRepository, GenderRepository genderRepository,
                        final CityService cityService, final JavaMailSender mailSender)
@@ -30,6 +33,7 @@ public class UserService {
         this.genderRepository = genderRepository;
         this.cityService = cityService;
         this.mailSender = mailSender;
+        this.encoder = new BCryptPasswordEncoder();
     }
 
     public Iterable<UserEntity> getAll()
@@ -46,7 +50,7 @@ public class UserService {
         UserEntity userEntity = UserEntity.builder()
                 .firstname(model.getFirstname())
                 .lastname(model.getLastname())
-                .password(model.getPassword())
+                .password(encoder.encode(model.getPassword()))
                 .email(model.getEmail())
                 .birthDate(model.getBirthDate())
                 .createdDate(Instant.now())
