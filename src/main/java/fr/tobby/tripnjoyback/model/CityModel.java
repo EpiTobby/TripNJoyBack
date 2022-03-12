@@ -12,6 +12,8 @@ public class CityModel {
 
     public static CityModel of(final CityEntity entity)
     {
+        if (entity == null)
+            return null;
         return new CityModel(entity.getName());
     }
 }
