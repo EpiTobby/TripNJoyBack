@@ -1,6 +1,9 @@
 package fr.tobby.tripnjoyback.controller;
 
+import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
+import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
+import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
@@ -71,6 +74,22 @@ public class UserController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(UserNotFoundException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(BadConfirmationCodeException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(BadConfirmationCodeException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(ExpiredCodeException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String getError(ExpiredCodeException exception)
     {
         return exception.getMessage();
     }

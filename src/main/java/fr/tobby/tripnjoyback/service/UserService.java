@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
+import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Optional;
+
+import static java.time.LocalTime.now;
 
 @Service
 public class UserService {
@@ -75,7 +78,7 @@ public class UserService {
         mailMessage.setTo(user.getEmail());
         mailMessage.setSubject("Code de confirmation TripNJoy");
         mailMessage.setText("Bonjour " + user.getFirstname() + ",\n\tVoici votre code de confirmation: "
-                + confirmationCode.getValue() +"\nCordialement, l'équipe TripNJoy");
+                + confirmationCode.getValue() +"\nCe dernier expirera dans 24 heures.\nCordialement, l'équipe TripNJoy");
         mailSender.send(mailMessage);
     }
 
@@ -94,9 +97,12 @@ public class UserService {
         return userRepository.findById(id).map(UserModel::of);
     }
 
-    public boolean findByConfirmationCode(long userId, String value) throws BadConfirmationCodeException{
-        ConfirmationCodeEntity confirmationCode= confirmationCodeRepository.findByValue(value).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
-        return userId == confirmationCode.getUserId();
+    public boolean findByConfirmationCode(long userId, String value) throws BadConfirmationCodeException, ExpiredCodeException{
+        ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(value).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
+        Boolean isValid = userId == confirmationCode.getUserId();
+        if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0)
+            throw new ExpiredCodeException("This code has expired");
+        return isValid;
     }
 
     @Transactional
