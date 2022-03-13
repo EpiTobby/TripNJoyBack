@@ -15,10 +15,13 @@ public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "first_name")
     private String firstname;
+    @Column(name = "last_name")
     private String lastname;
     private String password;
     private String email;
+    @Column(name = "birthdate")
     private Instant birthDate;
     @ManyToOne()
     @JoinColumn(name = "gender_id")
