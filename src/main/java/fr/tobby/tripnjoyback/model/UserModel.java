@@ -20,6 +20,7 @@ public class UserModel {
     private CityModel city;
     private Instant createdDate;
     private String phoneNumber;
+    private boolean registered;
 
     public static UserModel of(final UserEntity entity)
     {
@@ -33,7 +34,8 @@ public class UserModel {
                 entity.getProfilePicture(),
                 CityModel.of(entity.getCity()),
                 entity.getCreatedDate(),
-                entity.getPhoneNumber()
+                entity.getPhoneNumber(),
+                entity.isRegistered()
         );
     }
 }

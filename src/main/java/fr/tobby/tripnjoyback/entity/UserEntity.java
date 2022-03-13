@@ -34,6 +34,8 @@ public class UserEntity {
     private Instant createdDate;
     @Setter
     private String phoneNumber;
+    @Setter
+    private boolean registered;
 
     public UserEntity(String firstname, String lastname, String password, String email, Instant birthDate, GenderEntity gender, String profilePicture, CityEntity city, Instant createdDate, String phoneNumber) {
         this.id = null;
@@ -47,5 +49,6 @@ public class UserEntity {
         this.city = city;
         this.createdDate = createdDate;
         this.phoneNumber = phoneNumber;
+        this.registered = false;
     }
 }

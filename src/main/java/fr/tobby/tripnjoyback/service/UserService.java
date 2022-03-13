@@ -1,10 +1,13 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
+import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.model.UserModel;
+import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.mail.SimpleMailMessage;
@@ -21,16 +24,18 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final GenderRepository genderRepository;
+    private final ConfirmationCodeRepository confirmationCodeRepository;
     private final CityService cityService;
     private final JavaMailSender mailSender;
     private final PasswordEncoder encoder;
 
     public UserService(UserRepository userRepository, GenderRepository genderRepository,
-                       final CityService cityService, final JavaMailSender mailSender,
-                       final PasswordEncoder encoder)
+                       final ConfirmationCodeRepository confirmationCodeRepository, final CityService cityService,
+                       final JavaMailSender mailSender, final PasswordEncoder encoder)
     {
         this.userRepository = userRepository;
         this.genderRepository = genderRepository;
+        this.confirmationCodeRepository = confirmationCodeRepository;
         this.cityService = cityService;
         this.mailSender = mailSender;
         this.encoder = encoder;
@@ -56,9 +61,22 @@ public class UserService {
                 .createdDate(Instant.now())
                 .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                 .phoneNumber(model.getPhoneNumber())
+                .registered(false)
                 .build();
-//        sendSuccessMail(userEntity);
+        ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userEntity.getId());
+        sendConfirmationCodeMail(userEntity, confirmationCodeEntity);
         return UserModel.of(userRepository.save(userEntity));
+    }
+
+    private void sendConfirmationCodeMail(UserEntity user, ConfirmationCodeEntity confirmationCode)
+    {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setFrom("tripnjoy.contact@gmail.com");
+        mailMessage.setTo(user.getEmail());
+        mailMessage.setSubject("Code de confirmation TripNJoy");
+        mailMessage.setText("Bonjour " + user.getFirstname() + ",\n\tVoici votre code de confirmation: "
+                + confirmationCode.getValue() +"\nCordialement, l'équipe TripNJoy");
+        mailSender.send(mailMessage);
     }
 
     private void sendSuccessMail(UserEntity user)
@@ -74,6 +92,19 @@ public class UserService {
     public Optional<UserModel> findById(final long id)
     {
         return userRepository.findById(id).map(UserModel::of);
+    }
+
+    public boolean findByConfirmationCode(long userId, String value) throws BadConfirmationCodeException{
+        ConfirmationCodeEntity confirmationCode= confirmationCodeRepository.findByValue(value).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
+        return userId == confirmationCode.getUserId();
+    }
+
+    @Transactional
+    public UserModel updateRegistration(long userId) throws UserNotFoundException{
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        user.setRegistered(true);
+        sendSuccessMail(user);
+        return UserModel.of(user);
     }
 
     @Transactional

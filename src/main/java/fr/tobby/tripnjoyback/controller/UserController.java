@@ -38,6 +38,15 @@ public class UserController {
         return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
     }
 
+    @PatchMapping("{id}/registration")
+    public UserModel UpdateRegistration(@PathVariable("id") final long userId, String value)
+    {
+        if (userService.findByConfirmationCode(userId, value))
+            return userService.updateRegistration(userId);
+        else
+            return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+    }
+
     @PatchMapping("{id}/phone")
     public UserModel UpdatePhoneNumber(@PathVariable("id") final long userId, String phoneNumber)
     {

@@ -9,7 +9,8 @@ CREATE TABLE "users" (
                          "profile_picture" text,
                          "phone_number" varchar,
                          "city_id" int,
-                         "created_date" timestamp
+                         "created_date" timestamp,
+                         "registered" boolean
 );
 
 CREATE TABLE "genders" (
@@ -145,6 +146,13 @@ CREATE TABLE "suggestions" (
                                "content" text
 );
 
+CREATE TABLE "confirmation_codes" (
+                                      "id" SERIAL PRIMARY KEY,
+                                      "user_id" int,
+                                      "value" text,
+                                      "expiration_date" datetime
+);
+
 ALTER TABLE "users" ADD FOREIGN KEY ("gender_id") REFERENCES "genders" ("id");
 
 ALTER TABLE "users_groups" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
@@ -202,6 +210,8 @@ ALTER TABLE "expenses" ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id");
 ALTER TABLE "expenses_members" ADD FOREIGN KEY ("expense_id") REFERENCES "expenses" ("id");
 
 ALTER TABLE "suggestions" ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
+
+ALTER TABLE "confirmation_codes" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 INSERT INTO "genders" (value) VALUES ('male');
 
