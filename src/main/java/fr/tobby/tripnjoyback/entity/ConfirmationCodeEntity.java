@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Entity
 @Table(name  = "confimation_codes")
@@ -31,7 +29,8 @@ public class ConfirmationCodeEntity {
     public ConfirmationCodeEntity(long userId){
         this.id = null;
         this.userId = userId;
-        this.value = UUID.randomUUID().toString();
+        int code = (int) (Math.random() * (999999 - 100000) + 100000);
+        this.value = String.valueOf(code);
         this.expirationDate = Instant.now().plus(24, ChronoUnit.HOURS);
     }
 }
