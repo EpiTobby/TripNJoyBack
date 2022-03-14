@@ -42,12 +42,9 @@ public class UserController {
     }
 
     @PatchMapping("{id}/registration")
-    public UserModel UpdateRegistration(@PathVariable("id") final long userId, String value)
+    public boolean RegisterUser(@PathVariable("id") final long userId, String value)
     {
-        if (userService.findByConfirmationCode(userId, value))
-            return userService.updateRegistration(userId);
-        else
-            return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        return userService.registerUser(userId,value);
     }
 
     @PatchMapping("{id}/phone")

@@ -97,7 +97,14 @@ public class UserService {
         return userRepository.findById(id).map(UserModel::of);
     }
 
-    public boolean findByConfirmationCode(long userId, String value) throws BadConfirmationCodeException, ExpiredCodeException{
+    public boolean registerUser(long userId, String value){
+        if (isValidConfirmationCode(userId, value))
+            return updateRegistration(userId).isRegistered();
+        else
+            return false;
+    }
+
+    public boolean isValidConfirmationCode(long userId, String value) throws BadConfirmationCodeException, ExpiredCodeException{
         ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(value).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
         Boolean isValid = userId == confirmationCode.getUserId();
         if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0)
