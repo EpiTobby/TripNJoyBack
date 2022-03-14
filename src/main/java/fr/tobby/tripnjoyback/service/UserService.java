@@ -6,12 +6,12 @@ import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
 import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
+import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Optional;
-
-import static java.time.LocalTime.now;
 
 @Service
 public class UserService {
@@ -30,17 +28,19 @@ public class UserService {
     private final ConfirmationCodeRepository confirmationCodeRepository;
     private final CityService cityService;
     private final JavaMailSender mailSender;
+    private final UserMailUtils userMailUtils;
     private final PasswordEncoder encoder;
 
     public UserService(UserRepository userRepository, GenderRepository genderRepository,
                        final ConfirmationCodeRepository confirmationCodeRepository, final CityService cityService,
-                       final JavaMailSender mailSender, final PasswordEncoder encoder)
+                       final JavaMailSender mailSender, final UserMailUtils userMailUtils, final PasswordEncoder encoder)
     {
         this.userRepository = userRepository;
         this.genderRepository = genderRepository;
         this.confirmationCodeRepository = confirmationCodeRepository;
         this.cityService = cityService;
         this.mailSender = mailSender;
+        this.userMailUtils = userMailUtils;
         this.encoder = encoder;
     }
 
@@ -67,29 +67,9 @@ public class UserService {
                 .registered(false)
                 .build();
         ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userEntity.getId());
-        sendConfirmationCodeMail(userEntity, confirmationCodeEntity);
-        return UserModel.of(userRepository.save(userEntity));
-    }
-
-    private void sendConfirmationCodeMail(UserEntity user, ConfirmationCodeEntity confirmationCode)
-    {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setFrom("tripnjoy.contact@gmail.com");
-        mailMessage.setTo(user.getEmail());
-        mailMessage.setSubject("Code de confirmation TripNJoy");
-        mailMessage.setText("Bonjour " + user.getFirstname() + ",\n\tVoici votre code de confirmation: "
-                + confirmationCode.getValue() +"\nCe dernier expirera dans 24 heures.\nCordialement, l'équipe TripNJoy");
-        mailSender.send(mailMessage);
-    }
-
-    private void sendSuccessMail(UserEntity user)
-    {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setFrom("tripnjoy.contact@gmail.com");
-        mailMessage.setTo(user.getEmail());
-        mailMessage.setSubject("Confirmation de la création de votre compte TripNJoy");
-        mailMessage.setText("Bonjour " + user.getFirstname() + ",\n\tBienvenue dans notre application.\nCordialement, l'équipe TripNJoy");
-        mailSender.send(mailMessage);
+        UserModel userModel = UserModel.of(userRepository.save(userEntity));
+        userMailUtils.sendConfirmationCodeMail(userModel, confirmationCodeEntity.getValue());
+        return userModel;
     }
 
     public Optional<UserModel> findById(final long id)
@@ -116,8 +96,9 @@ public class UserService {
     public UserModel updateRegistration(long userId) throws UserNotFoundException{
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         user.setRegistered(true);
-        sendSuccessMail(user);
-        return UserModel.of(user);
+        UserModel userModel = UserModel.of(user);
+        userMailUtils.sendRegistrationSuccessMail(userModel);
+        return userModel;
     }
 
     @Transactional
