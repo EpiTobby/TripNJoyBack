@@ -66,12 +66,17 @@ public class UserService {
                 .confirmed(false)
                 .build();
         UserModel userModel = UserModel.of(userRepository.save(userEntity));
-        ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userRepository.findByEmail(userEntity.getEmail()).get().getId());
-        confirmationCodeRepository.save(confirmationCodeEntity);
-        userMailUtils.sendConfirmationCodeMail(userModel, confirmationCodeEntity.getValue());
+        generateConfirmationCode(userModel);
         return userModel;
     }
 
+    private ConfirmationCodeEntity generateConfirmationCode(UserModel userModel){
+        ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userRepository.findByEmail(userModel.getEmail()).get().getId());
+        confirmationCodeRepository.save(confirmationCodeEntity);
+        userMailUtils.sendConfirmationCodeMail(userModel, confirmationCodeEntity.getValue());
+        return confirmationCodeEntity;
+    }
+    
     public Optional<UserModel> findById(final long id)
     {
         return userRepository.findById(id).map(UserModel::of);
@@ -80,8 +85,17 @@ public class UserService {
     public boolean confirmUser(long userId, ConfirmationCodeModel confirmationCodeModel){
         ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(confirmationCodeModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
         boolean isValid = userId == confirmationCode.getUserId();
-        if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0)
-            throw new ExpiredCodeException("This code has expired");
+        if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0) {
+            Optional<UserEntity> userEntity = userRepository.findById(userId);
+            if (isValid && userEntity.isPresent()) {
+                confirmationCodeRepository.delete(confirmationCode);
+                generateConfirmationCode(UserModel.of(userEntity.get()));
+                throw new ExpiredCodeException("This code has expired. A new one has been sent to " + userEntity.get().getEmail());
+            }
+            else
+                throw new BadConfirmationCodeException("Bad Confirmation Code");
+
+        }
         if (isValid) {
             confirmationCodeRepository.delete(confirmationCode);
             return updateConfirmation(userId).isConfirmed();
