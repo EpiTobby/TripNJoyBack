@@ -79,7 +79,7 @@ public class UserService {
 
     public boolean confirmUser(long userId, ConfirmationCodeModel confirmationCodeModel){
         ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(confirmationCodeModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
-        Boolean isValid = userId == confirmationCode.getUserId();
+        boolean isValid = userId == confirmationCode.getUserId();
         if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0)
             throw new ExpiredCodeException("This code has expired");
         if (isValid) {
