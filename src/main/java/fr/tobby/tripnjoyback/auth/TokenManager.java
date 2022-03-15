@@ -25,7 +25,7 @@ public final class TokenManager {
         this.jwtSecret = jwtSecret;
     }
 
-    public String computeNewTokenFor(UserDetails userDetails)
+    public String generateFor(UserDetails userDetails)
     {
         return Jwts.builder()
                    .setClaims(new HashMap<>())
