@@ -10,7 +10,6 @@ import fr.tobby.tripnjoyback.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
@@ -43,13 +42,12 @@ public class LoginController {
     @PostMapping("")
     public LoginResponse login(@RequestBody LoginRequest loginRequest)
     {
-        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-        if (!authenticate.isAuthenticated())
-            return LoginResponse.FAILED;
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
         String token = tokenManager.generateFor(userDetails);
 
-        return new LoginResponse(userDetails.getUsername(), token, true);
+        return new LoginResponse(userDetails.getUsername(), token);
     }
 
     @ExceptionHandler(UserCreationException.class)

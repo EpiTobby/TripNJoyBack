@@ -7,16 +7,12 @@ import lombok.Getter;
 @Getter
 public final class LoginResponse {
 
-    public static final LoginResponse FAILED = new LoginResponse("", "", false);
-
     private final String username;
     private final String token;
-    private final boolean authenticated;
 
-    public LoginResponse(final String username, final String token, final boolean authenticated)
+    public LoginResponse(final String username, final String token)
     {
         this.username = username;
         this.token = token;
-        this.authenticated = authenticated;
     }
 }
