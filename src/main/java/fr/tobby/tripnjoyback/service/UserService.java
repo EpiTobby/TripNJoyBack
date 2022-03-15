@@ -1,13 +1,18 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
+import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
+import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
+import fr.tobby.tripnjoyback.mail.UserMailUtils;
+import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.model.UserModel;
+import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,18 +26,20 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final GenderRepository genderRepository;
+    private final ConfirmationCodeRepository confirmationCodeRepository;
     private final CityService cityService;
-    private final JavaMailSender mailSender;
+    private final UserMailUtils userMailUtils;
     private final PasswordEncoder encoder;
 
     public UserService(UserRepository userRepository, GenderRepository genderRepository,
-                       final CityService cityService, final JavaMailSender mailSender,
-                       final PasswordEncoder encoder)
+                       final ConfirmationCodeRepository confirmationCodeRepository, final CityService cityService,
+                       final UserMailUtils userMailUtils, final PasswordEncoder encoder)
     {
         this.userRepository = userRepository;
         this.genderRepository = genderRepository;
+        this.confirmationCodeRepository = confirmationCodeRepository;
         this.cityService = cityService;
-        this.mailSender = mailSender;
+        this.userMailUtils = userMailUtils;
         this.encoder = encoder;
     }
 
@@ -56,24 +63,41 @@ public class UserService {
                 .createdDate(Instant.now())
                 .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                 .phoneNumber(model.getPhoneNumber())
+                .confirmed(false)
                 .build();
-//        sendSuccessMail(userEntity);
-        return UserModel.of(userRepository.save(userEntity));
-    }
-
-    private void sendSuccessMail(UserEntity user)
-    {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setFrom("tripnjoy.contact@gmail.com");
-        mailMessage.setTo(user.getEmail());
-        mailMessage.setSubject("Confirmation de la création de votre compte TripNJoy");
-        mailMessage.setText("Bonjour " + user.getFirstname() + ",\n\tBienvenue dans notre application.\nCordialement, l'équipe TripNJoy");
-        mailSender.send(mailMessage);
+        UserModel userModel = UserModel.of(userRepository.save(userEntity));
+        ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userRepository.findByEmail(userEntity.getEmail()).get().getId());
+        confirmationCodeRepository.save(confirmationCodeEntity);
+        userMailUtils.sendConfirmationCodeMail(userModel, confirmationCodeEntity.getValue());
+        return userModel;
     }
 
     public Optional<UserModel> findById(final long id)
     {
         return userRepository.findById(id).map(UserModel::of);
+    }
+
+    public boolean confirmUser(long userId, ConfirmationCodeModel confirmationCodeModel){
+        ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(confirmationCodeModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
+        boolean isValid = userId == confirmationCode.getUserId();
+        if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0)
+            throw new ExpiredCodeException("This code has expired");
+        if (isValid) {
+            confirmationCodeRepository.delete(confirmationCode);
+            return updateConfirmation(userId).isConfirmed();
+        }
+        else
+            return false;
+    }
+
+    @Transactional
+    public UserModel updateConfirmation(long userId) throws UserNotFoundException{
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        user.setConfirmed(true);
+        UserModel userModel = UserModel.of(user);
+        userRepository.save(user);
+        userMailUtils.sendConfirmationSuccessMail(userModel);
+        return userModel;
     }
 
     @Transactional
@@ -90,5 +114,11 @@ public class UserService {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         user.setCity(cityService.getOrAddCity(city));
         return UserModel.of(user);
+    }
+
+    public Optional<UserModel> findByEmail(final String email)
+    {
+        return userRepository.findByEmail(email)
+                .map(UserModel::of);
     }
 }

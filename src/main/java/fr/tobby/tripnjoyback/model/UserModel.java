@@ -10,6 +10,7 @@ import java.time.Instant;
 @Getter
 public class UserModel {
 
+    private long id;
     private String firstname;
     private String lastname;
     private String password;
@@ -20,10 +21,12 @@ public class UserModel {
     private CityModel city;
     private Instant createdDate;
     private String phoneNumber;
+    private boolean confirmed;
 
     public static UserModel of(final UserEntity entity)
     {
         return new UserModel(
+                entity.getId(),
                 entity.getFirstname(),
                 entity.getLastname(),
                 entity.getPassword(),
@@ -33,7 +36,8 @@ public class UserModel {
                 entity.getProfilePicture(),
                 CityModel.of(entity.getCity()),
                 entity.getCreatedDate(),
-                entity.getPhoneNumber()
+                entity.getPhoneNumber(),
+                entity.isConfirmed()
         );
     }
 }
