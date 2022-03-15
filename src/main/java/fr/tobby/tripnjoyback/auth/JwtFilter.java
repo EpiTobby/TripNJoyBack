@@ -37,7 +37,7 @@ public final class JwtFilter extends OncePerRequestFilter {
         String tokenHeader = request.getHeader("Authorization");
         if (tokenHeader == null || !tokenHeader.startsWith("Bearer "))
         {
-            response.setStatus(401);
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -49,10 +49,11 @@ public final class JwtFilter extends OncePerRequestFilter {
         }
         catch (TokenVerificationException e)
         {
-            logger.error("Failed to verify jwt", e);
-            response.setStatus(401);
+            logger.error("Failed to verify jwt");
+            filterChain.doFilter(request, response);
             return;
         }
+        // If jwt is found and valid, we authenticate the user so that he can access authenticated pages
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 userDetails, null,
                 userDetails.getAuthorities());
