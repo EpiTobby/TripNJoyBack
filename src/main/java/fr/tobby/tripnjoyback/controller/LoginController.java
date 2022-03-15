@@ -46,7 +46,8 @@ public class LoginController {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
-        String token = tokenManager.generateFor(userDetails);
+        UserModel userModel = userService.findByEmail(loginRequest.getUsername()).orElseThrow();
+        String token = tokenManager.generateFor(userDetails, userModel.getId());
 
         return new LoginResponse(userDetails.getUsername(), token);
     }

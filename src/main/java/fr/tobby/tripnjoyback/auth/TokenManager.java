@@ -29,10 +29,13 @@ public final class TokenManager {
         this.userDetailsService = userDetailsService;
     }
 
-    public String generateFor(UserDetails userDetails)
+    public String generateFor(UserDetails userDetails, final long userId)
     {
+        final HashMap<String, Object> claims = new HashMap<>();
+
+        claims.put("userId", userId);
         return Jwts.builder()
-                   .setClaims(new HashMap<>())
+                   .setClaims(claims)
                    .setExpiration(Date.from(Instant.now().plus(10, ChronoUnit.DAYS)))
                    .setIssuedAt(Date.from(Instant.now()))
                    .setSubject(userDetails.getUsername())

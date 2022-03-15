@@ -10,6 +10,7 @@ import java.time.Instant;
 @Getter
 public class UserModel {
 
+    private long id;
     private String firstname;
     private String lastname;
     private String password;
@@ -25,6 +26,7 @@ public class UserModel {
     public static UserModel of(final UserEntity entity)
     {
         return new UserModel(
+                entity.getId(),
                 entity.getFirstname(),
                 entity.getLastname(),
                 entity.getPassword(),
