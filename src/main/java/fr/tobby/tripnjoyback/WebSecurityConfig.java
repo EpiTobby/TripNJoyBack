@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback;
 
 import fr.tobby.tripnjoyback.auth.AuthenticationService;
+import fr.tobby.tripnjoyback.auth.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -18,6 +20,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private AuthenticationService service;
+    private final JwtFilter jwtFilter;
+
+    public WebSecurityConfig(final JwtFilter jwtFilter)
+    {
+        this.jwtFilter = jwtFilter;
+    }
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception
@@ -29,6 +37,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
             .and()
                 .csrf().disable();
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override

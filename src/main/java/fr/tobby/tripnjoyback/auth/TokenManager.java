@@ -8,6 +8,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
@@ -19,10 +20,13 @@ import java.util.HashMap;
 public final class TokenManager {
 
     private final String jwtSecret;
+    private final UserDetailsService userDetailsService;
 
-    public TokenManager(@Value("${jwt.secret}") final String jwtSecret)
+    public TokenManager(@Value("${jwt.secret}") final String jwtSecret,
+                        final UserDetailsService userDetailsService)
     {
         this.jwtSecret = jwtSecret;
+        this.userDetailsService = userDetailsService;
     }
 
     public String generateFor(UserDetails userDetails)
@@ -36,7 +40,7 @@ public final class TokenManager {
                    .compact();
     }
 
-    public boolean verifyToken(final String tokenString, final String username) throws TokenVerificationException
+    public UserDetails verifyToken(final String tokenString) throws TokenVerificationException
     {
         Claims claims;
         try
@@ -51,10 +55,9 @@ public final class TokenManager {
             throw new TokenParsingException(e);
         }
 
-        if (!claims.getSubject().equals(username))
-            throw new TokenVerificationException("Invalid token");
         if (claims.getExpiration().before(Date.from(Instant.now())))
             throw new TokenExpiredException();
-        return true;
+        String username = claims.getSubject();
+        return userDetailsService.loadUserByUsername(username);
     }
 }
