@@ -10,6 +10,7 @@ import fr.tobby.tripnjoyback.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +49,14 @@ public class LoginController {
         String token = tokenManager.generateFor(userDetails);
 
         return new LoginResponse(userDetails.getUsername(), token);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String loginFailed(AuthenticationException exception)
+    {
+        return "Invalid username or password";
     }
 
     @ExceptionHandler(UserCreationException.class)
