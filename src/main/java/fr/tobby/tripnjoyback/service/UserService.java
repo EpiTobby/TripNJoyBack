@@ -115,4 +115,10 @@ public class UserService {
         user.setCity(cityService.getOrAddCity(city));
         return UserModel.of(user);
     }
+
+    public Optional<UserModel> findByEmail(final String email)
+    {
+        return userRepository.findByEmail(email)
+                .map(UserModel::of);
+    }
 }
