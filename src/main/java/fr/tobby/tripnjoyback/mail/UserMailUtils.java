@@ -17,7 +17,7 @@ public class UserMailUtils {
         this.mailSender = mailSender;
     }
 
-    public void sendRegistrationSuccessMail(UserModel user)
+    public void sendConfirmationSuccessMail(UserModel user)
     {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())

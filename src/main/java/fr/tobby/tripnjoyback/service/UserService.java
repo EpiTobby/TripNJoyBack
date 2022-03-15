@@ -28,19 +28,17 @@ public class UserService {
     private final GenderRepository genderRepository;
     private final ConfirmationCodeRepository confirmationCodeRepository;
     private final CityService cityService;
-    private final JavaMailSender mailSender;
     private final UserMailUtils userMailUtils;
     private final PasswordEncoder encoder;
 
     public UserService(UserRepository userRepository, GenderRepository genderRepository,
                        final ConfirmationCodeRepository confirmationCodeRepository, final CityService cityService,
-                       final JavaMailSender mailSender, final UserMailUtils userMailUtils, final PasswordEncoder encoder)
+                       final UserMailUtils userMailUtils, final PasswordEncoder encoder)
     {
         this.userRepository = userRepository;
         this.genderRepository = genderRepository;
         this.confirmationCodeRepository = confirmationCodeRepository;
         this.cityService = cityService;
-        this.mailSender = mailSender;
         this.userMailUtils = userMailUtils;
         this.encoder = encoder;
     }
@@ -65,7 +63,7 @@ public class UserService {
                 .createdDate(Instant.now())
                 .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                 .phoneNumber(model.getPhoneNumber())
-                .registered(false)
+                .confirmed(false)
                 .build();
         UserModel userModel = UserModel.of(userRepository.save(userEntity));
         ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userRepository.findByEmail(userEntity.getEmail()).get().getId());
@@ -79,26 +77,26 @@ public class UserService {
         return userRepository.findById(id).map(UserModel::of);
     }
 
-    public boolean registerUser(long userId, ConfirmationCodeModel confirmationCodeModel){
+    public boolean confirmUser(long userId, ConfirmationCodeModel confirmationCodeModel){
         ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(confirmationCodeModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
         Boolean isValid = userId == confirmationCode.getUserId();
         if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0)
             throw new ExpiredCodeException("This code has expired");
         if (isValid) {
             confirmationCodeRepository.delete(confirmationCode);
-            return updateRegistration(userId).isRegistered();
+            return updateConfirmation(userId).isConfirmed();
         }
         else
             return false;
     }
 
     @Transactional
-    public UserModel updateRegistration(long userId) throws UserNotFoundException{
+    public UserModel updateConfirmation(long userId) throws UserNotFoundException{
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        user.setRegistered(true);
+        user.setConfirmed(true);
         UserModel userModel = UserModel.of(user);
         userRepository.save(user);
-        userMailUtils.sendRegistrationSuccessMail(userModel);
+        userMailUtils.sendConfirmationSuccessMail(userModel);
         return userModel;
     }
 

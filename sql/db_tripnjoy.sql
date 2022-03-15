@@ -10,7 +10,7 @@ CREATE TABLE "users" (
                          "phone_number" varchar,
                          "city_id" int,
                          "created_date" timestamp,
-                         "registered" boolean
+                         "confirmed" boolean
 );
 
 CREATE TABLE "genders" (

@@ -42,10 +42,10 @@ public class UserController {
         return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
     }
 
-    @PatchMapping("{id}/register")
-    public boolean RegisterUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
+    @PatchMapping("{id}/confirm")
+    public boolean ConfirmUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
     {
-        return userService.registerUser(userId,confirmationCode);
+        return userService.confirmUser(userId,confirmationCode);
     }
 
     @PatchMapping("{id}/phone")
