@@ -22,7 +22,7 @@ public class UserMailUtils {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject("Confirmation de la création de votre compte TripNJoy")
-                .setContent("Bonjour " + user.getFirstname() + ",\n\tBienvenue dans notre application.\nCordialement, l'équipe TripNJoy")
+                .setContent("Bonjour " + user.getFirstname() + ",\n\nBienvenue dans notre application.\nCordialement, l'équipe TripNJoy")
                 .build();
         mailSender.send(mail);
     }
@@ -33,7 +33,7 @@ public class UserMailUtils {
         mailMessage.setFrom("tripnjoy.contact@gmail.com");
         mailMessage.setTo(user.getEmail());
         mailMessage.setSubject("Code de confirmation TripNJoy");
-        mailMessage.setText("Bonjour " + user.getFirstname() + ",\n\tVoici votre code de confirmation: "
+        mailMessage.setText("Bonjour " + user.getFirstname() + ",\n\nVoici votre code de confirmation: "
                 + code + "\nCe dernier expirera dans 24 heures.\nCordialement, l'équipe TripNJoy");
         mailSender.send(mailMessage);
     }

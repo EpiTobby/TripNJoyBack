@@ -6,6 +6,7 @@ import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
 import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
+import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.service.UserService;
@@ -13,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "users")
+@RequestMapping(path = "/users")
 public class UserController {
 
     private final UserService userService;
@@ -41,10 +42,10 @@ public class UserController {
         return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
     }
 
-    @PatchMapping("{id}/registration")
-    public boolean RegisterUser(@PathVariable("id") final long userId, String value)
+    @PatchMapping("{id}/register")
+    public boolean RegisterUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
     {
-        return userService.registerUser(userId,value);
+        return userService.registerUser(userId,confirmationCode);
     }
 
     @PatchMapping("{id}/phone")

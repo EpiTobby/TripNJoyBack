@@ -7,6 +7,7 @@ import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
+import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
@@ -66,8 +67,9 @@ public class UserService {
                 .phoneNumber(model.getPhoneNumber())
                 .registered(false)
                 .build();
-        ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userEntity.getId());
         UserModel userModel = UserModel.of(userRepository.save(userEntity));
+        ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userRepository.findByEmail(userEntity.getEmail()).get().getId());
+        confirmationCodeRepository.save(confirmationCodeEntity);
         userMailUtils.sendConfirmationCodeMail(userModel, confirmationCodeEntity.getValue());
         return userModel;
     }
@@ -77,19 +79,17 @@ public class UserService {
         return userRepository.findById(id).map(UserModel::of);
     }
 
-    public boolean registerUser(long userId, String value){
-        if (isValidConfirmationCode(userId, value))
-            return updateRegistration(userId).isRegistered();
-        else
-            return false;
-    }
-
-    public boolean isValidConfirmationCode(long userId, String value) throws BadConfirmationCodeException, ExpiredCodeException{
-        ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(value).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
+    public boolean registerUser(long userId, ConfirmationCodeModel confirmationCodeModel){
+        ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(confirmationCodeModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
         Boolean isValid = userId == confirmationCode.getUserId();
         if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0)
             throw new ExpiredCodeException("This code has expired");
-        return isValid;
+        if (isValid) {
+            confirmationCodeRepository.delete(confirmationCode);
+            return updateRegistration(userId).isRegistered();
+        }
+        else
+            return false;
     }
 
     @Transactional
@@ -97,6 +97,7 @@ public class UserService {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         user.setRegistered(true);
         UserModel userModel = UserModel.of(user);
+        userRepository.save(user);
         userMailUtils.sendRegistrationSuccessMail(userModel);
         return userModel;
     }

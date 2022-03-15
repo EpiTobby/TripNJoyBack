@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 @Entity
-@Table(name  = "confimation_codes")
+@Table(name  = "confirmation_codes")
 @Builder
 @Getter
 @AllArgsConstructor
