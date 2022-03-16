@@ -7,13 +7,10 @@ import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
-import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
-import fr.tobby.tripnjoyback.model.UserCreationModel;
-import fr.tobby.tripnjoyback.model.UserModel;
+import fr.tobby.tripnjoyback.model.*;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,6 +73,13 @@ public class UserService {
         userMailUtils.sendConfirmationCodeMail(userModel, confirmationCodeEntity.getValue());
         return confirmationCodeEntity;
     }
+
+    private ConfirmationCodeEntity generateForgottenPasswordCode(UserModel userModel){
+        ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userRepository.findByEmail(userModel.getEmail()).get().getId());
+        confirmationCodeRepository.save(confirmationCodeEntity);
+        userMailUtils.sendForgottenPasswordCodeMail(userModel, confirmationCodeEntity.getValue());
+        return confirmationCodeEntity;
+    }
     
     public Optional<UserModel> findById(final long id)
     {
@@ -84,24 +88,18 @@ public class UserService {
 
     public boolean confirmUser(long userId, ConfirmationCodeModel confirmationCodeModel){
         ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(confirmationCodeModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
-        boolean isValid = userId == confirmationCode.getUserId();
-        if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0) {
-            Optional<UserEntity> userEntity = userRepository.findById(userId);
-            if (isValid && userEntity.isPresent()) {
-                confirmationCodeRepository.delete(confirmationCode);
-                generateConfirmationCode(UserModel.of(userEntity.get()));
-                throw new ExpiredCodeException("This code has expired. A new one has been sent to " + userEntity.get().getEmail());
-            }
-            else
-                throw new BadConfirmationCodeException("Bad Confirmation Code");
-
-        }
-        if (isValid) {
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        if (userId == confirmationCode.getUserId()) {
             confirmationCodeRepository.delete(confirmationCode);
-            return updateConfirmation(userId).isConfirmed();
+            if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0) {
+                generateConfirmationCode(UserModel.of(userEntity));
+                throw new ExpiredCodeException("This code has expired. A new one has been sent to " + userEntity.getEmail());
+            }
+            else {
+                return updateConfirmation(userId).isConfirmed();
+            }
         }
-        else
-            return false;
+        throw new BadConfirmationCodeException("Bad Confirmation Code");
     }
 
     @Transactional
@@ -112,6 +110,42 @@ public class UserService {
         userRepository.save(user);
         userMailUtils.sendConfirmationSuccessMail(userModel);
         return userModel;
+    }
+
+    @Transactional
+    public boolean forgotPassword(ForgotPasswordModel forgotPassword){
+        UserEntity userEntity = userRepository.findByEmail(forgotPassword.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("No user with email " + forgotPassword.getEmail()));
+        generateForgottenPasswordCode(UserModel.of(userEntity));
+        return true;
+    }
+
+    @Transactional
+    public UserModel validateCodePassword(ValidateCodePasswordModel validateCodePasswordModel){
+        UserEntity userEntity = userRepository.findByEmail(validateCodePasswordModel.getEmail()).filter(user ->user.isConfirmed())
+                .orElseThrow(() -> new UserNotFoundException("No user with email " + validateCodePasswordModel.getEmail()));;
+        ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(validateCodePasswordModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
+        if (userEntity.getId() == confirmationCode.getUserId())
+        {
+            confirmationCodeRepository.delete(confirmationCode);
+            if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0) {
+                generateForgottenPasswordCode(UserModel.of(userEntity));
+                throw new ExpiredCodeException("This code has expired. A new one has been sent to " + userEntity.getEmail());
+            }
+            else{
+                return UserModel.of(userEntity);
+            }
+        }
+        else
+            throw new BadConfirmationCodeException("Bad confirmation code");
+    }
+
+    @Transactional
+    public UserModel updatePassword(long userId, UpdatePasswordModel updatePasswordModel){
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        user.setPassword(encoder.encode(updatePasswordModel.getPassword()));
+        userMailUtils.sendUpdatePasswordMail(UserModel.of(user));
+        return UserModel.of(user);
     }
 
     @Transactional

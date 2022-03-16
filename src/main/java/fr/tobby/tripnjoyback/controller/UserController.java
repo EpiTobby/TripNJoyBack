@@ -1,14 +1,11 @@
 package fr.tobby.tripnjoyback.controller;
 
-import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
 import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
-import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
-import fr.tobby.tripnjoyback.model.UserCreationModel;
-import fr.tobby.tripnjoyback.model.UserModel;
+import fr.tobby.tripnjoyback.model.*;
 import fr.tobby.tripnjoyback.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +43,24 @@ public class UserController {
     public boolean ConfirmUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
     {
         return userService.confirmUser(userId,confirmationCode);
+    }
+
+    @PostMapping("forgotpassword")
+    public boolean ForgotPassword(@RequestBody ForgotPasswordModel forgotPasswordModel)
+    {
+        return userService.forgotPassword(forgotPasswordModel);
+    }
+
+    @PatchMapping("validatecodepassword")
+    public UserModel ValidateCodePassword(@RequestBody ValidateCodePasswordModel validateCodePasswordModel)
+    {
+        return userService.validateCodePassword(validateCodePasswordModel);
+    }
+
+    @PatchMapping("{id}/updatepassword")
+    public UserModel UpdatePassword(@PathVariable("id") final long userId, @RequestBody UpdatePasswordModel updatePasswordModel)
+    {
+        return userService.updatePassword(userId, updatePasswordModel);
     }
 
     @PatchMapping("{id}/phone")
