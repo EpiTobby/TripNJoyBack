@@ -2,10 +2,16 @@ package fr.tobby.tripnjoyback.controller;
 
 import fr.tobby.tripnjoyback.auth.TokenManager;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
+import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.model.UserModel;
+import fr.tobby.tripnjoyback.model.request.ForgotPasswordRequest;
+import fr.tobby.tripnjoyback.model.request.UpdatePasswordRequest;
+import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordRequest;
 import fr.tobby.tripnjoyback.model.request.auth.LoginRequest;
+import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.model.response.auth.LoginResponse;
+import fr.tobby.tripnjoyback.service.AuthService;
 import fr.tobby.tripnjoyback.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,21 +29,23 @@ public class LoginController {
     private final AuthenticationManager authenticationManager;
     private final TokenManager tokenManager;
     private final UserDetailsService userDetailsService;
+    private final AuthService authService;
 
     public LoginController(final UserService userService,
                            final AuthenticationManager authenticationManager, final TokenManager tokenManager,
-                           final UserDetailsService userDetailsService)
+                           final UserDetailsService userDetailsService, final AuthService authService)
     {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.tokenManager = tokenManager;
         this.userDetailsService = userDetailsService;
+        this.authService = authService;
     }
 
     @PostMapping("register")
     public UserModel create(@RequestBody UserCreationModel model)
     {
-        return userService.createUser(model);
+        return authService.createUser(model);
     }
 
     @PostMapping("login")
@@ -50,6 +58,30 @@ public class LoginController {
         String token = tokenManager.generateFor(userDetails, userModel.getId());
 
         return new LoginResponse(userDetails.getUsername(), token);
+    }
+
+    @PatchMapping("{id}/confirm")
+    public boolean confirmUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
+    {
+        return authService.confirmUser(userId,confirmationCode);
+    }
+
+    @PostMapping("forgotpassword")
+    public void forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest)
+    {
+        authService.forgotPassword(forgotPasswordRequest);
+    }
+
+    @PatchMapping("validatecodepassword")
+    public UserIdResponse validateCodePassword(@RequestBody ValidateCodePasswordRequest validateCodePasswordRequest)
+    {
+        return authService.validateCodePassword(validateCodePasswordRequest);
+    }
+
+    @PatchMapping("{id}/updatepassword")
+    public void UpdatePassword(@PathVariable("id") final long userId, @RequestBody UpdatePasswordRequest updatePasswordRequest)
+    {
+        authService.updatePassword(userId, updatePasswordRequest);
     }
 
     @ExceptionHandler(AuthenticationException.class)
