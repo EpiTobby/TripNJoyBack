@@ -22,40 +22,40 @@ public class UserMailUtils {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject("Confirmation de la création de votre compte TripNJoy")
-                .setContent("Bonjour " + user.getFirstname() + ",\n\nBienvenue dans notre application.\nCordialement, l'équipe TripNJoy")
+                .setContent("Bonjour " + user.getFirstname() + ",\n\nBienvenue dans notre application.\nCordialement,\nl'équipe TripNJoy")
                 .build();
         mailSender.send(mail);
     }
 
     public void sendConfirmationCodeMail(UserModel user, String code)
     {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setFrom("tripnjoy.contact@gmail.com");
-        mailMessage.setTo(user.getEmail());
-        mailMessage.setSubject("Code de confirmation TripNJoy");
-        mailMessage.setText("Bonjour " + user.getFirstname() + ",\n\nVoici votre code de confirmation: "
-                + code + "\nCe dernier expirera dans 24 heures.\nCordialement, l'équipe TripNJoy");
-        mailSender.send(mailMessage);
+        SimpleMailMessage mail = new MailBuilder(config)
+                .toAddr(user.getEmail())
+                .setSubject("Code de confirmation de votre compte TripNJoy")
+                .setContent("Bonjour " + user.getFirstname() + ",\n\nVoici votre code de confirmation: "
+                        + code + "\nCe dernier expirera dans 24 heures.\nCordialement,\nl'équipe TripNJoy")
+                .build();
+        mailSender.send(mail);
     }
 
     public void sendForgottenPasswordCodeMail(UserModel user, String code)
     {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setFrom("tripnjoy.contact@gmail.com");
-        mailMessage.setTo(user.getEmail());
-        mailMessage.setSubject("Code de changement de mot de passe TripNJoy");
-        mailMessage.setText("Bonjour " + user.getFirstname() + ",\n\nVoici votre code de changement de mot de passe: "
-                + code + "\nCe dernier expirera dans 24 heures.\nCordialement, l'équipe TripNJoy");
-        mailSender.send(mailMessage);
+        SimpleMailMessage mail = new MailBuilder(config)
+                .toAddr(user.getEmail())
+                .setSubject("Code de changement de mot de passe TripNJoy")
+                .setContent("Bonjour " + user.getFirstname() + ",\n\nVoici votre code de changement de mot de passe: "
+                        + code + "\nCe dernier expirera dans 24 heures.\nCordialement,\nl'équipe TripNJoy")
+                .build();
+        mailSender.send(mail);
     }
 
     public void sendUpdatePasswordMail(UserModel user)
     {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setFrom("tripnjoy.contact@gmail.com");
-        mailMessage.setTo(user.getEmail());
-        mailMessage.setSubject("Code de changement de mot de passe TripNJoy");
-        mailMessage.setText("Bonjour " + user.getFirstname() + ",\n\nVotre mot de passe a bien été mis à jour.\nCordialement, l'équipe TripNJoy");
-        mailSender.send(mailMessage);
+        SimpleMailMessage mail = new MailBuilder(config)
+                .toAddr(user.getEmail())
+                .setSubject("Confirmation du changement de mot de passe TripNJoy")
+                .setContent("Bonjour " + user.getFirstname() + ",\n\nVotre mot de passe a bien été mis à jour.\nCordialement,\nl'équipe TripNJoy")
+                .build();
+        mailSender.send(mail);
     }
 }

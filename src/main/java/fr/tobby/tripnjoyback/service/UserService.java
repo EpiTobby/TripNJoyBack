@@ -8,6 +8,10 @@ import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.*;
+import fr.tobby.tripnjoyback.model.request.ForgotPasswordModel;
+import fr.tobby.tripnjoyback.model.request.UpdatePasswordModel;
+import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordModel;
+import fr.tobby.tripnjoyback.model.response.UserIdModel;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
@@ -121,7 +125,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserModel validateCodePassword(ValidateCodePasswordModel validateCodePasswordModel){
+    public UserIdModel validateCodePassword(ValidateCodePasswordModel validateCodePasswordModel){
         UserEntity userEntity = userRepository.findByEmail(validateCodePasswordModel.getEmail()).filter(user ->user.isConfirmed())
                 .orElseThrow(() -> new UserNotFoundException("No user with email " + validateCodePasswordModel.getEmail()));;
         ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(validateCodePasswordModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
@@ -133,7 +137,7 @@ public class UserService {
                 throw new ExpiredCodeException("This code has expired. A new one has been sent to " + userEntity.getEmail());
             }
             else{
-                return UserModel.of(userEntity);
+                return UserIdModel.builder().userId(userEntity.getId()).build();
             }
         }
         else
@@ -141,11 +145,11 @@ public class UserService {
     }
 
     @Transactional
-    public UserModel updatePassword(long userId, UpdatePasswordModel updatePasswordModel){
+    public boolean updatePassword(long userId, UpdatePasswordModel updatePasswordModel){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         user.setPassword(encoder.encode(updatePasswordModel.getPassword()));
         userMailUtils.sendUpdatePasswordMail(UserModel.of(user));
-        return UserModel.of(user);
+        return true;
     }
 
     @Transactional

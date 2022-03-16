@@ -1,4 +1,4 @@
-package fr.tobby.tripnjoyback.model;
+package fr.tobby.tripnjoyback.model.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.AllArgsConstructor;
