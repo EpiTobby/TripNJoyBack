@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-public class LoginController {
+public class AuthController {
 
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
@@ -31,9 +31,9 @@ public class LoginController {
     private final UserDetailsService userDetailsService;
     private final AuthService authService;
 
-    public LoginController(final UserService userService,
-                           final AuthenticationManager authenticationManager, final TokenManager tokenManager,
-                           final UserDetailsService userDetailsService, final AuthService authService)
+    public AuthController(final UserService userService,
+                          final AuthenticationManager authenticationManager, final TokenManager tokenManager,
+                          final UserDetailsService userDetailsService, final AuthService authService)
     {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
