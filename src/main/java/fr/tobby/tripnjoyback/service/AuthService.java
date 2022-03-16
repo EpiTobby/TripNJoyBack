@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.auth.TokenManager;
 import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
@@ -17,6 +18,12 @@ import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,16 +38,26 @@ public class AuthService {
     private final PasswordEncoder encoder;
     private final GenderRepository genderRepository;
     private final ConfirmationCodeRepository confirmationCodeRepository;
+    private final AuthenticationManager authenticationManager;
+    private final TokenManager tokenManager;
+    private final UserDetailsService userDetailsService;
+    private final UserService userService;
 
     public AuthService(final UserRepository userRepository, final UserMailUtils userMailUtils, final PasswordEncoder encoder,
                        final GenderRepository genderRepository,
-                       final ConfirmationCodeRepository confirmationCodeRepository)
+                       final ConfirmationCodeRepository confirmationCodeRepository,
+                       final AuthenticationManager authenticationManager, final TokenManager tokenManager,
+                       final UserDetailsService userDetailsService, final UserService userService)
     {
         this.userRepository = userRepository;
         this.userMailUtils = userMailUtils;
         this.encoder = encoder;
         this.genderRepository = genderRepository;
         this.confirmationCodeRepository = confirmationCodeRepository;
+        this.authenticationManager = authenticationManager;
+        this.tokenManager = tokenManager;
+        this.userDetailsService = userDetailsService;
+        this.userService = userService;
     }
 
     @Transactional
@@ -64,6 +81,15 @@ public class AuthService {
         UserModel userModel = UserModel.of(userRepository.save(userEntity));
         generateConfirmationCode(userModel);
         return userModel;
+    }
+
+    public String login(@NonNull String username, @NonNull String password) throws AuthenticationException
+    {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UserModel userModel = userService.findByEmail(username).orElseThrow();
+        return tokenManager.generateFor(userDetails, userModel.getId());
     }
 
     private ConfirmationCodeEntity generateConfirmationCode(UserModel userModel)
