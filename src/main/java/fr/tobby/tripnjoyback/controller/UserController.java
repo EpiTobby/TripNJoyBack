@@ -1,14 +1,15 @@
 package fr.tobby.tripnjoyback.controller;
 
-import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
 import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
-import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
-import fr.tobby.tripnjoyback.model.UserCreationModel;
-import fr.tobby.tripnjoyback.model.UserModel;
+import fr.tobby.tripnjoyback.model.*;
+import fr.tobby.tripnjoyback.model.request.ForgotPasswordRequest;
+import fr.tobby.tripnjoyback.model.request.UpdatePasswordRequest;
+import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordRequest;
+import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -43,9 +44,27 @@ public class UserController {
     }
 
     @PatchMapping("{id}/confirm")
-    public boolean ConfirmUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
+    public boolean confirmUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
     {
         return userService.confirmUser(userId,confirmationCode);
+    }
+
+    @PostMapping("forgotpassword")
+    public void forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest)
+    {
+        userService.forgotPassword(forgotPasswordRequest);
+    }
+
+    @PatchMapping("validatecodepassword")
+    public UserIdResponse validateCodePassword(@RequestBody ValidateCodePasswordRequest validateCodePasswordRequest)
+    {
+        return userService.validateCodePassword(validateCodePasswordRequest);
+    }
+
+    @PatchMapping("{id}/updatepassword")
+    public void UpdatePassword(@PathVariable("id") final long userId, @RequestBody UpdatePasswordRequest updatePasswordRequest)
+    {
+        userService.updatePassword(userId, updatePasswordRequest);
     }
 
     @PatchMapping("{id}/phone")
