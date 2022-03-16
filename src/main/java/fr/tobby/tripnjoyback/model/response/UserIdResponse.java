@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @JsonAutoDetect
 @NoArgsConstructor
 @Builder
-public class UserIdModel {
+public class UserIdResponse {
     private long userId;
 }

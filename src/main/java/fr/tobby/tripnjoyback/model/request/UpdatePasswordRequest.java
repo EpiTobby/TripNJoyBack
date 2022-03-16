@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonAutoDetect
 @NoArgsConstructor
-public class ForgotPasswordModel {
-    private String email;
+public class UpdatePasswordRequest {
+    private String password;
 }

@@ -8,10 +8,10 @@ import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.*;
-import fr.tobby.tripnjoyback.model.request.ForgotPasswordModel;
-import fr.tobby.tripnjoyback.model.request.UpdatePasswordModel;
-import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordModel;
-import fr.tobby.tripnjoyback.model.response.UserIdModel;
+import fr.tobby.tripnjoyback.model.request.ForgotPasswordRequest;
+import fr.tobby.tripnjoyback.model.request.UpdatePasswordRequest;
+import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordRequest;
+import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
@@ -72,14 +72,14 @@ public class UserService {
     }
 
     private ConfirmationCodeEntity generateConfirmationCode(UserModel userModel){
-        ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userRepository.findByEmail(userModel.getEmail()).get().getId());
+        ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userModel.getId());
         confirmationCodeRepository.save(confirmationCodeEntity);
         userMailUtils.sendConfirmationCodeMail(userModel, confirmationCodeEntity.getValue());
         return confirmationCodeEntity;
     }
 
     private ConfirmationCodeEntity generateForgottenPasswordCode(UserModel userModel){
-        ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userRepository.findByEmail(userModel.getEmail()).get().getId());
+        ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userModel.getId());
         confirmationCodeRepository.save(confirmationCodeEntity);
         userMailUtils.sendForgottenPasswordCodeMail(userModel, confirmationCodeEntity.getValue());
         return confirmationCodeEntity;
@@ -117,18 +117,17 @@ public class UserService {
     }
 
     @Transactional
-    public boolean forgotPassword(ForgotPasswordModel forgotPassword){
+    public void forgotPassword(ForgotPasswordRequest forgotPassword){
         UserEntity userEntity = userRepository.findByEmail(forgotPassword.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("No user with email " + forgotPassword.getEmail()));
         generateForgottenPasswordCode(UserModel.of(userEntity));
-        return true;
     }
 
     @Transactional
-    public UserIdModel validateCodePassword(ValidateCodePasswordModel validateCodePasswordModel){
-        UserEntity userEntity = userRepository.findByEmail(validateCodePasswordModel.getEmail()).filter(user ->user.isConfirmed())
-                .orElseThrow(() -> new UserNotFoundException("No user with email " + validateCodePasswordModel.getEmail()));;
-        ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(validateCodePasswordModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
+    public UserIdResponse validateCodePassword(ValidateCodePasswordRequest validateCodePasswordRequest){
+        UserEntity userEntity = userRepository.findByEmail(validateCodePasswordRequest.getEmail()).filter(user ->user.isConfirmed())
+                .orElseThrow(() -> new UserNotFoundException("No user with email " + validateCodePasswordRequest.getEmail()));;
+        ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(validateCodePasswordRequest.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
         if (userEntity.getId() == confirmationCode.getUserId())
         {
             confirmationCodeRepository.delete(confirmationCode);
@@ -137,7 +136,7 @@ public class UserService {
                 throw new ExpiredCodeException("This code has expired. A new one has been sent to " + userEntity.getEmail());
             }
             else{
-                return UserIdModel.builder().userId(userEntity.getId()).build();
+                return UserIdResponse.builder().userId(userEntity.getId()).build();
             }
         }
         else
@@ -145,11 +144,10 @@ public class UserService {
     }
 
     @Transactional
-    public boolean updatePassword(long userId, UpdatePasswordModel updatePasswordModel){
+    public void updatePassword(long userId, UpdatePasswordRequest updatePasswordRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        user.setPassword(encoder.encode(updatePasswordModel.getPassword()));
+        user.setPassword(encoder.encode(updatePasswordRequest.getPassword()));
         userMailUtils.sendUpdatePasswordMail(UserModel.of(user));
-        return true;
     }
 
     @Transactional

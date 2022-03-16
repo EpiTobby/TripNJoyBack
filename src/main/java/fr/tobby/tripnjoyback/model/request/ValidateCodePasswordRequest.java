@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonAutoDetect
 @NoArgsConstructor
-public class ValidateCodePasswordModel {
+public class ValidateCodePasswordRequest {
     private String email;
     private String value;
 }
