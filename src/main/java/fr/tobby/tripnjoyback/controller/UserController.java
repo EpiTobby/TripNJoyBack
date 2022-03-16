@@ -3,9 +3,9 @@ package fr.tobby.tripnjoyback.controller;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
 import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
-import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
-import fr.tobby.tripnjoyback.model.*;
+import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
+import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.ForgotPasswordRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePasswordRequest;
 import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordRequest;
@@ -29,12 +29,6 @@ public class UserController {
     public Iterable<UserEntity> getAll()
     {
         return userService.getAll();
-    }
-
-    @PostMapping("")
-    public UserModel create(@RequestBody UserCreationModel model)
-    {
-        return userService.createUser(model);
     }
 
     @GetMapping("{id}")
@@ -77,14 +71,6 @@ public class UserController {
     public UserModel UpdateCityNumber(@PathVariable("id") final long userId, String city)
     {
         return userService.updateCity(userId,city);
-    }
-
-    @ExceptionHandler(UserCreationException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String creationError(UserCreationException exception)
-    {
-        return exception.getMessage();
     }
 
     @ExceptionHandler(UserNotFoundException.class)

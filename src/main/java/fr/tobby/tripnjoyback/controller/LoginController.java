@@ -16,7 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/auth")
 public class LoginController {
 
     private final UserService userService;
@@ -34,13 +34,13 @@ public class LoginController {
         this.userDetailsService = userDetailsService;
     }
 
-    @PostMapping("create")
+    @PostMapping("register")
     public UserModel create(@RequestBody UserCreationModel model)
     {
         return userService.createUser(model);
     }
 
-    @PostMapping("")
+    @PostMapping("login")
     public LoginResponse login(@RequestBody LoginRequest loginRequest)
     {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
