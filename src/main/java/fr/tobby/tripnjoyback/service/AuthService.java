@@ -180,18 +180,18 @@ public class AuthService {
     public void updatePassword(long userId, UpdatePasswordRequest updatePasswordRequest)
     {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        String encodedPassword = encoder.encode(updatePasswordRequest.getOldPassword());
-        if (user.getPassword() == encodedPassword) {
-            user.setPassword(encodedPassword);
+        if (encoder.matches(updatePasswordRequest.getOldPassword(),user.getPassword())) {
+            user.setPassword(encoder.encode(updatePasswordRequest.getNewPassword()));
             userMailUtils.sendUpdatePasswordMail(UserModel.of(user));
         }
-        throw new UpdatePasswordException("Bad Password");
+        else
+            throw new UpdatePasswordException("Bad Password");
     }
 
     @Transactional
-    public void updateUserInfo(long userId, UpdateEmailRequest updateEmailRequest){
+    public void updateEmail(long userId, UpdateEmailRequest updateEmailRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        if (user.getPassword() != encoder.encode(updateEmailRequest.getPassword())) {
+        if (encoder.matches(updateEmailRequest.getPassword(),user.getPassword())) {
             throw new BadCredentialsException("Bad Password");
         }
         if (!userMailUtils.userEmailExists(updateEmailRequest.getNewEmail())){

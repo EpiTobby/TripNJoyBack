@@ -14,7 +14,6 @@ import lombok.Setter;
 public class UserUpdateRequest {
     private String firstname;
     private String lastname;
-    private String email;
     private String profilePicture;
     private CityModel city;
     private String phoneNumber;

@@ -1,15 +1,13 @@
 package fr.tobby.tripnjoyback.controller;
 
+import fr.tobby.tripnjoyback.exception.UpdateEmailException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.model.UserModel;
-import fr.tobby.tripnjoyback.model.request.ForgotPasswordRequest;
-import fr.tobby.tripnjoyback.model.request.UpdatePasswordRequest;
-import fr.tobby.tripnjoyback.model.request.UserUpdateRequest;
-import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordRequest;
+import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.request.auth.LoginRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.model.response.auth.LoginResponse;
@@ -68,8 +66,8 @@ public class AuthController {
     }
 
     @PatchMapping("{id}/updateemail")
-    public void updateEmail(@PathVariable("id") final long userId, @RequestBody UserUpdateRequest userUpdateRequest){
-        updateEmail(userId, userUpdateRequest);
+    public void updateEmail(@PathVariable("id") final long userId, @RequestBody UpdateEmailRequest updateEmailRequest){
+        authService.updateEmail(userId, updateEmailRequest);
     }
 
     @ExceptionHandler(AuthenticationException.class)
@@ -91,7 +89,15 @@ public class AuthController {
     @ExceptionHandler(UpdatePasswordException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String getError(UserNotFoundException exception)
+    public String getError(UpdatePasswordException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(UpdateEmailException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String getError(UpdateEmailException exception)
     {
         return exception.getMessage();
     }

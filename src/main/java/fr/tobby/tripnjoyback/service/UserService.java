@@ -44,22 +44,12 @@ public class UserService {
     }
 
     @Transactional
-    public UserModel updateCity(long userId, String city) throws UserNotFoundException
-    {
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        user.setCity(cityService.getOrAddCity(city));
-        return UserModel.of(user);
-    }
-
-    @Transactional
     public void updateUserInfo(long userId, UserUpdateRequest userUpdateRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         if (userUpdateRequest.getFirstname() != null)
             user.setFirstname(userUpdateRequest.getFirstname());
         if (userUpdateRequest.getLastname() != null)
             user.setLastname(userUpdateRequest.getLastname());
-        if (userUpdateRequest.getLastname() != null)
-            user.setEmail(userUpdateRequest.getLastname());
         if (userUpdateRequest.getProfilePicture() != null )
             user.setProfilePicture(userUpdateRequest.getProfilePicture());
         if (userUpdateRequest.getCity() != null) {
