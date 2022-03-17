@@ -38,6 +38,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/users/forgotpassword").permitAll()
                 .antMatchers("/users/validatecodepassword").permitAll()
                 .antMatchers("/users/{id}/updatepassword").permitAll()
+                .antMatchers("/swagger-ui.html/**").permitAll()
+                .antMatchers("/swagger-ui/**").permitAll()
+                .antMatchers("/v2/api-docs").permitAll()
+                .antMatchers("/swagger-resources/**").permitAll()
                 .anyRequest().authenticated()
             .and()
             // Do not persist session. Auth is done via jwt and checked at each request
