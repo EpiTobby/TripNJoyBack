@@ -1,6 +1,9 @@
 package fr.tobby.tripnjoyback.controller;
 
+import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
+import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
+import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserCreationRequest;
 import fr.tobby.tripnjoyback.model.UserModel;
@@ -49,12 +52,18 @@ public class AuthController {
     }
 
     @PatchMapping("{id}/confirm")
+    @ApiOperation("Confirm a user's email")
+    @ApiResponse(responseCode = "200", description = "User is now confirmed")
+    @ApiResponse(responseCode = "403", description = "Invalid or expired confirmation code")
     public boolean confirmUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
     {
         return authService.confirmUser(userId, confirmationCode);
     }
 
     @PostMapping("forgotpassword")
+    @ApiOperation("Used to ask a new password")
+    @ApiResponse(responseCode = "200", description = "Email is sent to reset password")
+    @ApiResponse(responseCode = "422", description = "If the user does not exist")
     public void forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest)
     {
         authService.forgotPassword(forgotPasswordRequest);
@@ -84,6 +93,30 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String creationError(UserCreationException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(ExpiredCodeException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String expiredConfirmationCode(ExpiredCodeException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(BadConfirmationCodeException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String badConfirmationCode(BadConfirmationCodeException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String badConfirmationCode(UserNotFoundException exception)
     {
         return exception.getMessage();
     }
