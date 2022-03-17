@@ -1,6 +1,5 @@
 package fr.tobby.tripnjoyback.mail;
 
-import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.model.UserModel;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
