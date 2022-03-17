@@ -191,7 +191,7 @@ public class AuthService {
     @Transactional
     public void updateEmail(long userId, UpdateEmailRequest updateEmailRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        if (encoder.matches(updateEmailRequest.getPassword(),user.getPassword())) {
+        if (!encoder.matches(updateEmailRequest.getPassword(),user.getPassword())) {
             throw new BadCredentialsException("Bad Password");
         }
         if (!userMailUtils.userEmailExists(updateEmailRequest.getNewEmail())){
