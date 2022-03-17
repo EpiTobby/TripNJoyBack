@@ -7,7 +7,7 @@ import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
-import fr.tobby.tripnjoyback.model.UserCreationModel;
+import fr.tobby.tripnjoyback.model.UserCreationRequest;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.ForgotPasswordRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateEmailRequest;
@@ -61,7 +61,7 @@ public class AuthService {
     }
 
     @Transactional
-    public UserModel createUser(UserCreationModel model) throws UserCreationException
+    public UserModel createUser(UserCreationRequest model) throws UserCreationException
     {
         if (userRepository.findByEmail(model.getEmail()).isPresent())
         {
