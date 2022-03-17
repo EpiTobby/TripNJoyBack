@@ -72,4 +72,15 @@ public class UserMailUtils {
                 .build();
         mailSender.send(mail);
     }
+
+
+
+    public void sendUpdateMail(UserModel user){
+        SimpleMailMessage mail = new MailBuilder(config)
+                .toAddr(user.getEmail())
+                .setSubject("Confirmation du changement d'addresse email TripNJoy")
+                .setContent("Bonjour " + user.getFirstname() + ",\n\nVotre compte TripNJoy est à présent lié à cette addresse email.\nCordialement,\nl'équipe TripNJoy")
+                .build();
+        mailSender.send(mail);
+    }
 }

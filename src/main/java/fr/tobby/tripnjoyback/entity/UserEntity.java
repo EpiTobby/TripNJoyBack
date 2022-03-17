@@ -16,17 +16,21 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "first_name")
+    @Setter
     private String firstname;
     @Column(name = "last_name")
+    @Setter
     private String lastname;
     @Setter
     private String password;
+    @Setter
     private String email;
     @Column(name = "birthdate")
     private Instant birthDate;
     @ManyToOne()
     @JoinColumn(name = "gender_id")
     private GenderEntity gender;
+    @Setter
     private String profilePicture;
     @ManyToOne
     @Setter
