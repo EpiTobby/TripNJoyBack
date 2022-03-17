@@ -32,12 +32,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception
     {
         http.authorizeHttpRequests()
-                .antMatchers("/login").permitAll()
-                .antMatchers("/login/create").permitAll()
-                .antMatchers("/users/create").permitAll()
-                .antMatchers("/users/forgotpassword").permitAll()
-                .antMatchers("/users/validatecodepassword").permitAll()
-                .antMatchers("/users/{id}/updatepassword").permitAll()
+                .antMatchers("/auth/**").permitAll()
                 .anyRequest().authenticated()
             .and()
             // Do not persist session. Auth is done via jwt and checked at each request
