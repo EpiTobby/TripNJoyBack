@@ -68,7 +68,7 @@ public class AuthService {
             throw new UserCreationException("Email is already in use");
         }
         if (!userMailUtils.userEmailExists(model.getEmail())){
-            throw new UserCreationException("Email does not exists");
+            throw new UserCreationException("Email is not valid");
         }
         UserEntity userEntity = UserEntity.builder()
                                           .firstname(model.getFirstname())
