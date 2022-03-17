@@ -21,9 +21,9 @@ public class UserMailUtils {
         this.mailSender = mailSender;
     }
 
-    public boolean userEmailExists(UserCreationModel user){
+    public boolean userEmailExists(String email){
         try {
-            InternetAddress internetAddress = new InternetAddress(user.getEmail());
+            InternetAddress internetAddress = new InternetAddress(email);
             internetAddress.validate();
             return true;
         }
