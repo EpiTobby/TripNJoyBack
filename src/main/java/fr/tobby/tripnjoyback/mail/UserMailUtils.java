@@ -1,9 +1,13 @@
 package fr.tobby.tripnjoyback.mail;
 
+import fr.tobby.tripnjoyback.model.UserCreationModel;
 import fr.tobby.tripnjoyback.model.UserModel;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
+
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 
 @Component
 public class UserMailUtils {
@@ -17,6 +21,16 @@ public class UserMailUtils {
         this.mailSender = mailSender;
     }
 
+    public boolean userEmailExists(String email){
+        try {
+            InternetAddress internetAddress = new InternetAddress(email);
+            internetAddress.validate();
+            return true;
+        }
+        catch (AddressException e){
+            return false;
+        }
+    }
     public void sendConfirmationSuccessMail(UserModel user)
     {
         SimpleMailMessage mail = new MailBuilder(config)
