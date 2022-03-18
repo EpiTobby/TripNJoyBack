@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @JsonAutoDetect
 @NoArgsConstructor
 public class UpdatePasswordRequest {
-    private String password;
+    private String oldPassword;
+    private String newPassword;
 }

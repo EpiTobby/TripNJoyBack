@@ -3,15 +3,14 @@ package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.auth.TokenManager;
 import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
-import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
-import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
-import fr.tobby.tripnjoyback.exception.UserCreationException;
-import fr.tobby.tripnjoyback.exception.UserNotFoundException;
+import fr.tobby.tripnjoyback.exception.*;
+import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserCreationRequest;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.ForgotPasswordRequest;
+import fr.tobby.tripnjoyback.model.request.UpdateEmailRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePasswordRequest;
 import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
@@ -20,6 +19,7 @@ import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -167,6 +167,8 @@ public class AuthService {
             }
             else
             {
+                userEntity.setPassword(encoder.encode(validateCodePasswordRequest.getNewPassword()));
+                userMailUtils.sendUpdatePasswordMail(UserModel.of(userEntity));
                 return UserIdResponse.builder().userId(userEntity.getId()).build();
             }
         }
@@ -178,7 +180,24 @@ public class AuthService {
     public void updatePassword(long userId, UpdatePasswordRequest updatePasswordRequest)
     {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        user.setPassword(encoder.encode(updatePasswordRequest.getPassword()));
-        userMailUtils.sendUpdatePasswordMail(UserModel.of(user));
+        if (encoder.matches(updatePasswordRequest.getOldPassword(),user.getPassword())) {
+            user.setPassword(encoder.encode(updatePasswordRequest.getNewPassword()));
+            userMailUtils.sendUpdatePasswordMail(UserModel.of(user));
+        }
+        else
+            throw new UpdatePasswordException("Bad Password");
+    }
+
+    @Transactional
+    public void updateEmail(long userId, UpdateEmailRequest updateEmailRequest){
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        if (!encoder.matches(updateEmailRequest.getPassword(),user.getPassword())) {
+            throw new BadCredentialsException("Bad Password");
+        }
+        if (!userMailUtils.userEmailExists(updateEmailRequest.getNewEmail())){
+            throw new UpdateEmailException("Email is not valid");
+        }
+        user.setEmail(updateEmailRequest.getNewEmail());
+        userMailUtils.sendUpdateMail(UserModel.of(user));
     }
 }

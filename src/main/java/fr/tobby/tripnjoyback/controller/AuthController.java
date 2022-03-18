@@ -2,14 +2,14 @@ package fr.tobby.tripnjoyback.controller;
 
 import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
 import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
+import fr.tobby.tripnjoyback.exception.UpdateEmailException;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
+import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserCreationRequest;
 import fr.tobby.tripnjoyback.model.UserModel;
-import fr.tobby.tripnjoyback.model.request.ForgotPasswordRequest;
-import fr.tobby.tripnjoyback.model.request.UpdatePasswordRequest;
-import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordRequest;
+import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.request.auth.LoginRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.model.response.auth.LoginResponse;
@@ -76,9 +76,14 @@ public class AuthController {
     }
 
     @PatchMapping("{id}/updatepassword")
-    public void UpdatePassword(@PathVariable("id") final long userId, @RequestBody UpdatePasswordRequest updatePasswordRequest)
+    public void updatePassword(@PathVariable("id") final long userId,@RequestBody UpdatePasswordRequest updatePasswordRequest)
     {
-        authService.updatePassword(userId, updatePasswordRequest);
+        authService.updatePassword(userId,updatePasswordRequest);
+    }
+
+    @PatchMapping("{id}/updateemail")
+    public void updateEmail(@PathVariable("id") final long userId, @RequestBody UpdateEmailRequest updateEmailRequest){
+        authService.updateEmail(userId, updateEmailRequest);
     }
 
     @ExceptionHandler(AuthenticationException.class)
@@ -93,6 +98,22 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String creationError(UserCreationException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(UpdatePasswordException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String getError(UpdatePasswordException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(UpdateEmailException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String getError(UpdateEmailException exception)
     {
         return exception.getMessage();
     }

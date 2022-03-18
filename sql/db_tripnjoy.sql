@@ -150,7 +150,7 @@ CREATE TABLE "confirmation_codes" (
                                       "id" SERIAL PRIMARY KEY,
                                       "user_id" int,
                                       "value" text,
-                                      "expiration_date" datetime
+                                      "expiration_date" timestamp
 );
 
 ALTER TABLE "users" ADD FOREIGN KEY ("gender_id") REFERENCES "genders" ("id");

@@ -5,8 +5,10 @@ import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
 import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserModel;
+import fr.tobby.tripnjoyback.model.request.UserUpdateRequest;
 import fr.tobby.tripnjoyback.service.UserService;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,16 +34,9 @@ public class UserController {
         return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
     }
 
-    @PatchMapping("{id}/phone")
-    public UserModel UpdatePhoneNumber(@PathVariable("id") final long userId, String phoneNumber)
-    {
-        return userService.updatePhoneNumber(userId,phoneNumber);
-    }
-
-    @PatchMapping("{id}/city")
-    public UserModel UpdateCityNumber(@PathVariable("id") final long userId, String city)
-    {
-        return userService.updateCity(userId,city);
+    @PatchMapping("{id}/update")
+    public void updateUserInfo(@PathVariable("id") final long userId, @RequestBody UserUpdateRequest userUpdateRequest){
+        userService.updateUserInfo(userId,userUpdateRequest);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
