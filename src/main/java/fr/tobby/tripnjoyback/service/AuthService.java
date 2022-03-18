@@ -9,10 +9,7 @@ import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserCreationRequest;
 import fr.tobby.tripnjoyback.model.UserModel;
-import fr.tobby.tripnjoyback.model.request.ForgotPasswordRequest;
-import fr.tobby.tripnjoyback.model.request.UpdateEmailRequest;
-import fr.tobby.tripnjoyback.model.request.UpdatePasswordRequest;
-import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordRequest;
+import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
@@ -199,5 +196,15 @@ public class AuthService {
         }
         user.setEmail(updateEmailRequest.getNewEmail());
         userMailUtils.sendUpdateMail(UserModel.of(user));
+    }
+
+    @Transactional
+    public void deleteUser(long userId, DeleteUserRequest deleteUserRequest){
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        if (!encoder.matches(deleteUserRequest.getPassword(),user.getPassword())) {
+            throw new BadCredentialsException("Bad Password");
+        }
+        //Delete rows in all tables where userid is present
+        userRepository.delete(user);
     }
 }
