@@ -17,6 +17,7 @@ import fr.tobby.tripnjoyback.service.AuthService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,7 +62,7 @@ public class AuthController {
     }
 
     @PostMapping("forgotpassword")
-    @ApiOperation("Used to ask a new password")
+    @ApiOperation("Used to receive a confirmation to update a password")
     @ApiResponse(responseCode = "200", description = "Email is sent to reset password")
     @ApiResponse(responseCode = "422", description = "If the user does not exist")
     public void forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest)
@@ -69,6 +70,10 @@ public class AuthController {
         authService.forgotPassword(forgotPasswordRequest);
     }
 
+    @PostMapping("validatepassword")
+    @ApiOperation("Used to update the password with a confirmation code")
+    @ApiResponse(responseCode = "200", description = "The password has been updated")
+    @ApiResponse(responseCode = "403", description = "Invalid or expired confirmation code")
     @PatchMapping("validatecodepassword")
     public UserIdResponse validateCodePassword(@RequestBody ValidateCodePasswordRequest validateCodePasswordRequest)
     {
@@ -76,12 +81,19 @@ public class AuthController {
     }
 
     @PatchMapping("{id}/updatepassword")
+    @ApiOperation("Used to update the password")
+    @ApiResponse(responseCode = "200", description = "If the password has been updated")
+    @ApiResponse(responseCode = "403", description = "If the old password is not valid")
     public void updatePassword(@PathVariable("id") final long userId,@RequestBody UpdatePasswordRequest updatePasswordRequest)
     {
         authService.updatePassword(userId,updatePasswordRequest);
     }
 
     @PatchMapping("{id}/updateemail")
+    @ApiOperation("Used to ask update the user email")
+    @ApiResponse(responseCode = "200", description = "If the email has been updated")
+    @ApiResponse(responseCode = "403", description = "If the given password is not valid")
+    @ApiResponse(responseCode = "422", description = "If the new email does not exist")
     public void updateEmail(@PathVariable("id") final long userId, @RequestBody UpdateEmailRequest updateEmailRequest){
         authService.updateEmail(userId, updateEmailRequest);
     }
@@ -112,7 +124,7 @@ public class AuthController {
 
     @ExceptionHandler(UpdateEmailException.class)
     @ResponseBody
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(UpdateEmailException exception)
     {
         return exception.getMessage();
@@ -122,6 +134,14 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String expiredConfirmationCode(ExpiredCodeException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String badCredentials(BadCredentialsException exception)
     {
         return exception.getMessage();
     }

@@ -20,7 +20,7 @@ public class UserMailUtils {
         this.mailSender = mailSender;
     }
 
-    public boolean userEmailExists(String email){
+    public boolean userEmailIsValid(String email){
         try {
             InternetAddress internetAddress = new InternetAddress(email);
             internetAddress.validate();

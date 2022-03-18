@@ -7,6 +7,8 @@ import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.UserUpdateRequest;
 import fr.tobby.tripnjoyback.service.UserService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,9 @@ public class UserController {
     }
 
     @PatchMapping("{id}/update")
+    @ApiOperation("Used to update the user information")
+    @ApiResponse(responseCode = "200", description = "User information have been updated")
+    @ApiResponse(responseCode = "422", description = "If the user does not exist")
     public void updateUserInfo(@PathVariable("id") final long userId, @RequestBody UserUpdateRequest userUpdateRequest){
         userService.updateUserInfo(userId,userUpdateRequest);
     }

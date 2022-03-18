@@ -36,14 +36,6 @@ public class UserService {
     }
 
     @Transactional
-    public UserModel updatePhoneNumber(long userId, String phoneNumber) throws UserNotFoundException
-    {
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        user.setPhoneNumber(phoneNumber);
-        return UserModel.of(user);
-    }
-
-    @Transactional
     public void updateUserInfo(long userId, UserUpdateRequest userUpdateRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         if (userUpdateRequest.getFirstname() != null)
