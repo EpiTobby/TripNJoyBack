@@ -11,6 +11,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,9 +34,17 @@ public class UserController {
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasAuthority('admin')")
     public UserModel getUserById(@PathVariable("id") final long userId)
     {
         return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+    }
+
+    @GetMapping("me")
+    public UserModel getCurrentUser()
+    {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return userService.findByEmail(authentication.getName()).orElseThrow(() -> new UserNotFoundException("Current user is not associated to a registered user"));
     }
 
     @PatchMapping("{id}/update")
