@@ -60,9 +60,9 @@ public class AuthController {
     @ApiOperation("Confirm a user's email")
     @ApiResponse(responseCode = "200", description = "User is now confirmed")
     @ApiResponse(responseCode = "403", description = "Invalid or expired confirmation code")
-    public boolean confirmUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
+    public void confirmUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
     {
-        return authService.confirmUser(userId, confirmationCode);
+        authService.confirmUser(userId, confirmationCode);
     }
 
     @PostMapping("forgotpassword")

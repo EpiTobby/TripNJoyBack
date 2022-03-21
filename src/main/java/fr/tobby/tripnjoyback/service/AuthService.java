@@ -111,7 +111,7 @@ public class AuthService {
         return confirmationCodeEntity;
     }
 
-    public boolean confirmUser(long userId, ConfirmationCodeModel confirmationCodeModel)
+    public void confirmUser(long userId, ConfirmationCodeModel confirmationCodeModel)
     {
         ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(confirmationCodeModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
@@ -125,7 +125,7 @@ public class AuthService {
             }
             else
             {
-                return updateConfirmation(userId).isConfirmed();
+                updateConfirmation(userId);
             }
         }
         throw new BadConfirmationCodeException("Bad Confirmation Code");
