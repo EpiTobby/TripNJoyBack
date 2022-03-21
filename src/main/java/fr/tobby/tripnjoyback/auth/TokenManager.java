@@ -31,6 +31,11 @@ public final class TokenManager {
 
     public String generateFor(UserDetails userDetails, final long userId)
     {
+        return generateFor(userDetails, userId);
+    }
+
+    public String generateFor(String username, final long userId)
+    {
         final HashMap<String, Object> claims = new HashMap<>();
 
         claims.put("userId", userId);
@@ -38,7 +43,7 @@ public final class TokenManager {
                    .setClaims(claims)
                    .setExpiration(Date.from(Instant.now().plus(10, ChronoUnit.DAYS)))
                    .setIssuedAt(Date.from(Instant.now()))
-                   .setSubject(userDetails.getUsername())
+                   .setSubject(username)
                    .signWith(SignatureAlgorithm.HS256, jwtSecret)
                    .compact();
     }
