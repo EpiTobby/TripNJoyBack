@@ -31,7 +31,7 @@ public final class TokenManager {
 
     public String generateFor(UserDetails userDetails, final long userId)
     {
-        return generateFor(userDetails, userId);
+        return generateFor(userDetails.getUsername(), userId);
     }
 
     public String generateFor(String username, final long userId)

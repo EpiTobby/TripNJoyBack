@@ -10,7 +10,7 @@ import fr.tobby.tripnjoyback.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,6 +25,7 @@ public class UserController {
     }
 
     @GetMapping("")
+    @PreAuthorize("hasAuthority('admin')")
     public Iterable<UserEntity> getAll()
     {
         return userService.getAll();

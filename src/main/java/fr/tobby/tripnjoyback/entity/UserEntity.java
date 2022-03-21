@@ -43,7 +43,7 @@ public class UserEntity {
     @Setter
     private boolean confirmed;
     @Setter
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Collection<RoleEntity> roles;
 
