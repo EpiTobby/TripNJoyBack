@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Getter
@@ -22,9 +24,13 @@ public class UserModel {
     private Instant createdDate;
     private String phoneNumber;
     private boolean confirmed;
+    private Collection<UserRole> roles;
 
     public static UserModel of(final UserEntity entity)
     {
+        Collection<UserRole> roles = entity.getRoles().stream()
+                                           .map(role -> UserRole.of(role.getName()))
+                                           .collect(Collectors.toList());
         return new UserModel(
                 entity.getId(),
                 entity.getFirstname(),
@@ -37,7 +43,8 @@ public class UserModel {
                 CityModel.of(entity.getCity()),
                 entity.getCreatedDate(),
                 entity.getPhoneNumber(),
-                entity.isConfirmed()
+                entity.isConfirmed(),
+                roles
         );
     }
 }
