@@ -131,7 +131,8 @@ public class AuthService {
                 updateConfirmation(userId);
             }
         }
-        throw new BadConfirmationCodeException("Bad Confirmation Code");
+        else
+            throw new BadConfirmationCodeException("Bad Confirmation Code");
     }
 
     @Transactional

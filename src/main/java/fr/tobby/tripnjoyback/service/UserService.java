@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.CityEntity;
+import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
@@ -8,6 +9,7 @@ import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.DeleteUserByAdminRequest;
 import fr.tobby.tripnjoyback.model.request.DeleteUserRequest;
 import fr.tobby.tripnjoyback.model.request.UserUpdateRequest;
+import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,13 +23,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final CityService cityService;
+    private final ConfirmationCodeRepository confirmationCodeRepository;
     private final PasswordEncoder encoder;
     private final UserMailUtils userMailUtils;
 
-    public UserService(UserRepository userRepository, final CityService cityService, PasswordEncoder encoder, UserMailUtils userMailUtils)
+    public UserService(UserRepository userRepository, final CityService cityService, ConfirmationCodeRepository confirmationCodeRepository, PasswordEncoder encoder, UserMailUtils userMailUtils)
     {
         this.userRepository = userRepository;
         this.cityService = cityService;
+        this.confirmationCodeRepository = confirmationCodeRepository;
         this.encoder = encoder;
         this.userMailUtils = userMailUtils;
     }
@@ -66,12 +70,21 @@ public class UserService {
     }
 
     @Transactional
+    protected void deleteUserPresence(long userId){
+        //Delete rows in all tables where userid is present
+        Optional<ConfirmationCodeEntity> confirmationCode = confirmationCodeRepository.findByUserId(userId);
+        if (confirmationCode.isPresent())
+            confirmationCodeRepository.delete(confirmationCode.get());
+    }
+
+    @Transactional
     public void deleteUserAccount(long userId, DeleteUserRequest deleteUserRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         if (!encoder.matches(deleteUserRequest.getPassword(),user.getPassword())) {
             throw new BadCredentialsException("Bad Password");
         }
-        //Delete rows in all tables where userid is present
+        deleteUserPresence(userId);
+
         userRepository.delete(user);
         userMailUtils.sendDeleteAccountMail(UserModel.of(user));
     }
@@ -79,7 +92,7 @@ public class UserService {
     @Transactional
     public void deleteUserByAdmin(long userId, DeleteUserByAdminRequest deleteUserByAdminRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        //Delete rows in all tables where userid is present
+        deleteUserPresence(userId);
         userRepository.delete(user);
         userMailUtils.sendDeleteAccountByAdminMail(UserModel.of(user), deleteUserByAdminRequest.getReason());
     }

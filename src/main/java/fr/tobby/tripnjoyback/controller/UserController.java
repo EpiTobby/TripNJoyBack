@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -89,6 +90,14 @@ public class UserController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String getError(ExpiredCodeException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String getError(BadCredentialsException exception)
     {
         return exception.getMessage();
     }
