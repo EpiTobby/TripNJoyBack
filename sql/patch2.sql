@@ -19,3 +19,6 @@ create table user_roles
     constraint user_roles_pk
         primary key (user_id, role_id)
 );
+
+INSERT INTO roles (name) VALUES ('default');
+INSERT INTO roles (name) VALUES ('admin');
