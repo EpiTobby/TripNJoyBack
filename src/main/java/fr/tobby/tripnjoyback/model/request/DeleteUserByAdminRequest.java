@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @JsonAutoDetect
 @NoArgsConstructor
 public class DeleteUserByAdminRequest {
-    String reason;
+    private String reason;
 }

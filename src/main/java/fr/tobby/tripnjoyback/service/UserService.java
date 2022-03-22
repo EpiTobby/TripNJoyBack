@@ -70,21 +70,11 @@ public class UserService {
     }
 
     @Transactional
-    protected void deleteUserPresence(long userId){
-        //Delete rows in all tables where userid is present
-        Optional<ConfirmationCodeEntity> confirmationCode = confirmationCodeRepository.findByUserId(userId);
-        if (confirmationCode.isPresent())
-            confirmationCodeRepository.delete(confirmationCode.get());
-    }
-
-    @Transactional
     public void deleteUserAccount(long userId, DeleteUserRequest deleteUserRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         if (!encoder.matches(deleteUserRequest.getPassword(),user.getPassword())) {
             throw new BadCredentialsException("Bad Password");
         }
-        deleteUserPresence(userId);
-
         userRepository.delete(user);
         userMailUtils.sendDeleteAccountMail(UserModel.of(user));
     }
@@ -92,7 +82,6 @@ public class UserService {
     @Transactional
     public void deleteUserByAdmin(long userId, DeleteUserByAdminRequest deleteUserByAdminRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        deleteUserPresence(userId);
         userRepository.delete(user);
         userMailUtils.sendDeleteAccountByAdminMail(UserModel.of(user), deleteUserByAdminRequest.getReason());
     }
