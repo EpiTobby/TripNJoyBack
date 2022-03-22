@@ -20,6 +20,7 @@ public class ConfirmationCodeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JoinColumn(name = "user_id")
     private long userId;
 
     private String value;
