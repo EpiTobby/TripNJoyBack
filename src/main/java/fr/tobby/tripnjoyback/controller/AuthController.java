@@ -1,17 +1,18 @@
 package fr.tobby.tripnjoyback.controller;
 
-import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
-import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
-import fr.tobby.tripnjoyback.exception.UpdateEmailException;
-import fr.tobby.tripnjoyback.exception.UserCreationException;
-import fr.tobby.tripnjoyback.exception.UserNotFoundException;
+import fr.tobby.tripnjoyback.auth.TokenManager;
+import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserCreationRequest;
 import fr.tobby.tripnjoyback.model.UserModel;
-import fr.tobby.tripnjoyback.model.request.*;
+import fr.tobby.tripnjoyback.model.request.ForgotPasswordRequest;
+import fr.tobby.tripnjoyback.model.request.UpdateEmailRequest;
+import fr.tobby.tripnjoyback.model.request.UpdatePasswordRequest;
+import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordRequest;
 import fr.tobby.tripnjoyback.model.request.auth.LoginRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
+import fr.tobby.tripnjoyback.model.response.auth.AuthTokenResponse;
 import fr.tobby.tripnjoyback.model.response.auth.LoginResponse;
 import fr.tobby.tripnjoyback.service.AuthService;
 import io.swagger.annotations.ApiOperation;
@@ -26,19 +27,22 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final TokenManager tokenManager;
 
-    public AuthController(final AuthService authService)
+    public AuthController(final AuthService authService, final TokenManager tokenManager)
     {
         this.authService = authService;
+        this.tokenManager = tokenManager;
     }
 
     @PostMapping("register")
     @ApiOperation(value = "Create a new account. Will send a confirmation mail to the given address")
     @ApiResponse(responseCode = "200", description = "User is created")
     @ApiResponse(responseCode = "422", description = "If the email is already in use by another user")
-    public UserModel create(@RequestBody UserCreationRequest model)
+    public AuthTokenResponse create(@RequestBody UserCreationRequest model)
     {
-        return authService.createUser(model);
+        UserModel user = authService.createUser(model);
+        return new AuthTokenResponse(tokenManager.generateFor(user.getEmail(), user.getId()));
     }
 
     @PostMapping("login")
@@ -56,9 +60,9 @@ public class AuthController {
     @ApiOperation("Confirm a user's email")
     @ApiResponse(responseCode = "200", description = "User is now confirmed")
     @ApiResponse(responseCode = "403", description = "Invalid or expired confirmation code")
-    public boolean confirmUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
+    public void confirmUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
     {
-        return authService.confirmUser(userId, confirmationCode);
+        authService.confirmUser(userId, confirmationCode);
     }
 
     @PostMapping("forgotpassword")

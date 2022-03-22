@@ -14,6 +14,7 @@ import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
+import fr.tobby.tripnjoyback.repository.UserRoleRepository;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 public class AuthService {
@@ -39,12 +41,14 @@ public class AuthService {
     private final TokenManager tokenManager;
     private final UserDetailsService userDetailsService;
     private final UserService userService;
+    private final UserRoleRepository userRoleRepository;
 
     public AuthService(final UserRepository userRepository, final UserMailUtils userMailUtils, final PasswordEncoder encoder,
                        final GenderRepository genderRepository,
                        final ConfirmationCodeRepository confirmationCodeRepository,
                        final AuthenticationManager authenticationManager, final TokenManager tokenManager,
-                       final UserDetailsService userDetailsService, final UserService userService)
+                       final UserDetailsService userDetailsService, final UserService userService,
+                       final UserRoleRepository userRoleRepository)
     {
         this.userRepository = userRepository;
         this.userMailUtils = userMailUtils;
@@ -55,6 +59,7 @@ public class AuthService {
         this.tokenManager = tokenManager;
         this.userDetailsService = userDetailsService;
         this.userService = userService;
+        this.userRoleRepository = userRoleRepository;
     }
 
     @Transactional
@@ -77,6 +82,7 @@ public class AuthService {
                                           .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                                           .phoneNumber(model.getPhoneNumber())
                                           .confirmed(false)
+                                          .roles(List.of(userRoleRepository.getByName("default")))
                                           .build();
         UserModel userModel = UserModel.of(userRepository.save(userEntity));
         generateConfirmationCode(userModel);
@@ -108,7 +114,7 @@ public class AuthService {
         return confirmationCodeEntity;
     }
 
-    public boolean confirmUser(long userId, ConfirmationCodeModel confirmationCodeModel)
+    public void confirmUser(long userId, ConfirmationCodeModel confirmationCodeModel)
     {
         ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(confirmationCodeModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
@@ -122,7 +128,7 @@ public class AuthService {
             }
             else
             {
-                return updateConfirmation(userId).isConfirmed();
+                updateConfirmation(userId);
             }
         }
         throw new BadConfirmationCodeException("Bad Confirmation Code");

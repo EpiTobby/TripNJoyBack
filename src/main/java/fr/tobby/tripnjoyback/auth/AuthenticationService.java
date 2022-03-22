@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
 @Component
 public class AuthenticationService implements UserDetailsService {
@@ -28,8 +28,8 @@ public class AuthenticationService implements UserDetailsService {
         return new UserDetailsImpl(
                 user.getId(),
                 user.getEmail(),
-                user.getPassword()
-        );
+                user.getPassword(),
+                user.getRoles());
     }
 }
 
@@ -38,18 +38,21 @@ class UserDetailsImpl implements UserDetails
     private final long id;
     private final String username;
     private final String password;
+    private final Collection<? extends GrantedAuthority> roles;
 
-    public UserDetailsImpl(final long id, final String username, final String password)
+    public UserDetailsImpl(final long id, final String username, final String password,
+                           final Collection<? extends GrantedAuthority> roles)
     {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.roles = roles;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities()
     {
-        return List.of();
+        return Collections.unmodifiableCollection(roles);
     }
 
     @Override
