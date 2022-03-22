@@ -72,7 +72,23 @@ public class UserMailUtils {
         mailSender.send(mail);
     }
 
+    public void sendDeleteAccountMail(UserModel user){
+        SimpleMailMessage mail = new MailBuilder(config)
+                .toAddr(user.getEmail())
+                .setSubject("Suppression de votre compte TripNJoy")
+                .setContent("Bonjour " + user.getFirstname() + ",\n\nVotre compte TripNJoy a bien été supprimé.\nCordialement,\nl'équipe TripNJoy")
+                .build();
+        mailSender.send(mail);
+    }
 
+    public void sendDeleteAccountByAdminMail(UserModel user, String reason){
+        SimpleMailMessage mail = new MailBuilder(config)
+                .toAddr(user.getEmail())
+                .setSubject("Suppression de votre compte TripNJoy")
+                .setContent("Bonjour " + user.getFirstname() + ",\n\nVotre compte TripNJoy a été supprimé pour la raison suivante:\n" + reason + ".\nCordialement,\nl'équipe TripNJoy")
+                .build();
+        mailSender.send(mail);
+    }
 
     public void sendUpdateMail(UserModel user){
         SimpleMailMessage mail = new MailBuilder(config)

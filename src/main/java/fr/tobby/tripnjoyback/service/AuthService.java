@@ -9,10 +9,7 @@ import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserCreationRequest;
 import fr.tobby.tripnjoyback.model.UserModel;
-import fr.tobby.tripnjoyback.model.request.ForgotPasswordRequest;
-import fr.tobby.tripnjoyback.model.request.UpdateEmailRequest;
-import fr.tobby.tripnjoyback.model.request.UpdatePasswordRequest;
-import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordRequest;
+import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
@@ -134,7 +131,8 @@ public class AuthService {
                 updateConfirmation(userId);
             }
         }
-        throw new BadConfirmationCodeException("Bad Confirmation Code");
+        else
+            throw new BadConfirmationCodeException("Bad Confirmation Code");
     }
 
     @Transactional

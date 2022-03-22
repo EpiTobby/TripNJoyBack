@@ -233,7 +233,7 @@ ALTER TABLE "expenses_members" ADD FOREIGN KEY ("expense_id") REFERENCES "expens
 
 ALTER TABLE "suggestions" ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
 
-ALTER TABLE "confirmation_codes" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "confirmation_codes" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")  on delete cascade;
 
 INSERT INTO "genders" (value) VALUES ('male');
 

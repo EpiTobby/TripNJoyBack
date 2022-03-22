@@ -5,12 +5,15 @@ import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
 import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserModel;
+import fr.tobby.tripnjoyback.model.request.DeleteUserByAdminRequest;
+import fr.tobby.tripnjoyback.model.request.DeleteUserRequest;
 import fr.tobby.tripnjoyback.model.request.UserUpdateRequest;
 import fr.tobby.tripnjoyback.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -55,6 +58,18 @@ public class UserController {
         userService.updateUserInfo(userId,userUpdateRequest);
     }
 
+    @DeleteMapping("{id}")
+    public void deleteUserAccount(@PathVariable("id") final long userId, @RequestBody DeleteUserRequest deleteUserRequest){
+        userService.deleteUserAccount(userId, deleteUserRequest);
+    }
+
+    @DeleteMapping("{id}/admin")
+    @PreAuthorize("hasAuthority('admin')")
+    public void deleteUserByAdmin(@PathVariable("id") final long userId, @RequestBody DeleteUserByAdminRequest deleteUserByAdminRequest)
+    {
+         userService.deleteUserByAdmin(userId, deleteUserByAdminRequest);
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -75,6 +90,14 @@ public class UserController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String getError(ExpiredCodeException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String getError(BadCredentialsException exception)
     {
         return exception.getMessage();
     }
