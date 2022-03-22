@@ -77,7 +77,7 @@ public class AuthService {
                                           .lastname(model.getLastname())
                                           .password(encoder.encode(model.getPassword()))
                                           .email(model.getEmail())
-                                          .birthDate(model.getBirthDate())
+                                          .birthDate(model.getBirthDate().toInstant())
                                           .createdDate(Instant.now())
                                           .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                                           .phoneNumber(model.getPhoneNumber())

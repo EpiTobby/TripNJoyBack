@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -20,7 +21,7 @@ public class UserCreationRequest {
     private String gender;
     @ApiModelProperty("Also known as username. Must be unique")
     private String email;
-    private Instant birthDate;
+    private Date birthDate;
     private String phoneNumber;
 
 }
