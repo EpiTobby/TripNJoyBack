@@ -5,6 +5,8 @@ import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
 import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserModel;
+import fr.tobby.tripnjoyback.model.request.DeleteUserByAdminRequest;
+import fr.tobby.tripnjoyback.model.request.DeleteUserRequest;
 import fr.tobby.tripnjoyback.model.request.UserUpdateRequest;
 import fr.tobby.tripnjoyback.service.UserService;
 import io.swagger.annotations.ApiOperation;
@@ -53,6 +55,18 @@ public class UserController {
     @ApiResponse(responseCode = "422", description = "If the user does not exist")
     public void updateUserInfo(@PathVariable("id") final long userId, @RequestBody UserUpdateRequest userUpdateRequest){
         userService.updateUserInfo(userId,userUpdateRequest);
+    }
+
+    @DeleteMapping("{id}")
+    public void deleteUserAccount(@PathVariable("id") final long userId, @RequestBody DeleteUserRequest deleteUserRequest){
+        userService.deleteUserAccount(userId, deleteUserRequest);
+    }
+
+    @DeleteMapping("{id}/admin")
+    @PreAuthorize("hasAuthority('admin')")
+    public void deleteUserAdmin(@PathVariable("id") final long userId, @RequestBody DeleteUserByAdminRequest deleteUserByAdminRequest)
+    {
+         userService.deleteUserByAdmin(userId, deleteUserByAdminRequest);
     }
 
     @ExceptionHandler(UserNotFoundException.class)

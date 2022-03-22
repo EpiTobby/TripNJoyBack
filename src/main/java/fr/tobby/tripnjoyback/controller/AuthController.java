@@ -99,11 +99,6 @@ public class AuthController {
         authService.updateEmail(userId, updateEmailRequest);
     }
 
-    @DeleteMapping("{id}")
-    public void deleteUser(@PathVariable("id") final long userId, @RequestBody DeleteUserRequest deleteUserRequest){
-        authService.deleteUser(userId, deleteUserRequest);
-    }
-
     @ExceptionHandler(AuthenticationException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
