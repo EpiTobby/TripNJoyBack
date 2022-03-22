@@ -15,7 +15,7 @@ import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.model.response.auth.AuthTokenResponse;
 import fr.tobby.tripnjoyback.model.response.auth.LoginResponse;
 import fr.tobby.tripnjoyback.service.AuthService;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    @ApiOperation(value = "Create a new account. Will send a confirmation mail to the given address")
+    @Operation(summary = "Create a new account. Will send a confirmation mail to the given address")
     @ApiResponse(responseCode = "200", description = "User is created")
     @ApiResponse(responseCode = "422", description = "If the email is already in use by another user")
     public AuthTokenResponse create(@RequestBody UserCreationRequest model)
@@ -46,7 +46,7 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    @ApiOperation("Log a user, to allow authenticated endpoints")
+    @Operation(summary = "Log a user, to allow authenticated endpoints")
     @ApiResponse(responseCode = "401", description = "Authentication failed. Wrong username or password")
     @ApiResponse(responseCode = "200", description = "Authentication Succeeded. Use the given jwt in following requests")
     public LoginResponse login(@RequestBody LoginRequest loginRequest)
@@ -57,7 +57,7 @@ public class AuthController {
     }
 
     @PatchMapping("{id}/confirm")
-    @ApiOperation("Confirm a user's email")
+    @Operation(summary = "Confirm a user's email")
     @ApiResponse(responseCode = "200", description = "User is now confirmed")
     @ApiResponse(responseCode = "403", description = "Invalid or expired confirmation code")
     public void confirmUser(@PathVariable("id") final long userId, @RequestBody ConfirmationCodeModel confirmationCode)
@@ -66,7 +66,7 @@ public class AuthController {
     }
 
     @PostMapping("forgotpassword")
-    @ApiOperation("Used to receive a confirmation to update a password")
+    @Operation(summary = "Used to receive a confirmation to update a password")
     @ApiResponse(responseCode = "200", description = "Email is sent to reset password")
     @ApiResponse(responseCode = "422", description = "If the user does not exist")
     public void forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest)
@@ -75,7 +75,7 @@ public class AuthController {
     }
 
     @PostMapping("validatepassword")
-    @ApiOperation("Used to update the password with a confirmation code")
+    @Operation(summary = "Used to update the password with a confirmation code")
     @ApiResponse(responseCode = "200", description = "The password has been updated")
     @ApiResponse(responseCode = "403", description = "Invalid or expired confirmation code")
     @PatchMapping("validatecodepassword")
@@ -85,7 +85,7 @@ public class AuthController {
     }
 
     @PatchMapping("{id}/updatepassword")
-    @ApiOperation("Used to update the password")
+    @Operation(summary = "Used to update the password")
     @ApiResponse(responseCode = "200", description = "If the password has been updated")
     @ApiResponse(responseCode = "403", description = "If the old password is not valid")
     public void updatePassword(@PathVariable("id") final long userId,@RequestBody UpdatePasswordRequest updatePasswordRequest)
@@ -94,7 +94,7 @@ public class AuthController {
     }
 
     @PatchMapping("{id}/updateemail")
-    @ApiOperation("Used to ask update the user email")
+    @Operation(summary = "Used to ask update the user email")
     @ApiResponse(responseCode = "200", description = "If the email has been updated")
     @ApiResponse(responseCode = "403", description = "If the given password is not valid")
     @ApiResponse(responseCode = "422", description = "If the new email does not exist")

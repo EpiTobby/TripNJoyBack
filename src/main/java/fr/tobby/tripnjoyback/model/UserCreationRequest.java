@@ -1,7 +1,7 @@
 package fr.tobby.tripnjoyback.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,7 +18,7 @@ public class UserCreationRequest {
     private String lastname;
     private String password;
     private String gender;
-    @ApiModelProperty("Also known as username. Must be unique")
+    @Schema(description = "Also known as username. Must be unique")
     private String email;
     private Instant birthDate;
     private String phoneNumber;
