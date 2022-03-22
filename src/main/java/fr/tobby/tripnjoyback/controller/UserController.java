@@ -96,7 +96,7 @@ public class UserController {
 
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseBody
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     public String getError(BadCredentialsException exception)
     {
         return exception.getMessage();
