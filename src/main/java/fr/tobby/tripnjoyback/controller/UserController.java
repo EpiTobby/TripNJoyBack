@@ -9,6 +9,8 @@ import fr.tobby.tripnjoyback.model.request.UserUpdateRequest;
 import fr.tobby.tripnjoyback.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(path = "/users")
 public class UserController {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
 
@@ -60,6 +63,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(UserNotFoundException exception)
     {
+        logger.debug("Error on request", exception);
         return exception.getMessage();
     }
 
@@ -68,6 +72,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(BadConfirmationCodeException exception)
     {
+        logger.debug("Error on request", exception);
         return exception.getMessage();
     }
 
@@ -76,6 +81,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String getError(ExpiredCodeException exception)
     {
+        logger.debug("Error on request", exception);
         return exception.getMessage();
     }
 }

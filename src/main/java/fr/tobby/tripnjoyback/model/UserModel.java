@@ -47,4 +47,24 @@ public class UserModel {
                 roles
         );
     }
+
+    @Override
+    public String toString()
+    {
+        return "UserModel{" +
+                "id=" + id +
+                ", firstname='" + firstname + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", birthDate=" + birthDate +
+                ", gender=" + gender +
+                ", profilePicture='" + profilePicture + '\'' +
+                ", city=" + city +
+                ", createdDate=" + createdDate +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", confirmed=" + confirmed +
+                ", roles=" + roles +
+                '}';
+    }
 }

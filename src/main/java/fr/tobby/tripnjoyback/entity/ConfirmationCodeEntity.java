@@ -33,4 +33,15 @@ public class ConfirmationCodeEntity {
         this.value = String.valueOf(code);
         this.expirationDate = Instant.now().plus(24, ChronoUnit.HOURS);
     }
+
+    @Override
+    public String toString()
+    {
+        return "ConfirmationCodeEntity{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", value='" + value + '\'' +
+                ", expirationDate=" + expirationDate +
+                '}';
+    }
 }
