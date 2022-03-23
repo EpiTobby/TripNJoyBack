@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.model.request.auth;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
@@ -15,4 +16,9 @@ public final class LoginRequest {
     @ApiModelProperty("Aka email")
     private String username;
     private String password;
+
+    @JsonProperty("username")
+    public void setUsername(String username){
+        this.username = username.toLowerCase().trim();
+    }
 }

@@ -57,10 +57,9 @@ public class AuthController {
     @ApiResponse(responseCode = "200", description = "Authentication Succeeded. Use the given jwt in following requests")
     public LoginResponse login(@RequestBody LoginRequest loginRequest)
     {
-        String username = loginRequest.getUsername().toLowerCase().trim();
-        String token = authService.login(username, loginRequest.getPassword());
+        String token = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
 
-        return new LoginResponse(username, token);
+        return new LoginResponse(loginRequest.getUsername(), token);
     }
 
     @PatchMapping("{id}/confirm")
