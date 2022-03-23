@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -133,6 +134,17 @@ public class AuthService {
         }
         else
             throw new BadConfirmationCodeException("Bad Confirmation Code");
+    }
+
+    @Transactional
+    public void resendConfirmationCode(long userId){
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        if (user.isConfirmed())
+            throw new UserAlreadyConfirmedException("User is already confirmed");
+        Optional<ConfirmationCodeEntity> confirmationCodeEntity  = confirmationCodeRepository.findByUserId(userId);
+        if (confirmationCodeEntity.isPresent())
+            confirmationCodeRepository.delete(confirmationCodeEntity.get());
+        generateConfirmationCode(UserModel.of(user));
     }
 
     @Transactional

@@ -42,6 +42,15 @@ public class AuthController {
         return new AuthTokenResponse(tokenManager.generateFor(user.getEmail(), user.getId()));
     }
 
+    @PostMapping("{id}/re-send")
+    @ApiOperation(value = "Will send a new confirmation code to the user")
+    @ApiResponse(responseCode = "200", description = "A new confirmation code has been sent")
+    @ApiResponse(responseCode = "401", description = "The user is already confirmed")
+    public void resendConfirmationCode(@PathVariable("id") final long userId)
+    {
+        authService.resendConfirmationCode(userId);
+    }
+
     @PostMapping("login")
     @ApiOperation("Log a user, to allow authenticated endpoints")
     @ApiResponse(responseCode = "401", description = "Authentication failed. Wrong username or password")
@@ -158,7 +167,15 @@ public class AuthController {
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String badConfirmationCode(UserNotFoundException exception)
+    public String userNotFoundException(UserNotFoundException exception)
+    {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(UserAlreadyConfirmedException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String userAlreadyConfirmedException(UserAlreadyConfirmedException exception)
     {
         return exception.getMessage();
     }
