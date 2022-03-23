@@ -66,7 +66,6 @@ public class AuthService {
     @Transactional
     public UserModel createUser(UserCreationRequest model) throws UserCreationException
     {
-        model.formatEmail();
         if (userRepository.findByEmail(model.getEmail()).isPresent())
         {
             throw new UserCreationException("Email is already in use");
@@ -162,7 +161,6 @@ public class AuthService {
     @Transactional
     public void forgotPassword(ForgotPasswordRequest forgotPassword)
     {
-        forgotPassword.formatEmail();
         UserEntity userEntity = userRepository.findByEmail(forgotPassword.getEmail())
                                               .orElseThrow(() -> new UserNotFoundException("No user with email " + forgotPassword.getEmail()));
         generateForgottenPasswordCode(UserModel.of(userEntity));
@@ -171,7 +169,6 @@ public class AuthService {
     @Transactional
     public UserIdResponse validateCodePassword(ValidateCodePasswordRequest validateCodePasswordRequest)
     {
-        validateCodePasswordRequest.formatEmail();
         UserEntity userEntity = userRepository.findByEmail(validateCodePasswordRequest.getEmail()).filter(user -> user.isConfirmed())
                                               .orElseThrow(() -> new UserNotFoundException("No user with email " + validateCodePasswordRequest.getEmail()));
         ;
