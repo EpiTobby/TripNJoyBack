@@ -4,7 +4,7 @@ import fr.tobby.tripnjoyback.auth.TokenManager;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
-import fr.tobby.tripnjoyback.model.UserCreationRequest;
+import fr.tobby.tripnjoyback.model.request.UserCreationRequest;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.request.auth.LoginRequest;
@@ -57,9 +57,10 @@ public class AuthController {
     @ApiResponse(responseCode = "200", description = "Authentication Succeeded. Use the given jwt in following requests")
     public LoginResponse login(@RequestBody LoginRequest loginRequest)
     {
-        String token = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
+        String username = loginRequest.getUsername().toLowerCase().trim();
+        String token = authService.login(username, loginRequest.getPassword());
 
-        return new LoginResponse(loginRequest.getUsername(), token);
+        return new LoginResponse(username, token);
     }
 
     @PatchMapping("{id}/confirm")
@@ -103,7 +104,7 @@ public class AuthController {
     @ApiOperation("Used to ask update the user email")
     @ApiResponse(responseCode = "200", description = "If the email has been updated")
     @ApiResponse(responseCode = "403", description = "If the given password is not valid")
-    @ApiResponse(responseCode = "422", description = "If the new email does not exist")
+    @ApiResponse(responseCode = "422", description = "If the new email does not exist or is already in use")
     public void updateEmail(@PathVariable("id") final long userId, @RequestBody UpdateEmailRequest updateEmailRequest){
         authService.updateEmail(userId, updateEmailRequest);
     }
