@@ -4,7 +4,7 @@ import fr.tobby.tripnjoyback.auth.TokenManager;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
-import fr.tobby.tripnjoyback.model.UserCreationRequest;
+import fr.tobby.tripnjoyback.model.request.UserCreationRequest;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.request.auth.LoginRequest;
@@ -103,7 +103,7 @@ public class AuthController {
     @ApiOperation("Used to ask update the user email")
     @ApiResponse(responseCode = "200", description = "If the email has been updated")
     @ApiResponse(responseCode = "403", description = "If the given password is not valid")
-    @ApiResponse(responseCode = "422", description = "If the new email does not exist")
+    @ApiResponse(responseCode = "422", description = "If the new email does not exist or is already in use")
     public void updateEmail(@PathVariable("id") final long userId, @RequestBody UpdateEmailRequest updateEmailRequest){
         authService.updateEmail(userId, updateEmailRequest);
     }

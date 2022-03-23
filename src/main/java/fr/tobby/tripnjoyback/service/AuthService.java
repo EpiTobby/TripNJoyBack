@@ -7,7 +7,7 @@ import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
-import fr.tobby.tripnjoyback.model.UserCreationRequest;
+import fr.tobby.tripnjoyback.model.request.UserCreationRequest;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
@@ -213,7 +213,12 @@ public class AuthService {
         if (!userMailUtils.userEmailIsValid(updateEmailRequest.getNewEmail())){
             throw new UpdateEmailException("Email is not valid");
         }
-        user.setEmail(updateEmailRequest.getNewEmail());
-        userMailUtils.sendUpdateMail(UserModel.of(user));
+        String newEmail = updateEmailRequest.getNewEmail().toLowerCase().trim();
+        if (userRepository.findByEmail(newEmail).isEmpty()){
+            user.setEmail(newEmail);
+            userMailUtils.sendUpdateMail(UserModel.of(user));
+        }
+        else
+            throw new UpdateEmailException("Email already used");
     }
 }
