@@ -42,7 +42,7 @@ public class AuthController {
         return new AuthTokenResponse(tokenManager.generateFor(user.getEmail(), user.getId()));
     }
 
-    @PostMapping("{id}/re-send")
+    @PostMapping("{id}/resend")
     @ApiOperation(value = "Will send a new confirmation code to the user")
     @ApiResponse(responseCode = "200", description = "A new confirmation code has been sent")
     @ApiResponse(responseCode = "401", description = "The user is already confirmed")
