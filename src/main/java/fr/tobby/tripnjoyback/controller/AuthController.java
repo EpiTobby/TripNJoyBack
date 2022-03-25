@@ -42,7 +42,7 @@ public class AuthController {
         return new AuthTokenResponse(tokenManager.generateFor(user.getEmail(), user.getId()));
     }
 
-    @PostMapping("{id}/re-send")
+    @PostMapping("{id}/resend")
     @ApiOperation(value = "Will send a new confirmation code to the user")
     @ApiResponse(responseCode = "200", description = "A new confirmation code has been sent")
     @ApiResponse(responseCode = "401", description = "The user is already confirmed")
@@ -62,7 +62,7 @@ public class AuthController {
         return new LoginResponse(loginRequest.getUsername(), token);
     }
 
-    @PatchMapping("{id}/confirm")
+    @PatchMapping("{id}/confirmation")
     @ApiOperation("Confirm a user's email")
     @ApiResponse(responseCode = "200", description = "User is now confirmed")
     @ApiResponse(responseCode = "403", description = "Invalid or expired confirmation code")
@@ -71,7 +71,7 @@ public class AuthController {
         authService.confirmUser(userId, confirmationCode);
     }
 
-    @PostMapping("forgotpassword")
+    @PostMapping("forgot/password")
     @ApiOperation("Used to receive a confirmation to update a password")
     @ApiResponse(responseCode = "200", description = "Email is sent to reset password")
     @ApiResponse(responseCode = "422", description = "If the user does not exist")
@@ -80,17 +80,17 @@ public class AuthController {
         authService.forgotPassword(forgotPasswordRequest);
     }
 
-    @PostMapping("validatepassword")
+    @PostMapping("validation/password")
     @ApiOperation("Used to update the password with a confirmation code")
     @ApiResponse(responseCode = "200", description = "The password has been updated")
     @ApiResponse(responseCode = "403", description = "Invalid or expired confirmation code")
-    @PatchMapping("validatecodepassword")
+    @PatchMapping("validation/password")
     public UserIdResponse validateCodePassword(@RequestBody ValidateCodePasswordRequest validateCodePasswordRequest)
     {
         return authService.validateCodePassword(validateCodePasswordRequest);
     }
 
-    @PatchMapping("{id}/updatepassword")
+    @PatchMapping("{id}/password")
     @ApiOperation("Used to update the password")
     @ApiResponse(responseCode = "200", description = "If the password has been updated")
     @ApiResponse(responseCode = "403", description = "If the old password is not valid")
@@ -99,7 +99,7 @@ public class AuthController {
         authService.updatePassword(userId,updatePasswordRequest);
     }
 
-    @PatchMapping("{id}/updateemail")
+    @PatchMapping("{id}/email")
     @ApiOperation("Used to ask update the user email")
     @ApiResponse(responseCode = "200", description = "If the email has been updated")
     @ApiResponse(responseCode = "403", description = "If the given password is not valid")
