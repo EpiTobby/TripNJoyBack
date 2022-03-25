@@ -7,7 +7,6 @@ import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
-import fr.tobby.tripnjoyback.model.request.UserCreationRequest;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
@@ -205,7 +204,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void updateEmail(long userId, UpdateEmailRequest updateEmailRequest){
+    public String updateEmail(long userId, UpdateEmailRequest updateEmailRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         if (!encoder.matches(updateEmailRequest.getPassword(),user.getPassword())) {
             throw new BadCredentialsException("Bad Password");
@@ -217,6 +216,7 @@ public class AuthService {
         if (userRepository.findByEmail(newEmail).isEmpty()){
             user.setEmail(newEmail);
             userMailUtils.sendUpdateMail(UserModel.of(user));
+            return tokenManager.generateFor(user.getEmail(), userId);
         }
         else
             throw new UpdateEmailException("Email already used");
