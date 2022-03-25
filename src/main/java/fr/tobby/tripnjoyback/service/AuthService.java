@@ -14,6 +14,8 @@ import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import fr.tobby.tripnjoyback.repository.UserRoleRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -31,6 +33,7 @@ import java.util.Optional;
 
 @Service
 public class AuthService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
     private final UserMailUtils userMailUtils;
@@ -86,6 +89,7 @@ public class AuthService {
                                           .build();
         UserModel userModel = UserModel.of(userRepository.save(userEntity));
         generateConfirmationCode(userModel);
+        logger.debug("Created new user " + userModel);
         return userModel;
     }
 
@@ -95,7 +99,9 @@ public class AuthService {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         UserModel userModel = userService.findByEmail(username).orElseThrow();
-        return tokenManager.generateFor(userDetails, userModel.getId());
+        String token = tokenManager.generateFor(userDetails, userModel.getId());
+        logger.debug("User {} logged in. jwt = {}", username, token);
+        return token;
     }
 
     private ConfirmationCodeEntity generateConfirmationCode(UserModel userModel)
@@ -103,6 +109,7 @@ public class AuthService {
         ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userModel.getId());
         confirmationCodeRepository.save(confirmationCodeEntity);
         userMailUtils.sendConfirmationCodeMail(userModel, confirmationCodeEntity.getValue());
+        logger.debug("Generated account confirmation code {}", confirmationCodeEntity);
         return confirmationCodeEntity;
     }
 
@@ -111,6 +118,7 @@ public class AuthService {
         ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userModel.getId());
         confirmationCodeRepository.save(confirmationCodeEntity);
         userMailUtils.sendForgottenPasswordCodeMail(userModel, confirmationCodeEntity.getValue());
+        logger.debug("Generated forgotten password code {}", confirmationCodeEntity);
         return confirmationCodeEntity;
     }
 
@@ -129,6 +137,7 @@ public class AuthService {
             else
             {
                 updateConfirmation(userId);
+                logger.debug("Confirmation of user account {}", userEntity.getEmail());
             }
         }
         else
@@ -184,6 +193,7 @@ public class AuthService {
             {
                 userEntity.setPassword(encoder.encode(validateCodePasswordRequest.getNewPassword()));
                 userMailUtils.sendUpdatePasswordMail(UserModel.of(userEntity));
+                logger.debug("New password set for user {}", validateCodePasswordRequest.getEmail());
                 return UserIdResponse.builder().userId(userEntity.getId()).build();
             }
         }
