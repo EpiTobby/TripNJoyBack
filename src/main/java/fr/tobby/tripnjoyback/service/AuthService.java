@@ -2,13 +2,16 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.auth.TokenManager;
 import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
+import fr.tobby.tripnjoyback.entity.GenderEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
+import fr.tobby.tripnjoyback.model.Gender;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.*;
+import fr.tobby.tripnjoyback.model.request.auth.GoogleRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
@@ -89,6 +92,39 @@ public class AuthService {
                                           .build();
         UserModel userModel = UserModel.of(userRepository.save(userEntity));
         generateConfirmationCode(userModel);
+        logger.debug("Created new user " + userModel);
+        return userModel;
+    }
+
+    @Transactional
+    public UserModel signInUpGoogle(GoogleRequest model) throws UserCreationException
+    {
+        var user = userRepository.findByEmail(model.getEmail());
+
+        if (user.isPresent())
+        {
+            if (encoder.encode(model.getPassword()).equals(user.get().getPassword()))
+                throw new UserCreationException("Email is already in use");
+            else
+                return UserModel.of(user.get());
+        }
+
+        var gender = genderRepository.findByValue("male");
+
+        UserEntity userEntity = UserEntity.builder()
+                .firstname(model.getFirstname())
+                .lastname(model.getLastname())
+                .password(encoder.encode(model.getPassword()))
+                .email(model.getEmail())
+                .createdDate(Instant.now())
+                .phoneNumber(model.getPhoneNumber())
+                .birthDate(null)
+                .gender(gender.get())
+                .confirmed(true)
+                .roles(List.of(userRoleRepository.getByName("default")))
+                .build();
+
+        UserModel userModel = UserModel.of(userRepository.save(userEntity));
         logger.debug("Created new user " + userModel);
         return userModel;
     }
