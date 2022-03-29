@@ -68,13 +68,6 @@ public class AuthService {
     @Transactional
     public UserModel createUser(UserCreationRequest model) throws UserCreationException
     {
-        if (userRepository.findByEmail(model.getEmail()).isPresent())
-        {
-            throw new UserCreationException("Email is already in use");
-        }
-        if (!userMailUtils.userEmailIsValid(model.getEmail())){
-            throw new UserCreationException("Email is not valid");
-        }
         UserEntity userEntity = UserEntity.builder()
                                           .firstname(model.getFirstname())
                                           .lastname(model.getLastname())
@@ -87,10 +80,19 @@ public class AuthService {
                                           .confirmed(false)
                                           .roles(List.of(userRoleRepository.getByName("default")))
                                           .build();
-        UserModel userModel = UserModel.of(userRepository.save(userEntity));
-        generateConfirmationCode(userModel);
-        logger.debug("Created new user " + userModel);
-        return userModel;
+        UserModel created = UserModel.of(createUser(userEntity));
+        generateConfirmationCode(created);
+        logger.debug("Created new user " + created);
+        return created;
+    }
+
+    UserEntity createUser(UserEntity entity)
+    {
+        if (userRepository.findByEmail(entity.getEmail()).isPresent())
+            throw new UserCreationException("Email is already in use");
+        if (!userMailUtils.userEmailIsValid(entity.getEmail()))
+            throw new UserCreationException("Email is not valid");
+        return userRepository.save(entity);
     }
 
     public String login(@NonNull String username, @NonNull String password) throws AuthenticationException
