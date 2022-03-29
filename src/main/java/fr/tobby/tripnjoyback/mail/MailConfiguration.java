@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.mail;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -9,6 +10,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import java.util.Properties;
 
 @Configuration
+@ConditionalOnProperty(name = "tripnjoy.mail.enable", havingValue = "true")
 public class MailConfiguration {
 
     @Bean

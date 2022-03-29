@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface ConfirmationCodeRepository extends CrudRepository<ConfirmationCodeEntity, Long> {
     Optional<ConfirmationCodeEntity> findByValue(String value);
+
+    Optional<ConfirmationCodeEntity> findByUserId(long id);
 }

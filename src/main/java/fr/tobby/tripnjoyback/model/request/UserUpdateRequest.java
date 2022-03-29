@@ -5,7 +5,6 @@ import fr.tobby.tripnjoyback.model.CityModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @AllArgsConstructor

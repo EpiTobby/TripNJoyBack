@@ -1,12 +1,14 @@
 package fr.tobby.tripnjoyback.model.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import fr.tobby.tripnjoyback.model.ModelWithEmail;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
 @JsonAutoDetect
-public class ForgotPasswordRequest extends ModelWithEmail {
+@NoArgsConstructor
+public class DeleteUserRequest {
+    private String password;
 }

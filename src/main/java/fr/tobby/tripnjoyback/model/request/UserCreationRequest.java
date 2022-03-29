@@ -1,26 +1,24 @@
-package fr.tobby.tripnjoyback.model;
+package fr.tobby.tripnjoyback.model.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import io.swagger.annotations.ApiModelProperty;
+import fr.tobby.tripnjoyback.model.ModelWithEmail;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.util.Date;
 
 @Getter
 @Setter
 @JsonAutoDetect
 @NoArgsConstructor
-public class UserCreationRequest {
+public class UserCreationRequest extends ModelWithEmail {
 
     private String firstname;
     private String lastname;
     private String password;
     private String gender;
-    @ApiModelProperty("Also known as username. Must be unique")
-    private String email;
-    private Instant birthDate;
+    private Date birthDate;
     private String phoneNumber;
 
 }

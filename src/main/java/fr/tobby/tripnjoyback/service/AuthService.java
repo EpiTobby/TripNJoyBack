@@ -7,16 +7,15 @@ import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
-import fr.tobby.tripnjoyback.model.UserCreationRequest;
 import fr.tobby.tripnjoyback.model.UserModel;
-import fr.tobby.tripnjoyback.model.request.ForgotPasswordRequest;
-import fr.tobby.tripnjoyback.model.request.UpdateEmailRequest;
-import fr.tobby.tripnjoyback.model.request.UpdatePasswordRequest;
-import fr.tobby.tripnjoyback.model.request.ValidateCodePasswordRequest;
+import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
+import fr.tobby.tripnjoyback.repository.UserRoleRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -29,9 +28,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AuthService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
     private final UserMailUtils userMailUtils;
@@ -42,12 +44,14 @@ public class AuthService {
     private final TokenManager tokenManager;
     private final UserDetailsService userDetailsService;
     private final UserService userService;
+    private final UserRoleRepository userRoleRepository;
 
     public AuthService(final UserRepository userRepository, final UserMailUtils userMailUtils, final PasswordEncoder encoder,
                        final GenderRepository genderRepository,
                        final ConfirmationCodeRepository confirmationCodeRepository,
                        final AuthenticationManager authenticationManager, final TokenManager tokenManager,
-                       final UserDetailsService userDetailsService, final UserService userService)
+                       final UserDetailsService userDetailsService, final UserService userService,
+                       final UserRoleRepository userRoleRepository)
     {
         this.userRepository = userRepository;
         this.userMailUtils = userMailUtils;
@@ -58,6 +62,7 @@ public class AuthService {
         this.tokenManager = tokenManager;
         this.userDetailsService = userDetailsService;
         this.userService = userService;
+        this.userRoleRepository = userRoleRepository;
     }
 
     @Transactional
@@ -75,14 +80,16 @@ public class AuthService {
                                           .lastname(model.getLastname())
                                           .password(encoder.encode(model.getPassword()))
                                           .email(model.getEmail())
-                                          .birthDate(model.getBirthDate())
+                                          .birthDate(model.getBirthDate().toInstant())
                                           .createdDate(Instant.now())
                                           .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                                           .phoneNumber(model.getPhoneNumber())
                                           .confirmed(false)
+                                          .roles(List.of(userRoleRepository.getByName("default")))
                                           .build();
         UserModel userModel = UserModel.of(userRepository.save(userEntity));
         generateConfirmationCode(userModel);
+        logger.debug("Created new user " + userModel);
         return userModel;
     }
 
@@ -92,7 +99,9 @@ public class AuthService {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         UserModel userModel = userService.findByEmail(username).orElseThrow();
-        return tokenManager.generateFor(userDetails, userModel.getId());
+        String token = tokenManager.generateFor(userDetails, userModel.getId());
+        logger.debug("User {} logged in. jwt = {}", username, token);
+        return token;
     }
 
     private ConfirmationCodeEntity generateConfirmationCode(UserModel userModel)
@@ -100,6 +109,7 @@ public class AuthService {
         ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userModel.getId());
         confirmationCodeRepository.save(confirmationCodeEntity);
         userMailUtils.sendConfirmationCodeMail(userModel, confirmationCodeEntity.getValue());
+        logger.debug("Generated account confirmation code {}", confirmationCodeEntity);
         return confirmationCodeEntity;
     }
 
@@ -108,10 +118,11 @@ public class AuthService {
         ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userModel.getId());
         confirmationCodeRepository.save(confirmationCodeEntity);
         userMailUtils.sendForgottenPasswordCodeMail(userModel, confirmationCodeEntity.getValue());
+        logger.debug("Generated forgotten password code {}", confirmationCodeEntity);
         return confirmationCodeEntity;
     }
 
-    public boolean confirmUser(long userId, ConfirmationCodeModel confirmationCodeModel)
+    public void confirmUser(long userId, ConfirmationCodeModel confirmationCodeModel)
     {
         ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(confirmationCodeModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
@@ -125,10 +136,23 @@ public class AuthService {
             }
             else
             {
-                return updateConfirmation(userId).isConfirmed();
+                updateConfirmation(userId);
+                logger.debug("Confirmation of user account {}", userEntity.getEmail());
             }
         }
-        throw new BadConfirmationCodeException("Bad Confirmation Code");
+        else
+            throw new BadConfirmationCodeException("Bad Confirmation Code");
+    }
+
+    @Transactional
+    public void resendConfirmationCode(long userId){
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        if (user.isConfirmed())
+            throw new UserAlreadyConfirmedException("User is already confirmed");
+        Optional<ConfirmationCodeEntity> confirmationCodeEntity  = confirmationCodeRepository.findByUserId(userId);
+        if (confirmationCodeEntity.isPresent())
+            confirmationCodeRepository.delete(confirmationCodeEntity.get());
+        generateConfirmationCode(UserModel.of(user));
     }
 
     @Transactional
@@ -169,6 +193,7 @@ public class AuthService {
             {
                 userEntity.setPassword(encoder.encode(validateCodePasswordRequest.getNewPassword()));
                 userMailUtils.sendUpdatePasswordMail(UserModel.of(userEntity));
+                logger.debug("New password set for user {}", validateCodePasswordRequest.getEmail());
                 return UserIdResponse.builder().userId(userEntity.getId()).build();
             }
         }
@@ -189,7 +214,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void updateEmail(long userId, UpdateEmailRequest updateEmailRequest){
+    public String updateEmail(long userId, UpdateEmailRequest updateEmailRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         if (!encoder.matches(updateEmailRequest.getPassword(),user.getPassword())) {
             throw new BadCredentialsException("Bad Password");
@@ -197,7 +222,13 @@ public class AuthService {
         if (!userMailUtils.userEmailIsValid(updateEmailRequest.getNewEmail())){
             throw new UpdateEmailException("Email is not valid");
         }
-        user.setEmail(updateEmailRequest.getNewEmail());
-        userMailUtils.sendUpdateMail(UserModel.of(user));
+        String newEmail = updateEmailRequest.getNewEmail().toLowerCase().trim();
+        if (userRepository.findByEmail(newEmail).isEmpty()){
+            user.setEmail(newEmail);
+            userMailUtils.sendUpdateMail(UserModel.of(user));
+            return tokenManager.generateFor(user.getEmail(), userId);
+        }
+        else
+            throw new UpdateEmailException("Email already used");
     }
 }
