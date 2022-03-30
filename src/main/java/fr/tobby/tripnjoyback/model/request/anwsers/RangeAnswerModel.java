@@ -1,4 +1,4 @@
-package fr.tobby.tripnjoyback.model.request.questions;
+package fr.tobby.tripnjoyback.model.request.anwsers;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.AllArgsConstructor;
@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonAutoDetect
 @NoArgsConstructor
-public class SingleAnswerModel implements AnswerModel {
-    private String answer;
+public class RangeAnswerModel implements AnswerModel {
+    private int minValue;
+    private int maxValue;
 }
