@@ -17,6 +17,7 @@ import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import fr.tobby.tripnjoyback.repository.UserRoleRepository;
+import net.minidev.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
@@ -30,6 +31,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -99,14 +105,26 @@ public class AuthService {
     @Transactional
     public UserModel signInUpGoogle(GoogleRequest model) throws UserCreationException
     {
+        URL url = null;
+        int status = 200;
+        try {
+            url = new URL("https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=" + model.getAccessToken());
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+
+            status = con.getResponseCode();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (status < 200 || status >= 300)
+            throw new UserCreationException("Google account is not valid");
+
         var user = userRepository.findByEmail(model.getEmail());
 
         if (user.isPresent())
         {
-            if (encoder.encode(model.getPassword()).equals(user.get().getPassword()))
-                throw new UserCreationException("Email is already in use");
-            else
-                return UserModel.of(user.get());
+            return UserModel.of(user.get());
         }
 
         var gender = genderRepository.findByValue("male");
@@ -114,10 +132,11 @@ public class AuthService {
         UserEntity userEntity = UserEntity.builder()
                 .firstname(model.getFirstname())
                 .lastname(model.getLastname())
-                .password(encoder.encode(model.getPassword()))
+                .password(null)
                 .email(model.getEmail())
                 .createdDate(Instant.now())
                 .phoneNumber(model.getPhoneNumber())
+                .profilePicture(model.getProfilePicture())
                 .birthDate(null)
                 .gender(gender.get())
                 .confirmed(true)

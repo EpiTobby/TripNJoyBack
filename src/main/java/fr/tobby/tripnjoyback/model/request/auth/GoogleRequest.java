@@ -18,7 +18,7 @@ public final class GoogleRequest extends ModelWithEmail {
 
     private String firstname;
     private String lastname;
-    private String password;
+    private String accessToken;
     private String profilePicture;
     private String phoneNumber;
 }
