@@ -2,13 +2,11 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.auth.TokenManager;
 import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
-import fr.tobby.tripnjoyback.entity.GenderEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
-import fr.tobby.tripnjoyback.model.Gender;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.request.auth.GoogleRequest;
@@ -17,9 +15,9 @@ import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import fr.tobby.tripnjoyback.repository.UserRoleRepository;
-import net.minidev.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -30,11 +28,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.List;
@@ -54,6 +53,9 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final UserService userService;
     private final UserRoleRepository userRoleRepository;
+
+    @Value("${google.secret}")
+    private String googleSecret;
 
     public AuthService(final UserRepository userRepository, final UserMailUtils userMailUtils, final PasswordEncoder encoder,
                        final GenderRepository genderRepository,
@@ -105,20 +107,35 @@ public class AuthService {
     @Transactional
     public UserModel signInUpGoogle(GoogleRequest model) throws UserCreationException
     {
-        URL url = null;
-        int status = 200;
         try {
-            url = new URL("https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=" + model.getAccessToken());
+            BufferedReader reader;
+            String line;
+            StringBuilder responseContent = new StringBuilder();
+
+            URL url = new URL("https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=" + model.getAccessToken());
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
 
-            status = con.getResponseCode();
+            int status = con.getResponseCode();
+
+            if (status != 200)
+                throw new UserCreationException("Google account is not valid");
+
+            reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            while ((line = reader.readLine()) != null) {
+                responseContent.append(line);
+            }
+            reader.close();
+
+
+            JSONObject responseBody = new JSONObject(responseContent.toString());
+
+            if (!responseBody.getString("email").equals(model.getEmail()) || !responseBody.getString("aud").equals(googleSecret))
+                throw new UserCreationException("Google account is not valid");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        if (status < 200 || status >= 300)
-            throw new UserCreationException("Google account is not valid");
 
         var user = userRepository.findByEmail(model.getEmail());
 
