@@ -1,10 +1,7 @@
 package fr.tobby.tripnjoyback.model.request.profiles;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import fr.tobby.tripnjoyback.model.request.questions.AvailabilityAnswerModel;
-import fr.tobby.tripnjoyback.model.request.questions.MultipleAnswersModel;
-import fr.tobby.tripnjoyback.model.request.questions.RangeAnswerModel;
-import fr.tobby.tripnjoyback.model.request.questions.SingleAnswerModel;
+import fr.tobby.tripnjoyback.model.request.questions.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +23,6 @@ public class AddProfileModel {
     private RangeAnswerModel groupeSize;
     private SingleAnswerModel chillOrVisit;
     private SingleAnswerModel aboutFood;
-    private SingleAnswerModel goOutAtNight;
+    private GoOutNightAnswers goOutAtNight;
     private SingleAnswerModel sport;
 }
