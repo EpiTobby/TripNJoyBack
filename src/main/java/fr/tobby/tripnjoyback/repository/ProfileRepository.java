@@ -9,5 +9,7 @@ import java.util.Optional;
 public interface ProfileRepository extends CrudRepository<ProfileEntity, Long> {
     List<ProfileEntity> findByUserId(long userId);
 
-    Optional<ProfileEntity> findById(long profileId);
+    Optional<ProfileEntity> findByIdAndUserId(long profileId, long userId);
+
+    List<ProfileEntity> findByActiveIsTrue();
 }

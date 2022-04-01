@@ -33,10 +33,14 @@ public class ProfileService {
         return profileEntities.stream().map(e -> ProfileModel.of(e)).toList();
     }
 
+    public List<ProfileModel> getActiveProfiles(){
+        List<ProfileEntity> profileEntities = profileRepository.findByActiveIsTrue();
+        return profileEntities.stream().map(e -> ProfileModel.of(e)).toList();
+    }
+
     @Transactional
     public void deleteProfile(long userId, long profileId) {
-        ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
-        if (profileEntity.getUserId() == userId)
-            profileRepository.delete(profileEntity);
+        ProfileEntity profileEntity = profileRepository.findByIdAndUserId(profileId, userId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
+        profileRepository.delete(profileEntity);
     }
 }
