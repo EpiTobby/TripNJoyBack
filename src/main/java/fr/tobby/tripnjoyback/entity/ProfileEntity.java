@@ -17,4 +17,8 @@ public class ProfileEntity {
 
     @Column(name = "user_id")
     private long userId;
+
+    @Column(name = "active")
+    @Setter
+    private boolean active;
 }

@@ -48,7 +48,8 @@ CREATE TABLE "users_groups" (
 
 CREATE TABLE "profiles" (
                             "id" SERIAL PRIMARY KEY,
-                            "user_id" int
+                            "user_id" int,
+                            "active" bool
 );
 
 CREATE TABLE "profile_criteria" (

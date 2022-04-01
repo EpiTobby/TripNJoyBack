@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 @JsonAutoDetect
 @NoArgsConstructor
+@Builder
 public class ProfileModel {
+    private long id;
     private AvailabilityAnswerModel availability;
     private RangeAnswerModel duration;
     private RangeAnswerModel budget;
@@ -28,8 +31,9 @@ public class ProfileModel {
     private AboutFoodAnswer aboutFood;
     private YesNoAnswer goOutAtNight;
     private YesNoAnswer sport;
+    private boolean iActive;
 
     public static ProfileModel of(ProfileEntity profileEntity){
-        return null;
+        return new ProfileModel().builder().id(profileEntity.getId()).iActive(profileEntity.isActive()).build();
     }
 }
