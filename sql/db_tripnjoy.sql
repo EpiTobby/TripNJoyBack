@@ -190,7 +190,7 @@ ALTER TABLE "users" ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
 
 ALTER TABLE "groups" ADD FOREIGN KEY ("destination_id") REFERENCES "cities" ("id");
 
-ALTER TABLE "profiles" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "profiles" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")  on delete cascade;
 
 ALTER TABLE "profile_criteria" ADD FOREIGN KEY ("profile_id") REFERENCES "profiles" ("id");
 

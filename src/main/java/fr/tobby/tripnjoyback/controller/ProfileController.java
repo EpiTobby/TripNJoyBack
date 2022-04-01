@@ -1,5 +1,7 @@
 package fr.tobby.tripnjoyback.controller;
 
+import fr.tobby.tripnjoyback.model.ProfileModel;
+import fr.tobby.tripnjoyback.model.request.ProfileCreationModel;
 import fr.tobby.tripnjoyback.service.ProfileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,11 @@ public class ProfileController {
     @GetMapping("{id}")
     public void GetProfiles(@PathVariable("id") final long userId){
         profileService.findByUserId(userId);
+    }
+
+    @PostMapping("{id}")
+    public ProfileModel CreateProfile(@PathVariable("id") final long userId, @RequestBody ProfileCreationModel profileCreationModel){
+        return profileService.createProfile(userId, profileCreationModel);
     }
 
     @DeleteMapping("{id}")

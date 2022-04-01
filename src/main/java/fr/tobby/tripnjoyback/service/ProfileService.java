@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.ProfileModel;
+import fr.tobby.tripnjoyback.model.request.ProfileCreationModel;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,15 @@ public class ProfileService {
     public ProfileService(ProfileRepository profileRepository, UserService userService) {
         this.profileRepository = profileRepository;
         this.userService = userService;
+    }
+
+    @Transactional
+    public ProfileModel createProfile(long userId, ProfileCreationModel profilecreationModel){
+        ProfileEntity profileEntity = new ProfileEntity().builder()
+                .userId(userId)
+                .active(true).build();
+        profileRepository.save(profileEntity);
+        return ProfileModel.of(profileEntity);
     }
 
     public List<ProfileModel> findByUserId(long userId){
