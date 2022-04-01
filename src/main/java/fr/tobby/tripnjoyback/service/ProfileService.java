@@ -34,8 +34,9 @@ public class ProfileService {
     }
 
     @Transactional
-    public void deleteById(long profileId){
+    public void deleteProfile(long userId, long profileId) {
         ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
-        profileRepository.delete(profileEntity);
+        if (profileEntity.getUserId() == userId)
+            profileRepository.delete(profileEntity);
     }
 }

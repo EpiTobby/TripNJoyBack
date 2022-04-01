@@ -32,9 +32,13 @@ public class ProfileModel {
     private YesNoAnswer goOutAtNight;
     private YesNoAnswer sport;
     private long userId;
-    private boolean iActive;
+    private boolean isActive;
 
     public static ProfileModel of(ProfileEntity profileEntity){
-        return new ProfileModel().builder().id(profileEntity.getId()).iActive(profileEntity.isActive()).build();
+        return new ProfileModel().builder()
+                .id(profileEntity.getId())
+                .userId(profileEntity.getUserId())
+                .isActive(profileEntity.isActive())
+                .build();
     }
 }
