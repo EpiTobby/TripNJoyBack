@@ -23,8 +23,8 @@ public class ProfileController {
     }
 
     @GetMapping("")
-    public List<ProfileModel> getProfiles(@PathVariable("id") final long userId){
-        return profileService.findByUserId(userId);
+    public List<ProfileModel> getUserProfiles(@PathVariable("id") final long userId){
+        return profileService.getUserProfiles(userId);
     }
 
     @PostMapping("")

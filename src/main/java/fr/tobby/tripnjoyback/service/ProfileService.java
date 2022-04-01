@@ -28,7 +28,7 @@ public class ProfileService {
         return ProfileModel.of(profileEntity);
     }
 
-    public List<ProfileModel> findByUserId(long userId){
+    public List<ProfileModel> getUserProfiles(long userId){
         List<ProfileEntity> profileEntities = profileRepository.findByUserId(userId);
         return profileEntities.stream().map(e -> ProfileModel.of(e)).toList();
     }
