@@ -1,11 +1,10 @@
 package fr.tobby.tripnjoyback.repository;
 
 import fr.tobby.tripnjoyback.entity.AnswersEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-@Component
-public class AnswersRepository {
-    public AnswersEntity findByProfileId(long profileId){
-        return null;
-    }
+public interface AnswersRepository extends MongoRepository<AnswersEntity,Long> {
+    AnswersEntity findByProfileId(long profileId);
+
+    void deleteByProfileId(Long profileId);
 }

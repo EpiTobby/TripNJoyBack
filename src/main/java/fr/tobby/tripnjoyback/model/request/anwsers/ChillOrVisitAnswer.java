@@ -2,7 +2,8 @@ package fr.tobby.tripnjoyback.model.request.anwsers;
 
 public enum ChillOrVisitAnswer {
     CHILL,
-    VISIT;
+    VISIT,
+    NO_PREFERENCE;
 
     public static ChillOrVisitAnswer of(String value){
         switch(value){
@@ -11,7 +12,7 @@ public enum ChillOrVisitAnswer {
             case "VISIT":
                 return VISIT;
             default:
-                return null;
+                return NO_PREFERENCE;
         }
     }
 }

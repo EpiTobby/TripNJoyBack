@@ -2,7 +2,8 @@ package fr.tobby.tripnjoyback.model.request.anwsers;
 
 public enum AboutFoodAnswer implements AnswerModel{
     COOKING,
-    RESTAURANT;
+    RESTAURANT,
+    NO_PREFERENCE;
 
     public static AboutFoodAnswer of(String value){
         switch(value){
@@ -11,7 +12,7 @@ public enum AboutFoodAnswer implements AnswerModel{
             case "RESTAURANT":
                 return RESTAURANT;
             default:
-                return null;
+                return NO_PREFERENCE;
         }
     }
 }

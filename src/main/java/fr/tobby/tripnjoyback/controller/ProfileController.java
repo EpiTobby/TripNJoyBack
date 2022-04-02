@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.controller;
 import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationModel;
+import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.service.ProfileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,11 @@ public class ProfileController {
     @PostMapping("")
     public ProfileModel createProfile(@PathVariable("id") final long userId, @RequestBody ProfileCreationModel profileCreationModel){
         return profileService.createProfile(userId, profileCreationModel);
+    }
+
+    @PatchMapping("{profile}/availability")
+    public void updateProfileAvailability(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, AvailabilityAnswerModel availability){
+        profileService.updateProfileAvailability(userId, profileId, availability);
     }
 
     @DeleteMapping("{profile}")

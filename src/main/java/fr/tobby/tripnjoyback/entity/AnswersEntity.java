@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
 import java.text.DateFormat;
@@ -17,6 +18,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Document(collection = "Profiles")
 public class AnswersEntity {
     @NotNull
     private long profileId;
@@ -42,9 +44,7 @@ public class AnswersEntity {
 
     public AnswersEntity(long profileId, ProfileCreationModel profileModel){
         this.profileId = profileId;
-        DateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy");
-        this.startDate = dateFormat.format(profileModel.getAvailability().getStartDate());
-        this.endDate = dateFormat.format(profileModel.getAvailability().getEndDate());
+        setAvailability(profileModel.getAvailability());
         this.durationMin = profileModel.getDuration().getMinValue();
         this.durationMax = profileModel.getDuration().getMaxValue();
         this.budgetMin = profileModel.getBudget().getMinValue();
@@ -62,5 +62,11 @@ public class AnswersEntity {
         this.aboutFood = profileModel.getAboutFood().toString();
         this.goOutAtNight = profileModel.getGoOutAtNight().toBoolean();
         this.sport = profileModel.getSport().toBoolean();
+    }
+
+    public void setAvailability(AvailabilityAnswerModel availability){
+        DateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy");
+        this.startDate = dateFormat.format(availability.getStartDate());
+        this.endDate = dateFormat.format(availability.getEndDate());
     }
 }

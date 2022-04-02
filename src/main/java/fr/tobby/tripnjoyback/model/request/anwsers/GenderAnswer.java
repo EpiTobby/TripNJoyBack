@@ -2,7 +2,8 @@ package fr.tobby.tripnjoyback.model.request.anwsers;
 
 public enum GenderAnswer implements AnswerModel{
     MALE,
-    FEMALE;
+    FEMALE,
+    MIXED;
 
     public static GenderAnswer of(String value){
         switch (value){
@@ -11,7 +12,7 @@ public enum GenderAnswer implements AnswerModel{
             case "FEMALE":
                 return FEMALE;
             default:
-                return null;
+                return MIXED;
         }
     }
 }
