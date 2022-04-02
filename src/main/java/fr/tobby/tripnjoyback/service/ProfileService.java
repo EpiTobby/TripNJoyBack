@@ -1,8 +1,10 @@
 package fr.tobby.tripnjoyback.service;
+import fr.tobby.tripnjoyback.entity.AnswersEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationModel;
+import fr.tobby.tripnjoyback.repository.AnswersRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +15,12 @@ import java.util.List;
 public class ProfileService {
     private final ProfileRepository profileRepository;
     private final UserService userService;
+    private final AnswersRepository answersRepository;
 
-    public ProfileService(ProfileRepository profileRepository, UserService userService) {
+    public ProfileService(ProfileRepository profileRepository, UserService userService, AnswersRepository answersRepository) {
         this.profileRepository = profileRepository;
         this.userService = userService;
+        this.answersRepository = answersRepository;
     }
 
     @Transactional
@@ -25,17 +29,18 @@ public class ProfileService {
                 .userId(userId)
                 .active(true).build();
         profileRepository.save(profileEntity);
-        return ProfileModel.of(profileEntity);
+        AnswersEntity answersEntity = new AnswersEntity(profileEntity.getId(), profilecreationModel);
+        return ProfileModel.of(profileEntity, answersEntity);
     }
 
     public List<ProfileModel> getUserProfiles(long userId){
         List<ProfileEntity> profileEntities = profileRepository.findByUserId(userId);
-        return profileEntities.stream().map(e -> ProfileModel.of(e)).toList();
+        return profileEntities.stream().map(e -> ProfileModel.of(e,answersRepository.findByProfileId(e.getId()))).toList();
     }
 
     public List<ProfileModel> getActiveProfiles(){
         List<ProfileEntity> profileEntities = profileRepository.findByActiveIsTrue();
-        return profileEntities.stream().map(e -> ProfileModel.of(e)).toList();
+        return profileEntities.stream().map(e -> ProfileModel.of(e, answersRepository.findByProfileId(e.getId()))).toList();
     }
 
     @Transactional
