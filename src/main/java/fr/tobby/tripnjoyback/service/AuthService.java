@@ -57,6 +57,8 @@ public class AuthService {
     @Value("${google.secret}")
     private String googleSecret;
 
+    static final String GOOGLE_URL = "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=";
+
     public AuthService(final UserRepository userRepository, final UserMailUtils userMailUtils, final PasswordEncoder encoder,
                        final GenderRepository genderRepository,
                        final ConfirmationCodeRepository confirmationCodeRepository,
@@ -112,7 +114,7 @@ public class AuthService {
             String line;
             StringBuilder responseContent = new StringBuilder();
 
-            URL url = new URL("https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=" + model.getAccessToken());
+            URL url = new URL(GOOGLE_URL + model.getAccessToken());
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
 
@@ -144,7 +146,7 @@ public class AuthService {
             return UserModel.of(user.get());
         }
 
-        var gender = genderRepository.findByValue("male");
+        var genders = genderRepository.findAll().iterator();
 
         UserEntity userEntity = UserEntity.builder()
                 .firstname(model.getFirstname())
@@ -155,7 +157,7 @@ public class AuthService {
                 .phoneNumber(model.getPhoneNumber())
                 .profilePicture(model.getProfilePicture())
                 .birthDate(null)
-                .gender(gender.get())
+                .gender(genders.hasNext() ? genders.next() : null)
                 .confirmed(true)
                 .roles(List.of(userRoleRepository.getByName("default")))
                 .build();
