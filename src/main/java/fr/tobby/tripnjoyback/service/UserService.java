@@ -84,6 +84,7 @@ public class UserService {
     @Transactional
     public void deleteUserByAdmin(long userId, DeleteUserByAdminRequest deleteUserByAdminRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        profileService.deleteProfilesByUserId(userId);
         userRepository.delete(user);
         userMailUtils.sendDeleteAccountByAdminMail(UserModel.of(user), deleteUserByAdminRequest.getReason());
     }

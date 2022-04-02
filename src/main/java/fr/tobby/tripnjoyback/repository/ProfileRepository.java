@@ -12,4 +12,6 @@ public interface ProfileRepository extends CrudRepository<ProfileEntity, Long> {
     Optional<ProfileEntity> findByIdAndUserId(long profileId, long userId);
 
     List<ProfileEntity> findByActiveIsTrue();
+
+    Optional<ProfileEntity> findByActiveIsTrueAndUserId(long userId);
 }

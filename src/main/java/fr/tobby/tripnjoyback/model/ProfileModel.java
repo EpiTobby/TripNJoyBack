@@ -54,7 +54,7 @@ public class ProfileModel {
                 .travelWithPersonFromSameCountry(YesNoAnswer.of(answersEntity.getTravelWithPersonFromSameCountry()))
                 .travelWithPersonSameLanguage(YesNoAnswer.of(answersEntity.getTravelWithPersonSameLanguage()))
                 .gender(GenderAnswer.of(answersEntity.getGender()))
-                .groupeSize(new RangeAnswerModel(answersEntity.getGroupeSizeMin(), answersEntity.getGroupeSizeMax()))
+                .groupeSize(new RangeAnswerModel(answersEntity.getGroupSizeMin(), answersEntity.getGroupSizeMax()))
                 .chillOrVisit(ChillOrVisitAnswer.of(answersEntity.getChillOrVisit()))
                 .aboutFood(AboutFoodAnswer.of(answersEntity.getAboutFood()))
                 .goOutAtNight(YesNoAnswer.of(answersEntity.getGoOutAtNight()))

@@ -1,8 +1,10 @@
 package fr.tobby.tripnjoyback.controller;
 
+import fr.tobby.tripnjoyback.exception.BadAvailabilityException;
 import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.ProfileModel;
-import fr.tobby.tripnjoyback.model.request.ProfileCreationModel;
+import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
+import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
 import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.service.ProfileService;
 import org.slf4j.Logger;
@@ -35,13 +37,19 @@ public class ProfileController {
     }
 
     @PostMapping("")
-    public ProfileModel createProfile(@PathVariable("id") final long userId, @RequestBody ProfileCreationModel profileCreationModel){
-        return profileService.createProfile(userId, profileCreationModel);
+    public ProfileModel createProfile(@PathVariable("id") final long userId, @RequestBody ProfileCreationRequest profileCreationRequest){
+        return profileService.createProfile(userId, profileCreationRequest);
     }
 
-    @PatchMapping("{profile}/availability")
-    public void updateProfileAvailability(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, AvailabilityAnswerModel availability){
-        profileService.updateProfileAvailability(userId, profileId, availability);
+
+    @PatchMapping("{profile}/update")
+    public void updateProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, ProfileUpdateRequest profileUpdateRequest){
+        profileService.updateProfile(userId, profileId, profileUpdateRequest);
+    }
+
+    @PatchMapping("{profile}/reuse")
+    public void reuseProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, AvailabilityAnswerModel availability){
+        profileService.reuseProfile(userId, profileId, availability);
     }
 
     @DeleteMapping("{profile}")
@@ -53,6 +61,14 @@ public class ProfileController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(ProfileNotFoundException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(BadAvailabilityException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(BadAvailabilityException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }
