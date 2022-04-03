@@ -36,13 +36,6 @@ public class ProfileModel {
     private boolean isActive;
 
     public static ProfileModel of(ProfileEntity profileEntity, AnswersEntity answersEntity){
-        if (answersEntity == null) {
-            return new ProfileModel().builder()
-                    .id(profileEntity.getId())
-                    .userId(profileEntity.getUserId())
-                    .isActive(profileEntity.isActive())
-                    .build();
-        }
         return new ProfileModel().builder()
                 .id(profileEntity.getId())
                 .availability(AvailabilityAnswerModel.of(answersEntity.getStartDate(), answersEntity.getEndDate()))

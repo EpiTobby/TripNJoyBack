@@ -22,7 +22,7 @@ public class ProfileUpdateRequest {
     private YesNoAnswer travelWithPersonFromSameCountry;
     private YesNoAnswer travelWithPersonSameLanguage;
     private GenderAnswer gender;
-    private RangeAnswerModel groupeSize;
+    private RangeAnswerModel groupSize;
     private ChillOrVisitAnswer chillOrVisit;
     private AboutFoodAnswer aboutFood;
     private YesNoAnswer goOutAtNight;

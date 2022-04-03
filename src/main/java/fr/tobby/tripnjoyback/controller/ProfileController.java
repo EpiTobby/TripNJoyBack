@@ -43,12 +43,12 @@ public class ProfileController {
 
 
     @PatchMapping("{profile}/update")
-    public void updateProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, ProfileUpdateRequest profileUpdateRequest){
+    public void updateProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, @RequestBody ProfileUpdateRequest profileUpdateRequest){
         profileService.updateProfile(userId, profileId, profileUpdateRequest);
     }
 
     @PatchMapping("{profile}/reuse")
-    public void reuseProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, AvailabilityAnswerModel availability){
+    public void reuseProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, @RequestBody AvailabilityAnswerModel availability){
         profileService.reuseProfile(userId, profileId, availability);
     }
 

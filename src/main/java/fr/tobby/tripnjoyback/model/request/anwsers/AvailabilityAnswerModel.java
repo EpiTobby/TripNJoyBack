@@ -2,6 +2,8 @@ package fr.tobby.tripnjoyback.model.request.anwsers;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sun.istack.NotNull;
+import fr.tobby.tripnjoyback.exception.BadAvailabilityException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 @Getter
@@ -16,36 +19,41 @@ import java.util.concurrent.TimeUnit;
 @JsonAutoDetect
 @NoArgsConstructor
 public class AvailabilityAnswerModel implements AnswerModel {
+    @NotNull
     private Date startDate;
+    @NotNull
     private Date endDate;
 
     @JsonProperty("startDate")
     public void setStartDate(String startDate){
-        DateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         try{
             this.startDate = dateFormat.parse(startDate);
         }
         catch (Exception e){
+            throw new BadAvailabilityException("Cannot parse start date");
         }
     }
 
     @JsonProperty("endDate")
     public void setEndDate(String endDate){
-        DateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         try{
             this.endDate = dateFormat.parse(endDate);
         }
         catch (Exception e){
+            throw new BadAvailabilityException("Cannot parse end date");
         }
     }
 
     public static AvailabilityAnswerModel of(String startDate, String endDate){
-        DateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         try{
+            dateFormat.setTimeZone(TimeZone.getDefault());
             return new AvailabilityAnswerModel(dateFormat.parse(startDate), dateFormat.parse(endDate));
         }
         catch (Exception e){
-            return null;
+            throw new BadAvailabilityException("Cannot parse availability");
         }
     }
 
