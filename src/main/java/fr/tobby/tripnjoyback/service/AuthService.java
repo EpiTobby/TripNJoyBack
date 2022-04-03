@@ -9,6 +9,7 @@ import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.*;
+import fr.tobby.tripnjoyback.model.request.auth.GoogleRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
@@ -16,6 +17,7 @@ import fr.tobby.tripnjoyback.repository.UserRepository;
 import fr.tobby.tripnjoyback.repository.UserRoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,7 +28,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +53,11 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final UserService userService;
     private final UserRoleRepository userRoleRepository;
+
+    @Value("${google.secret}")
+    private String googleSecret;
+
+    static final String GOOGLE_URL = "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=";
 
     public AuthService(final UserRepository userRepository, final UserMailUtils userMailUtils, final PasswordEncoder encoder,
                        final GenderRepository genderRepository,
@@ -93,6 +106,67 @@ public class AuthService {
         if (!userMailUtils.userEmailIsValid(entity.getEmail()))
             throw new UserCreationException("Email is not valid");
         return userRepository.save(entity);
+    }
+
+    @Transactional
+    public UserModel signInUpGoogle(GoogleRequest model) throws UserCreationException
+    {
+        try {
+            BufferedReader reader;
+            String line;
+            StringBuilder responseContent = new StringBuilder();
+
+            URL url = new URL(GOOGLE_URL + model.getAccessToken());
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+
+            int status = con.getResponseCode();
+
+            if (status != 200)
+                throw new UserCreationException("Google account is not valid");
+
+            reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            while ((line = reader.readLine()) != null) {
+                responseContent.append(line);
+            }
+            reader.close();
+
+
+            JSONObject responseBody = new JSONObject(responseContent.toString());
+
+            if (!responseBody.getString("email").equals(model.getEmail()) || !responseBody.getString("aud").equals(googleSecret))
+                throw new UserCreationException("Google account is not valid");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        var user = userRepository.findByEmail(model.getEmail());
+
+        if (user.isPresent())
+        {
+            return UserModel.of(user.get());
+        }
+
+        var genders = genderRepository.findAll().iterator();
+
+        UserEntity userEntity = UserEntity.builder()
+                .firstname(model.getFirstname())
+                .lastname(model.getLastname())
+                .password(null)
+                .email(model.getEmail())
+                .createdDate(Instant.now())
+                .phoneNumber(model.getPhoneNumber())
+                .profilePicture(model.getProfilePicture())
+                .birthDate(null)
+                .gender(genders.hasNext() ? genders.next() : null)
+                .confirmed(true)
+                .roles(List.of(userRoleRepository.getByName("default")))
+                .build();
+
+        UserModel userModel = UserModel.of(userRepository.save(userEntity));
+        logger.debug("Created new user " + userModel);
+        return userModel;
     }
 
     public String login(@NonNull String username, @NonNull String password) throws AuthenticationException

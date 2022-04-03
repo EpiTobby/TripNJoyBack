@@ -6,6 +6,7 @@ import fr.tobby.tripnjoyback.exception.auth.UpdatePasswordException;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.*;
+import fr.tobby.tripnjoyback.model.request.auth.GoogleRequest;
 import fr.tobby.tripnjoyback.model.request.auth.LoginRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.model.response.auth.AuthTokenResponse;
@@ -63,6 +64,18 @@ public class AuthController {
 
         return new LoginResponse(loginRequest.getUsername(), token);
     }
+
+    @PostMapping("google")
+    @Operation(summary = "Log a user, to allow authenticated endpoints")
+    @ApiResponse(responseCode = "401", description = "Authentication failed. Wrong username or password")
+    @ApiResponse(responseCode = "200", description = "Authentication Succeeded. Use the given jwt in following requests")
+    public LoginResponse signInUpGoogle(@RequestBody GoogleRequest googleRequest)
+    {
+        UserModel user = authService.signInUpGoogle(googleRequest);
+        String token = tokenManager.generateFor(user.getEmail(), user.getId());
+        return new LoginResponse(user.getEmail(), token);
+    }
+
 
     @PatchMapping("{id}/confirmation")
     @Operation(summary = "Confirm a user's email")
