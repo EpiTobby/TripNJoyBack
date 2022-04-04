@@ -72,4 +72,12 @@ public class ProfileController {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(IllegalArgumentException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
 }
