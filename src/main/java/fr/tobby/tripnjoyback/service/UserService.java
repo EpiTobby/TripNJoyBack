@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.CityEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
+import fr.tobby.tripnjoyback.exception.UserCreationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.UserModel;
@@ -9,6 +10,7 @@ import fr.tobby.tripnjoyback.model.request.DeleteUserByAdminRequest;
 import fr.tobby.tripnjoyback.model.request.DeleteUserRequest;
 import fr.tobby.tripnjoyback.model.request.UserUpdateRequest;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
+import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,15 +23,17 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final GenderRepository genderRepository;
     private final ProfileService profileService;
     private final CityService cityService;
     private final ConfirmationCodeRepository confirmationCodeRepository;
     private final PasswordEncoder encoder;
     private final UserMailUtils userMailUtils;
 
-    public UserService(UserRepository userRepository, ProfileService profileService, final CityService cityService, ConfirmationCodeRepository confirmationCodeRepository, PasswordEncoder encoder, UserMailUtils userMailUtils)
+    public UserService(UserRepository userRepository, GenderRepository genderRepository, ProfileService profileService, final CityService cityService, ConfirmationCodeRepository confirmationCodeRepository, PasswordEncoder encoder, UserMailUtils userMailUtils)
     {
         this.userRepository = userRepository;
+        this.genderRepository = genderRepository;
         this.profileService = profileService;
         this.cityService = cityService;
         this.confirmationCodeRepository = confirmationCodeRepository;
@@ -62,6 +66,12 @@ public class UserService {
         }
         if (userUpdateRequest.getPhoneNumber() != null )
             user.setPhoneNumber(userUpdateRequest.getPhoneNumber());
+        if (userUpdateRequest.getBirthdate() != null) {
+            user.setBirthDate(userUpdateRequest.getBirthdate().toInstant());
+        }
+        if (userUpdateRequest.getGender() != null) {
+            user.setGender(genderRepository.findByValue(userUpdateRequest.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + userUpdateRequest.getGender())));
+        }
     }
 
     public Optional<UserModel> findByEmail(final String email)

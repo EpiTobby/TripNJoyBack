@@ -21,6 +21,4 @@ public final class GoogleRequest extends ModelWithEmail {
     private String accessToken;
     private String profilePicture;
     private String phoneNumber;
-    private Instant birthdate;
-    private String gender;
 }

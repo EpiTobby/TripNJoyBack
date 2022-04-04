@@ -27,9 +27,11 @@ public class UserEntity {
     @Setter
     private String email;
     @Column(name = "birthdate")
+    @Setter
     private Instant birthDate;
     @ManyToOne()
     @JoinColumn(name = "gender_id")
+    @Setter
     private GenderEntity gender;
     @Setter
     private String profilePicture;

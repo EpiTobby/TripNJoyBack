@@ -11,6 +11,7 @@ import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.request.auth.GoogleRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
+import fr.tobby.tripnjoyback.model.response.auth.GoogleUserResponse;
 import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
@@ -109,7 +110,7 @@ public class AuthService {
     }
 
     @Transactional
-    public UserModel signInUpGoogle(GoogleRequest model) throws UserCreationException
+    public GoogleUserResponse signInUpGoogle(GoogleRequest model) throws UserCreationException
     {
         try {
             BufferedReader reader;
@@ -145,7 +146,7 @@ public class AuthService {
 
         if (user.isPresent())
         {
-            return UserModel.of(user.get());
+            return new GoogleUserResponse(UserModel.of(user.get()), false);
         }
 
         var genders = genderRepository.findAll().iterator();
@@ -158,15 +159,15 @@ public class AuthService {
                 .createdDate(Instant.now())
                 .phoneNumber(model.getPhoneNumber())
                 .profilePicture(model.getProfilePicture())
-                .birthDate(model.getBirthdate())
-                .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
+                .birthDate(null)
+                .gender(genders.hasNext() ? genders.next() : null)
                 .confirmed(true)
                 .roles(List.of(userRoleRepository.getByName("default")))
                 .build();
 
         UserModel userModel = UserModel.of(userRepository.save(userEntity));
         logger.debug("Created new user " + userModel);
-        return userModel;
+        return new GoogleUserResponse(userModel, true);
     }
 
     public String login(@NonNull String username, @NonNull String password) throws AuthenticationException
