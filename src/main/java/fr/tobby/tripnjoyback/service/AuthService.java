@@ -130,32 +130,24 @@ public class AuthService {
             e.printStackTrace();
         }
 
-        var user = userRepository.findByEmail(model.getEmail());
+        UserEntity user = userRepository.findByEmail(model.getEmail()).orElseGet(() -> {
+            UserEntity userEntity = UserEntity.builder()
+                                              .firstname(model.getFirstname())
+                                              .lastname(model.getLastname())
+                                              .password(null)
+                                              .email(model.getEmail())
+                                              .createdDate(Instant.now())
+                                              .phoneNumber(model.getPhoneNumber())
+                                              .profilePicture(model.getProfilePicture())
+                                              .birthDate(null)
+                                              .gender(null)
+                                              .confirmed(true)
+                                              .roles(List.of(userRoleRepository.getByName("default")))
+                                              .build();
+            return createUser(userEntity);
+        });
 
-        if (user.isPresent())
-        {
-            return UserModel.of(user.get());
-        }
-
-        var genders = genderRepository.findAll().iterator();
-
-        UserEntity userEntity = UserEntity.builder()
-                .firstname(model.getFirstname())
-                .lastname(model.getLastname())
-                .password(null)
-                .email(model.getEmail())
-                .createdDate(Instant.now())
-                .phoneNumber(model.getPhoneNumber())
-                .profilePicture(model.getProfilePicture())
-                .birthDate(null)
-                .gender(genders.hasNext() ? genders.next() : null)
-                .confirmed(true)
-                .roles(List.of(userRoleRepository.getByName("default")))
-                .build();
-
-        UserModel userModel = UserModel.of(userRepository.save(userEntity));
-        logger.debug("Created new user " + userModel);
-        return userModel;
+        return UserModel.of(user);
     }
 
     public String login(@NonNull String username, @NonNull String password) throws AuthenticationException
