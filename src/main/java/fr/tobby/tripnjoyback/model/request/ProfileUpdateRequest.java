@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @JsonAutoDetect
 @NoArgsConstructor
-public class ProfileCreationModel {
+public class ProfileUpdateRequest {
     private AvailabilityAnswerModel availability;
     private RangeAnswerModel duration;
     private RangeAnswerModel budget;
@@ -22,9 +22,10 @@ public class ProfileCreationModel {
     private YesNoAnswer travelWithPersonFromSameCountry;
     private YesNoAnswer travelWithPersonSameLanguage;
     private GenderAnswer gender;
-    private RangeAnswerModel groupeSize;
+    private RangeAnswerModel groupSize;
     private ChillOrVisitAnswer chillOrVisit;
     private AboutFoodAnswer aboutFood;
     private YesNoAnswer goOutAtNight;
     private YesNoAnswer sport;
+    private boolean active;
 }

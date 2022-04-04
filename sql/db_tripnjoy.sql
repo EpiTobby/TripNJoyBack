@@ -52,17 +52,6 @@ CREATE TABLE "profiles" (
                             "active" bool
 );
 
-CREATE TABLE "profile_criteria" (
-                                    "profile_id" int,
-                                    "question_id" int,
-                                    "answer" text
-);
-
-CREATE TABLE "questions" (
-                             "id" SERIAL PRIMARY KEY,
-                             "value" varchar
-);
-
 CREATE TABLE "reviews" (
                            "id" SERIAL PRIMARY KEY,
                            "user_id" int,
@@ -191,10 +180,6 @@ ALTER TABLE "users" ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
 ALTER TABLE "groups" ADD FOREIGN KEY ("destination_id") REFERENCES "cities" ("id");
 
 ALTER TABLE "profiles" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")  on delete cascade;
-
-ALTER TABLE "profile_criteria" ADD FOREIGN KEY ("profile_id") REFERENCES "profiles" ("id");
-
-ALTER TABLE "profile_criteria" ADD FOREIGN KEY ("question_id") REFERENCES "questions" ("id");
 
 ALTER TABLE "users_groups" ADD FOREIGN KEY ("profile_id") REFERENCES "profiles" ("id");
 

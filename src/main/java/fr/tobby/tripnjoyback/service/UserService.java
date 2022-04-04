@@ -1,7 +1,6 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.CityEntity;
-import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.mail.UserMailUtils;
@@ -22,14 +21,16 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ProfileService profileService;
     private final CityService cityService;
     private final ConfirmationCodeRepository confirmationCodeRepository;
     private final PasswordEncoder encoder;
     private final UserMailUtils userMailUtils;
 
-    public UserService(UserRepository userRepository, final CityService cityService, ConfirmationCodeRepository confirmationCodeRepository, PasswordEncoder encoder, UserMailUtils userMailUtils)
+    public UserService(UserRepository userRepository, ProfileService profileService, final CityService cityService, ConfirmationCodeRepository confirmationCodeRepository, PasswordEncoder encoder, UserMailUtils userMailUtils)
     {
         this.userRepository = userRepository;
+        this.profileService = profileService;
         this.cityService = cityService;
         this.confirmationCodeRepository = confirmationCodeRepository;
         this.encoder = encoder;
@@ -75,6 +76,7 @@ public class UserService {
         if (!encoder.matches(deleteUserRequest.getPassword(),user.getPassword())) {
             throw new BadCredentialsException("Bad Password");
         }
+        profileService.deleteProfilesByUserId(userId);
         userRepository.delete(user);
         userMailUtils.sendDeleteAccountMail(UserModel.of(user));
     }
@@ -82,6 +84,7 @@ public class UserService {
     @Transactional
     public void deleteUserByAdmin(long userId, DeleteUserByAdminRequest deleteUserByAdminRequest){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        profileService.deleteProfilesByUserId(userId);
         userRepository.delete(user);
         userMailUtils.sendDeleteAccountByAdminMail(UserModel.of(user), deleteUserByAdminRequest.getReason());
     }

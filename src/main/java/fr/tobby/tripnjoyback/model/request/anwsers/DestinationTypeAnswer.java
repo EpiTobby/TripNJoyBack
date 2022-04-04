@@ -4,5 +4,5 @@ public enum DestinationTypeAnswer implements AnswerModel {
     CITY,
     COUNTRYSIDE,
     BEACH,
-    MOUNTAIN
+    MOUNTAIN;
 }
