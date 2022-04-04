@@ -32,9 +32,7 @@ public class ProfileService {
 
     @Transactional
     public ProfileModel createProfile(long userId, ProfileCreationRequest profileCreationRequest){
-        if (profileCreationRequest.getAvailability().getStartDate().after(profileCreationRequest.getAvailability().getEndDate()))
-            throw new BadAvailabilityException("Start Date must be before end Date");
-        ProfileEntity profileEntity = new ProfileEntity().builder()
+        ProfileEntity profileEntity = ProfileEntity.builder()
                 .userId(userId)
                 .active(true).build();
         setProfileInactive(userId);

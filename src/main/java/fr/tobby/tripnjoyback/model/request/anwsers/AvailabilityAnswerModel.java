@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -29,8 +30,10 @@ public class AvailabilityAnswerModel implements AnswerModel {
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         try{
             this.startDate = dateFormat.parse(startDate);
+            if (endDate != null && this.startDate.after(endDate))
+                throw new BadAvailabilityException("Start date cannot be after end date");
         }
-        catch (Exception e){
+        catch (ParseException e){
             throw new BadAvailabilityException("Cannot parse start date");
         }
     }
@@ -40,8 +43,10 @@ public class AvailabilityAnswerModel implements AnswerModel {
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         try{
             this.endDate = dateFormat.parse(endDate);
+            if (startDate != null && this.endDate.before(startDate))
+                throw new BadAvailabilityException("Start date cannot be after end date");
         }
-        catch (Exception e){
+        catch (ParseException e){
             throw new BadAvailabilityException("Cannot parse end date");
         }
     }
