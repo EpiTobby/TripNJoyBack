@@ -7,6 +7,8 @@ import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
 import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.service.ProfileService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,9 @@ public class ProfileController {
     }
 
     @GetMapping("")
+    @Operation(summary = "Get all profiles from a user")
+    @ApiResponse(responseCode = "200", description = "Returns list of profiles")
+    @ApiResponse(responseCode = "422", description = "If the answers are not valid")
     public List<ProfileModel> getUserProfiles(@PathVariable("id") final long userId){
         return profileService.getUserProfiles(userId);
     }
@@ -37,22 +42,34 @@ public class ProfileController {
     }
 
     @PostMapping("")
+    @Operation(summary = "Create a profile")
+    @ApiResponse(responseCode = "200", description = "Returns the profile")
+    @ApiResponse(responseCode = "422", description = "")
     public ProfileModel createProfile(@PathVariable("id") final long userId, @RequestBody ProfileCreationRequest profileCreationRequest){
         return profileService.createProfile(userId, profileCreationRequest);
     }
 
 
     @PatchMapping("{profile}/update")
+    @Operation(summary = "Update a profile")
+    @ApiResponse(responseCode = "200", description = "The profile is updated")
+    @ApiResponse(responseCode = "422", description = "The answers are not valid")
     public void updateProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, @RequestBody ProfileUpdateRequest profileUpdateRequest){
         profileService.updateProfile(userId, profileId, profileUpdateRequest);
     }
 
     @PatchMapping("{profile}/reuse")
+    @Operation(summary = "Reuse a profile of the users")
+    @ApiResponse(responseCode = "200", description = "The profile is now active")
+    @ApiResponse(responseCode = "422", description = "The availabilities are not valid")
     public void reuseProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, @RequestBody AvailabilityAnswerModel availability){
         profileService.reuseProfile(userId, profileId, availability);
     }
 
     @DeleteMapping("{profile}")
+    @Operation(summary = "Delete the profile of a user")
+    @ApiResponse(responseCode = "200", description = "The profile is deleted")
+    @ApiResponse(responseCode = "422", description = "No profile has been found")
     public void deleteProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId){
         profileService.deleteProfile(userId, profileId);
     }
