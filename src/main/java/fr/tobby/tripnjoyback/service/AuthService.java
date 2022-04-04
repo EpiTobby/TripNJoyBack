@@ -158,8 +158,8 @@ public class AuthService {
                 .createdDate(Instant.now())
                 .phoneNumber(model.getPhoneNumber())
                 .profilePicture(model.getProfilePicture())
-                .birthDate(null)
-                .gender(genders.hasNext() ? genders.next() : null)
+                .birthDate(model.getBirthdate())
+                .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                 .confirmed(true)
                 .roles(List.of(userRoleRepository.getByName("default")))
                 .build();

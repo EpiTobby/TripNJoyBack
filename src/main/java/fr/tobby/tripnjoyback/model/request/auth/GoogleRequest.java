@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.Instant;
 
 @JsonSerialize
 @NoArgsConstructor
@@ -21,4 +21,6 @@ public final class GoogleRequest extends ModelWithEmail {
     private String accessToken;
     private String profilePicture;
     private String phoneNumber;
+    private Instant birthdate;
+    private String gender;
 }
