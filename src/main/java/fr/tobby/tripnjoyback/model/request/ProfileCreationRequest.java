@@ -12,7 +12,6 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @JsonAutoDetect
-@NoArgsConstructor
 public class ProfileCreationRequest {
     @NotNull
     private AvailabilityAnswerModel availability;

@@ -6,10 +6,7 @@ import fr.tobby.tripnjoyback.model.request.anwsers.*;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -22,7 +19,6 @@ import java.util.List;
 public class AnswersEntity {
     @Id
     private String id;
-    @NotNull
     private long profileId;
     @Setter
     private String startDate;

@@ -1,5 +1,7 @@
 package fr.tobby.tripnjoyback.model.request.anwsers;
 
+import com.mongodb.lang.Nullable;
+
 public enum YesNoAnswer implements AnswerModel{
     YES,
     NO,
@@ -16,7 +18,7 @@ public enum YesNoAnswer implements AnswerModel{
         }
     }
 
-    public static YesNoAnswer of(Boolean bool){
+    public static YesNoAnswer of(@Nullable Boolean bool){
         if (bool == null)
             return NO_PREFERENCE;
         return bool ? YES : NO;

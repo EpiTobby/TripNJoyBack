@@ -22,17 +22,18 @@ import java.util.Optional;
 public class ProfileService {
     private final ProfileRepository profileRepository;
     private final AnswersRepository answersRepository;
+    private final DateFormat dateFormat;
 
     public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository) {
         this.profileRepository = profileRepository;
         this.answersRepository = answersRepository;
+        this.dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     }
 
     @Transactional
     public ProfileModel createProfile(long userId, ProfileCreationRequest profileCreationRequest){
         if (profileCreationRequest.getAvailability().getStartDate().after(profileCreationRequest.getAvailability().getEndDate()))
             throw new BadAvailabilityException("Start Date must be before end Date");
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         ProfileEntity profileEntity = new ProfileEntity().builder()
                 .userId(userId)
                 .active(true).build();
@@ -94,9 +95,7 @@ public class ProfileService {
     @Transactional
     public void setProfileInactive(long userId){
         Optional<ProfileEntity> profileEntity = profileRepository.findByActiveIsTrueAndUserId(userId);
-        if (profileEntity.isPresent()){
-            profileEntity.get().setActive(false);
-        }
+        profileEntity.ifPresent(profile -> profile.setActive(false));
     }
 
     @Transactional
@@ -105,7 +104,6 @@ public class ProfileService {
             throw new BadAvailabilityException("Start Date must be before end Date");
         ProfileEntity profileEntity = profileRepository.findByIdAndUserId(profileId, userId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         answersEntity.setStartDate(dateFormat.format(availability.getStartDate()));
         answersEntity.setEndDate(dateFormat.format(availability.getEndDate()));
         if (!profileEntity.isActive()) {
@@ -123,7 +121,6 @@ public class ProfileService {
         profileEntity.setActive(profileUpdateRequest.isActive());
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
         if (profileUpdateRequest.getAvailability() != null) {
-            DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
             answersEntity.setStartDate(dateFormat.format(profileUpdateRequest.getAvailability().getStartDate()));
             answersEntity.setEndDate(dateFormat.format(profileUpdateRequest.getAvailability().getEndDate()));
         }
