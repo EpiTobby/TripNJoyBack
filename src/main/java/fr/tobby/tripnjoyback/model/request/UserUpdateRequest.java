@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+import java.util.Date;
+
 @Getter
 @AllArgsConstructor
 @JsonAutoDetect
@@ -16,4 +19,6 @@ public class UserUpdateRequest {
     private String profilePicture;
     private CityModel city;
     private String phoneNumber;
+    private Date birthdate;
+    private String gender;
 }
