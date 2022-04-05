@@ -21,9 +21,7 @@ public class AnswersEntity {
     private String id;
     private long profileId;
     @Setter
-    private String startDate;
-    @Setter
-    private String endDate;
+    private List<AvailabiltyEntity> availabilities;
     @Setter
     private int durationMin;
     @Setter
@@ -62,8 +60,7 @@ public class AnswersEntity {
     public static AnswersEntity of(ProfileModel profileModel){
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         return AnswersEntity.builder()
-        .startDate(dateFormat.format(profileModel.getAvailability().getStartDate()))
-        .endDate(dateFormat.format(profileModel.getAvailability().getEndDate()))
+        .availabilities(profileModel.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()),dateFormat.format(a.getEndDate()))).toList())
         .durationMin(profileModel.getDuration().getMinValue())
         .durationMax(profileModel.getDuration().getMaxValue())
         .budgetMin(profileModel.getBudget().getMinValue())

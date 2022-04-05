@@ -18,7 +18,7 @@ import java.util.List;
 @Builder
 public class ProfileModel {
     private long id;
-    private AvailabilityAnswerModel availability;
+    private List<AvailabilityAnswerModel> availabilities;
     private RangeAnswerModel duration;
     private RangeAnswerModel budget;
     private List<DestinationTypeAnswer> destinationTypes;
@@ -38,7 +38,7 @@ public class ProfileModel {
     public static ProfileModel of(ProfileEntity profileEntity, AnswersEntity answersEntity){
         return new ProfileModel().builder()
                 .id(profileEntity.getId())
-                .availability(AvailabilityAnswerModel.of(answersEntity.getStartDate(), answersEntity.getEndDate()))
+                .availabilities(answersEntity.getAvailabilities().stream().map(a -> AvailabilityAnswerModel.of(a.getStartDate(),a.getEndDate())).toList())
                 .duration(new RangeAnswerModel(answersEntity.getDurationMin(), answersEntity.getDurationMax()))
                 .budget(new RangeAnswerModel(answersEntity.getBudgetMin(), answersEntity.getBudgetMax()))
                 .destinationTypes(answersEntity.getDestinationTypes().stream().map(DestinationTypeAnswer::valueOf).toList())
