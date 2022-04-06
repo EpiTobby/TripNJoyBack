@@ -5,7 +5,6 @@ import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
-import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -48,7 +47,6 @@ public class ProfileController {
     public ProfileModel createProfile(@PathVariable("id") final long userId, @RequestBody ProfileCreationRequest profileCreationRequest){
         return profileService.createProfile(userId, profileCreationRequest);
     }
-
 
     @PatchMapping("{profile}/update")
     @Operation(summary = "Update a profile")
