@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.entity.AnswersEntity;
+import fr.tobby.tripnjoyback.entity.AvailabiltyEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.exception.BadAvailabilityException;
 import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
@@ -39,8 +40,7 @@ public class ProfileService {
         profileRepository.save(profileEntity);
         AnswersEntity answersEntity = AnswersEntity.builder()
                 .profileId(profileEntity.getId())
-                .startDate(dateFormat.format(profileCreationRequest.getAvailability().getStartDate()))
-                .endDate(dateFormat.format(profileCreationRequest.getAvailability().getEndDate()))
+                .availabilities(profileCreationRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()),dateFormat.format(a.getEndDate()))).toList())
                 .durationMin(profileCreationRequest.getDuration().getMinValue())
                 .durationMax(profileCreationRequest.getDuration().getMaxValue())
                 .budgetMin(profileCreationRequest.getBudget().getMinValue())
@@ -97,31 +97,14 @@ public class ProfileService {
     }
 
     @Transactional
-    public void reuseProfile(long userId, long profileId, AvailabilityAnswerModel availability) {
-        if (availability.getStartDate().after(availability.getEndDate()))
-            throw new BadAvailabilityException("Start Date must be before end Date");
-        ProfileEntity profileEntity = profileRepository.findByIdAndUserId(profileId, userId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
-        AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
-        answersEntity.setStartDate(dateFormat.format(availability.getStartDate()));
-        answersEntity.setEndDate(dateFormat.format(availability.getEndDate()));
-        if (!profileEntity.isActive()) {
-            setProfileInactive(userId);
-            profileEntity.setActive(true);
-        }
-        answersRepository.save(answersEntity);
-    }
-
-    @Transactional
     public void updateProfile(long userId, long profileId, ProfileUpdateRequest profileUpdateRequest) {
         ProfileEntity profileEntity = profileRepository.findByIdAndUserId(profileId, userId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
         if (profileUpdateRequest.isActive())
             setProfileInactive(userId);
         profileEntity.setActive(profileUpdateRequest.isActive());
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
-        if (profileUpdateRequest.getAvailability() != null) {
-            answersEntity.setStartDate(dateFormat.format(profileUpdateRequest.getAvailability().getStartDate()));
-            answersEntity.setEndDate(dateFormat.format(profileUpdateRequest.getAvailability().getEndDate()));
-        }
+        if (profileUpdateRequest.getAvailabilities() != null)
+            answersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()),dateFormat.format(a.getEndDate()))).toList());
         if (profileUpdateRequest.getDuration() != null) {
             answersEntity.setDurationMin(profileUpdateRequest.getDuration().getMinValue());
             answersEntity.setDurationMax(profileUpdateRequest.getDuration().getMaxValue());

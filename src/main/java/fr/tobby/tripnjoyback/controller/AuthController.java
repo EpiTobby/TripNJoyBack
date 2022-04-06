@@ -10,6 +10,8 @@ import fr.tobby.tripnjoyback.model.request.auth.GoogleRequest;
 import fr.tobby.tripnjoyback.model.request.auth.LoginRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.model.response.auth.AuthTokenResponse;
+import fr.tobby.tripnjoyback.model.response.auth.GoogleAuthResponse;
+import fr.tobby.tripnjoyback.model.response.auth.GoogleUserResponse;
 import fr.tobby.tripnjoyback.model.response.auth.LoginResponse;
 import fr.tobby.tripnjoyback.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,11 +71,11 @@ public class AuthController {
     @Operation(summary = "Log a user, to allow authenticated endpoints")
     @ApiResponse(responseCode = "401", description = "Authentication failed. Wrong username or password")
     @ApiResponse(responseCode = "200", description = "Authentication Succeeded. Use the given jwt in following requests")
-    public LoginResponse signInUpGoogle(@RequestBody GoogleRequest googleRequest)
+    public GoogleAuthResponse signInUpGoogle(@RequestBody GoogleRequest googleRequest)
     {
-        UserModel user = authService.signInUpGoogle(googleRequest);
-        String token = tokenManager.generateFor(user.getEmail(), user.getId());
-        return new LoginResponse(user.getEmail(), token);
+        GoogleUserResponse res = authService.signInUpGoogle(googleRequest);
+        String token = tokenManager.generateFor(res.user().getEmail(), res.user().getId());
+        return new GoogleAuthResponse(res.user().getEmail(), token, res.newUser());
     }
 
 

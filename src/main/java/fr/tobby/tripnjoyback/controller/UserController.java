@@ -20,6 +20,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/users")
 public class UserController {
@@ -34,9 +37,11 @@ public class UserController {
 
     @GetMapping("")
     @PreAuthorize("hasAuthority('admin')")
-    public Iterable<UserEntity> getAll()
+    public List<UserEntity> getAll()
     {
-        return userService.getAll();
+        List<UserEntity> userEntities = new ArrayList<UserEntity>();
+        userService.getAll().forEach(userEntities::add);
+        return userEntities;
     }
 
     @GetMapping("{id}")
