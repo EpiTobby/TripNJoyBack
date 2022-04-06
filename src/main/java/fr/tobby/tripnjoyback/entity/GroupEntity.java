@@ -46,9 +46,7 @@ public class GroupEntity {
     @Column(name = "end_of_Trip")
     private Date endOfTrip;
 
-    @ManyToMany
-    @JoinTable(name = "users_groups",
-            joinColumns = @JoinColumn(name = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Collection<UserEntity> members;
+    @OneToMany
+    @JoinColumn(name = "group_id")
+    private Collection<GroupMemberEntity> members;
 }
