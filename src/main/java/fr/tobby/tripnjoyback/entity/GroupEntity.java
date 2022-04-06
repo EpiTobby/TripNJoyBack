@@ -48,5 +48,5 @@ public class GroupEntity {
 
     @OneToMany
     @JoinColumn(name = "group_id")
-    private Collection<GroupMemberEntity> members;
+    public Collection<GroupMemberEntity> members;
 }

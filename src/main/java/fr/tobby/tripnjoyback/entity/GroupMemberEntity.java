@@ -18,15 +18,18 @@ public class GroupMemberEntity {
     @Id
     private Long id;
 
-    @ManyToOne
     @JoinColumn(name = "group_id")
-    private GroupEntity group;
+    private long groupId;
 
-    @ManyToOne
     @JoinColumn(name = "user_id")
-    private UserEntity user;
+    private long userId;
 
-    @ManyToOne
     @JoinColumn(name = "profile_id")
-    private ProfileEntity profile;
+    private long profileId;
+
+    public GroupMemberEntity(long groupId, long userId, long profileId) {
+        this.groupId = groupId;
+        this.userId = userId;
+        this.profileId = profileId;
+    }
 }
