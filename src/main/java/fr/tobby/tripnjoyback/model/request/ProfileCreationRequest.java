@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.List;
 @JsonAutoDetect
 public class ProfileCreationRequest {
     @NotNull
-    private AvailabilityAnswerModel availability;
+    private List<AvailabilityAnswerModel> availabilities;
     @NotNull
     private RangeAnswerModel duration;
     @NotNull

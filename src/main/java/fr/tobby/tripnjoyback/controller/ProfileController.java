@@ -58,14 +58,6 @@ public class ProfileController {
         profileService.updateProfile(userId, profileId, profileUpdateRequest);
     }
 
-    @PatchMapping("{profile}/reuse")
-    @Operation(summary = "Reuse a profile of the users")
-    @ApiResponse(responseCode = "200", description = "The profile is now active")
-    @ApiResponse(responseCode = "422", description = "The availabilities are not valid")
-    public void reuseProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, @RequestBody AvailabilityAnswerModel availability){
-        profileService.reuseProfile(userId, profileId, availability);
-    }
-
     @DeleteMapping("{profile}")
     @Operation(summary = "Delete the profile of a user")
     @ApiResponse(responseCode = "200", description = "The profile is deleted")

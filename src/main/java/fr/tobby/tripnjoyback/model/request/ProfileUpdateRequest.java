@@ -13,7 +13,7 @@ import java.util.List;
 @JsonAutoDetect
 @NoArgsConstructor
 public class ProfileUpdateRequest {
-    private AvailabilityAnswerModel availability;
+    private List<AvailabilityAnswerModel> availabilities;
     private RangeAnswerModel duration;
     private RangeAnswerModel budget;
     private List<DestinationTypeAnswer> destinationTypes;
