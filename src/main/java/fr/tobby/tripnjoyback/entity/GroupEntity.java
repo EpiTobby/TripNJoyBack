@@ -1,6 +1,9 @@
 package fr.tobby.tripnjoyback.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -8,7 +11,7 @@ import java.util.Collection;
 import java.util.Date;
 
 @Entity
-@Table(name  = "groups")
+@Table(name = "groups")
 @Builder
 @Getter
 @NoArgsConstructor
@@ -42,4 +45,10 @@ public class GroupEntity {
 
     @Column(name = "end_of_Trip")
     private Date endOfTrip;
+
+    @ManyToMany
+    @JoinTable(name = "users_groups",
+            joinColumns = @JoinColumn(name = "group_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private Collection<UserEntity> members;
 }
