@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
+import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -120,5 +121,52 @@ class MatchMakerTest {
         var a2 = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("11-01-2000"));
         var b2 = new AvailabilityAnswerModel(dateFormat.parse("06-01-2000"), dateFormat.parse("07-01-2000"));
         assertThrows(IllegalArgumentException.class, () -> matchMaker.computeAvailabilityCorrelation(List.of(a1, a2), List.of(b1, b2)));
+    }
+}
+
+class MatchMakerRangeTest {
+    private MatchMaker matchMaker;
+
+    @BeforeEach
+    void setUp()
+    {
+        matchMaker = new MatchMaker();
+    }
+
+
+    @Test
+    void rangeDistinctTest()
+    {
+        var a = new RangeAnswerModel(1, 5);
+        var b = new RangeAnswerModel(6, 10);
+
+        assertEquals(0, matchMaker.computeRangeScore(a, b));
+    }
+
+    @Test
+    void rangeEqualsTest()
+    {
+        var a = new RangeAnswerModel(1, 5);
+        var b = new RangeAnswerModel(1, 5);
+
+        assertEquals(1, matchMaker.computeRangeScore(a, b));
+    }
+
+    @Test
+    void rangeHalfOverlappingTest()
+    {
+        var a = new RangeAnswerModel(1, 6);
+        var b = new RangeAnswerModel(4, 9);
+
+        assertEquals(0.5, matchMaker.computeRangeScore(a, b));
+    }
+
+    @Test
+    void rangeHalfContainedTest()
+    {
+        var a = new RangeAnswerModel(1, 6);
+        var b = new RangeAnswerModel(1, 3);
+
+        assertEquals(0.75, matchMaker.computeRangeScore(a, b));
     }
 }

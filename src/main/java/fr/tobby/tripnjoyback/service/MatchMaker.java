@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
+import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -69,5 +70,23 @@ public class MatchMaker {
         }
 
         return res;
+    }
+
+    /**
+     * Compute the similarity between to ranges, i.e, the ratio of shared area
+     * @return score between 0 and 1. 0 for distinct ranges, 1 for equal ranges
+     */
+    float computeRangeScore(@NotNull final RangeAnswerModel a, @NotNull final RangeAnswerModel b)
+    {
+        int min = Math.max(a.getMinValue(), b.getMinValue());
+        int max = Math.min(a.getMaxValue(), b.getMaxValue());
+        if (min > max)
+            return 0;
+
+        float overlappingRange = max - min + 1f;
+        float scoreA = overlappingRange / (a.getMaxValue() - a.getMinValue() + 1f);
+        float scoreB = overlappingRange / (b.getMaxValue() - b.getMinValue() + 1f);
+
+        return 0.5f * scoreA + 0.5f * scoreB;
     }
 }
