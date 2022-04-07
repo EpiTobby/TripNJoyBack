@@ -2,12 +2,10 @@ package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.entity.AnswersEntity;
 import fr.tobby.tripnjoyback.entity.AvailabiltyEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
-import fr.tobby.tripnjoyback.exception.BadAvailabilityException;
 import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
-import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.DestinationTypeAnswer;
 import fr.tobby.tripnjoyback.repository.AnswersRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
@@ -100,9 +98,13 @@ public class ProfileService {
     @Transactional
     public void updateProfile(long userId, long profileId, ProfileUpdateRequest profileUpdateRequest) {
         ProfileEntity profileEntity = profileRepository.findByIdAndUserId(profileId, userId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
-        if (profileUpdateRequest.isActive())
-            setProfileInactive(userId);
-        profileEntity.setActive(profileUpdateRequest.isActive());
+        if (profileUpdateRequest.getActive() != null) {
+            if (profileUpdateRequest.getActive())
+                setProfileInactive(userId);
+            profileEntity.setActive(profileUpdateRequest.getActive());
+        }
+        if (profileUpdateRequest.getName() != null)
+            profileEntity.setName(profileUpdateRequest.getName());
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
         if (profileUpdateRequest.getAvailabilities() != null)
             answersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()),dateFormat.format(a.getEndDate()))).toList());

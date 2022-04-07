@@ -39,7 +39,6 @@ public class ProfileModel {
     public static ProfileModel of(ProfileEntity profileEntity, AnswersEntity answersEntity){
         return new ProfileModel().builder()
                 .id(profileEntity.getId())
-                .name(profileEntity.getName())
                 .availabilities(answersEntity.getAvailabilities().stream().map(a -> AvailabilityAnswerModel.of(a.getStartDate(),a.getEndDate())).toList())
                 .duration(new RangeAnswerModel(answersEntity.getDurationMin(), answersEntity.getDurationMax()))
                 .budget(new RangeAnswerModel(answersEntity.getBudgetMin(), answersEntity.getBudgetMax()))
@@ -56,6 +55,7 @@ public class ProfileModel {
                 .sport(YesNoAnswer.of(answersEntity.getSport()))
                 .userId(profileEntity.getUserId())
                 .isActive(profileEntity.isActive())
+                .name(profileEntity.getName())
                 .build();
     }
 }
