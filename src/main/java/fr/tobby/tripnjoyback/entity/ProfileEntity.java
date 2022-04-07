@@ -15,6 +15,9 @@ public class ProfileEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Setter
+    private String name;
+
     @Column(name = "user_id")
     private long userId;
 
