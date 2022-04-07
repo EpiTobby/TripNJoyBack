@@ -33,7 +33,6 @@ public class GroupModel {
                 .state(State.valueOf(groupEntity.getStateEntity().getValue()))
                 .ownerId(groupEntity.getOwner().getId())
                 .maxSize(groupEntity.getMaxSize())
-                .destinationId(groupEntity.getDestinationId())
                 .startOfTrip(groupEntity.getStartOfTrip())
                 .endOfTrip(groupEntity.getEndOfTrip())
                 .build();

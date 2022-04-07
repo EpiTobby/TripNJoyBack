@@ -25,7 +25,6 @@ CREATE TABLE "groups" (
                           "owner_id" int,
                           "max_size" int,
                           "created_date" timestamp,
-                          "destination_id" int,
                           "start_of_trip" timestamp,
                           "end_of_trip" timestamp
 );
@@ -49,6 +48,7 @@ CREATE TABLE "users_groups" (
 CREATE TABLE "profiles" (
                             "id" SERIAL PRIMARY KEY,
                             "user_id" int,
+                            name varchar,
                             "active" bool
 );
 
@@ -176,8 +176,6 @@ ALTER TABLE "groups" ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id");
 ALTER TABLE "groups" ADD FOREIGN KEY ("state_id") REFERENCES "states" ("id");
 
 ALTER TABLE "users" ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
-
-ALTER TABLE "groups" ADD FOREIGN KEY ("destination_id") REFERENCES "cities" ("id");
 
 ALTER TABLE "profiles" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")  on delete cascade;
 

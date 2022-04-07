@@ -11,6 +11,7 @@ import java.util.Date;
 @Table(name = "groups")
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class GroupEntity {
@@ -34,9 +35,6 @@ public class GroupEntity {
 
     @Column(name = "created_date")
     private Instant createdDate;
-
-    @Column(name = "destination_id")
-    private int destinationId;
 
     @Column(name = "start_of_Trip")
     private Date startOfTrip;
