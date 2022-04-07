@@ -13,6 +13,8 @@ import java.util.List;
 @JsonAutoDetect
 public class ProfileCreationRequest {
     @NotNull
+    private String name;
+    @NotNull
     private List<AvailabilityAnswerModel> availabilities;
     @NotNull
     private RangeAnswerModel duration;
