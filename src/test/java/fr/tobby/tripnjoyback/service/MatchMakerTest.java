@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
+import fr.tobby.tripnjoyback.model.request.anwsers.StaticAnswerModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -106,7 +107,7 @@ class MatchMakerTest {
     }
 
     @Test
-    void emptyIntervalTest() throws ParseException
+    void emptyIntervalTest()
     {
         assertThrows(IllegalArgumentException.class, () -> matchMaker.computeAvailabilityCorrelation(List.of(), List.of()));
     }
@@ -132,7 +133,6 @@ class MatchMakerRangeTest {
     {
         matchMaker = new MatchMaker();
     }
-
 
     @Test
     void rangeDistinctTest()
@@ -168,5 +168,75 @@ class MatchMakerRangeTest {
         var b = new RangeAnswerModel(1, 3);
 
         assertEquals(0.75, matchMaker.computeRangeScore(a, b));
+    }
+}
+
+class MatchMakerStaticChoiceTest {
+    private MatchMaker matchMaker;
+
+    @BeforeEach
+    void setUp()
+    {
+        matchMaker = new MatchMaker();
+    }
+
+    @Test
+    void distinctTest()
+    {
+        float res = matchMaker.computeStaticChoiceScore(List.of(TwoValueChoice.B), List.of(TwoValueChoice.A), TwoValueChoice.NONE);
+        assertEquals(0f, res, 0.001f); // Delta for comparing floats
+    }
+
+    @Test
+    void equalsTest()
+    {
+        float res = matchMaker.computeStaticChoiceScore(List.of(TwoValueChoice.A), List.of(TwoValueChoice.A), TwoValueChoice.NONE);
+        assertEquals(1f, res, 0.001f);
+    }
+
+    @Test
+    void noPrefTest()
+    {
+        float res = matchMaker.computeStaticChoiceScore(List.of(TwoValueChoice.NONE), List.of(TwoValueChoice.A), TwoValueChoice.NONE);
+        assertEquals(0.8f, res, 0.001f); // 0.8 = hardcoded value if one user has no preference
+    }
+
+    @Test
+    void multiValueOneDiffOneCommonTest()
+    {
+        float res = matchMaker.computeStaticChoiceScore(List.of(FourValueChoice.A, FourValueChoice.B), List.of(FourValueChoice.B, FourValueChoice.C), FourValueChoice.NONE);
+        assertEquals(0.5f, res, 0.001f);
+    }
+
+    @Test
+    void multiValueOneDiffTwoCommonTest()
+    {
+        float res = matchMaker.computeStaticChoiceScore(List.of(FourValueChoice.A, FourValueChoice.B, FourValueChoice.C),
+                List.of(FourValueChoice.B, FourValueChoice.C),
+                FourValueChoice.NONE);
+        assertEquals(0.8f, res, 0.001f);
+    }
+
+    @Test
+    void multiValueTwoDiffOneCommonTest()
+    {
+        float res = matchMaker.computeStaticChoiceScore(List.of(FourValueChoice.A, FourValueChoice.B, FourValueChoice.C),
+                List.of(FourValueChoice.C, FourValueChoice.D),
+                FourValueChoice.NONE);
+        assertEquals(0.4f, res, 0.001f);
+    }
+
+    private enum TwoValueChoice implements StaticAnswerModel {
+        A,
+        B,
+        NONE
+    }
+
+    private enum FourValueChoice implements StaticAnswerModel {
+        A,
+        B,
+        C,
+        D,
+        NONE
     }
 }

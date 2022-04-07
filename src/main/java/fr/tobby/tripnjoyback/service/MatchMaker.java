@@ -3,12 +3,15 @@ package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
+import fr.tobby.tripnjoyback.model.request.anwsers.StaticAnswerModel;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class MatchMaker {
@@ -74,6 +77,7 @@ public class MatchMaker {
 
     /**
      * Compute the similarity between to ranges, i.e, the ratio of shared area
+     *
      * @return score between 0 and 1. 0 for distinct ranges, 1 for equal ranges
      */
     float computeRangeScore(@NotNull final RangeAnswerModel a, @NotNull final RangeAnswerModel b)
@@ -88,5 +92,25 @@ public class MatchMaker {
         float scoreB = overlappingRange / (b.getMaxValue() - b.getMinValue() + 1f);
 
         return 0.5f * scoreA + 0.5f * scoreB;
+    }
+
+    /**
+     * Compute the similarity between to list of answers, i.e, the ratio of shared answers
+     *
+     * @return score between 0 and 1. 0 for distinct choices, 1 for equal choices
+     */
+    <T extends StaticAnswerModel> float computeStaticChoiceScore(@NotNull final List<T> a, @NotNull final List<T> b, T noPreferenceValue)
+    {
+        if (a.isEmpty() || b.isEmpty() || (a.size() == 1 && a.get(0).equals(noPreferenceValue)) || (b.size() == 1 && b.get(0).equals(noPreferenceValue)))
+            return 0.8f;
+
+        Set<T> values = new HashSet<>(a);
+        int common = 0;
+        for (final T el : b)
+        {
+            if (!values.add(el))
+                common++;
+        }
+        return (common * 2f) / (a.size() + b.size());
     }
 }
