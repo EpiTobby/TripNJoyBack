@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class ModelWithEmail {
+public class ModelWithEmail {
     protected String email;
 
     @JsonProperty("email")
