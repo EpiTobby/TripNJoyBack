@@ -1,10 +1,13 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.model.Gender;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
+import fr.tobby.tripnjoyback.model.request.anwsers.GenderAnswer;
 import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.StaticAnswerModel;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -112,5 +115,27 @@ public class MatchMaker {
                 common++;
         }
         return (common * 2f) / (a.size() + b.size());
+    }
+
+    /**
+     * Match the gender preferences.
+     *
+     * @param genderA Gender of user A
+     * @param genderB Gender of user B
+     * @param prefA Preference of user A
+     * @param prefB Preference of user B
+     *
+     * @return 0 if at least one preference is not satisfied. 1 if all are satisfied. 0.8 if matches but at least one user has no preference.
+     */
+    float compareGender(@Nullable Gender genderA, @Nullable Gender genderB, @NotNull GenderAnswer prefA, @NotNull GenderAnswer prefB)
+    {
+        if (prefA == GenderAnswer.MIXED && prefB == GenderAnswer.MIXED)
+            return 0.8f;
+
+        if (prefA != GenderAnswer.MIXED && prefA.toGender() != genderB)
+            return 0f;
+        if (prefB != GenderAnswer.MIXED && prefB.toGender() != genderA)
+            return 0f;
+        return prefA != GenderAnswer.MIXED && prefB != GenderAnswer.MIXED ? 1 : 0.8f;
     }
 }

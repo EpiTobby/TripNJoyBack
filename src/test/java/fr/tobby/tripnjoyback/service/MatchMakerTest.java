@@ -1,6 +1,8 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.model.Gender;
 import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
+import fr.tobby.tripnjoyback.model.request.anwsers.GenderAnswer;
 import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.StaticAnswerModel;
 import org.junit.jupiter.api.BeforeEach;
@@ -238,5 +240,50 @@ class MatchMakerStaticChoiceTest {
         C,
         D,
         NONE
+    }
+}
+
+class MatchMakerGender {
+    private MatchMaker matchMaker;
+
+    @BeforeEach
+    void setUp()
+    {
+        matchMaker = new MatchMaker();
+    }
+
+    @Test
+    void distinctTest()
+    {
+        float res = matchMaker.compareGender(Gender.MALE, Gender.FEMALE, GenderAnswer.MALE, GenderAnswer.FEMALE);
+        assertEquals(0f, res, 0.001f);
+    }
+
+    @Test
+    void matchingSameGenderTest()
+    {
+        float res = matchMaker.compareGender(Gender.MALE, Gender.MALE, GenderAnswer.MALE, GenderAnswer.MALE);
+        assertEquals(1f, res, 0.001f);
+    }
+
+    @Test
+    void noPrefTest()
+    {
+        float res = matchMaker.compareGender(Gender.MALE, Gender.NOT_SPECIFIED, GenderAnswer.MIXED, GenderAnswer.MIXED);
+        assertEquals(0.8f, res, 0.001f);
+    }
+
+    @Test
+    void matchingAndNoPrefTest()
+    {
+        float res = matchMaker.compareGender(Gender.MALE, Gender.MALE, GenderAnswer.MALE, GenderAnswer.MIXED);
+        assertEquals(0.8f, res, 0.001f);
+    }
+
+    @Test
+    void noMatchTest()
+    {
+        float res = matchMaker.compareGender(Gender.MALE, Gender.MALE, GenderAnswer.MALE, GenderAnswer.FEMALE);
+        assertEquals(0f, res, 0.001f);
     }
 }
