@@ -99,9 +99,11 @@ public class ProfileService {
     @Transactional
     public void updateProfile(long userId, long profileId, ProfileUpdateRequest profileUpdateRequest) {
         ProfileEntity profileEntity = profileRepository.findByIdAndUserId(profileId, userId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
-        if (profileUpdateRequest.isActive())
-            setProfileInactive(userId);
-        profileEntity.setActive(profileUpdateRequest.isActive());
+        if (profileUpdateRequest.getActive() != null) {
+            if (profileUpdateRequest.getActive())
+                setProfileInactive(userId);
+            profileEntity.setActive(profileUpdateRequest.getActive());
+        }
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
         if (profileUpdateRequest.getAvailabilities() != null)
             answersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()),dateFormat.format(a.getEndDate()))).toList());

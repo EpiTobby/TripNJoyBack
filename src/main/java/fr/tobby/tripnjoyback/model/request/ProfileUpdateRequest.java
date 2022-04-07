@@ -27,5 +27,5 @@ public class ProfileUpdateRequest {
     private AboutFoodAnswer aboutFood;
     private YesNoAnswer goOutAtNight;
     private YesNoAnswer sport;
-    private boolean active;
+    private Boolean active;
 }
