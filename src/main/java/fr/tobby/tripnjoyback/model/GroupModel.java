@@ -20,21 +20,24 @@ public class GroupModel {
     private long id;
     private String name;
     private State state;
-    private long ownerId;
+    private String owner;
     private int maxSize;
-    private int destinationId;
     private Date startOfTrip;
     private Date endOfTrip;
+    private String createdDate;
     private List<String> users;
 
     public static GroupModel of(GroupEntity groupEntity){
         return GroupModel.builder()
+                .id(groupEntity.getId())
                 .name(groupEntity.getName())
                 .state(State.valueOf(groupEntity.getStateEntity().getValue()))
-                .ownerId(groupEntity.getOwner().getId())
+                .owner(groupEntity.getOwner().getFirstname() + " " + groupEntity.getOwner().getLastname())
                 .maxSize(groupEntity.getMaxSize())
                 .startOfTrip(groupEntity.getStartOfTrip())
                 .endOfTrip(groupEntity.getEndOfTrip())
+                .createdDate(groupEntity.getCreatedDate().toString().substring(0,10))
+                .users(groupEntity.members.stream().map(m -> m.getUser().getFirstname() + " " + m.getUser().getLastname()).toList())
                 .build();
     }
 }
