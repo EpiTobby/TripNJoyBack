@@ -18,7 +18,7 @@ import java.util.List;
 @Builder
 public class ProfileModel {
     private long id;
-    private String profileName;
+    private String name;
     private List<AvailabilityAnswerModel> availabilities;
     private RangeAnswerModel duration;
     private RangeAnswerModel budget;
@@ -55,7 +55,7 @@ public class ProfileModel {
                 .sport(YesNoAnswer.of(answersEntity.getSport()))
                 .userId(profileEntity.getUserId())
                 .isActive(profileEntity.isActive())
-                .profileName(profileEntity.getProfileName())
+                .name(profileEntity.getName())
                 .build();
     }
 }

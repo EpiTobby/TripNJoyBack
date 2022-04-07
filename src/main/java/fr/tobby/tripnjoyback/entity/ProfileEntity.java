@@ -17,7 +17,7 @@ public class ProfileEntity {
 
     @Setter
     @Column(name = "name")
-    private String profileName;
+    private String name;
 
     @Column(name = "user_id")
     private long userId;

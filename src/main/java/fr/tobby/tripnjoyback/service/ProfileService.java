@@ -102,8 +102,8 @@ public class ProfileService {
                 setProfileInactive(userId);
             profileEntity.setActive(profileUpdateRequest.getActive());
         }
-        if (profileUpdateRequest.getProfileName() != null)
-            profileEntity.setProfileName(profileUpdateRequest.getProfileName());
+        if (profileUpdateRequest.getName() != null)
+            profileEntity.setName(profileUpdateRequest.getName());
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
         if (profileUpdateRequest.getAvailabilities() != null)
             answersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()),dateFormat.format(a.getEndDate()))).toList());
