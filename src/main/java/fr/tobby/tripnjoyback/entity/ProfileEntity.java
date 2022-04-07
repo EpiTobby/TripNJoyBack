@@ -22,10 +22,6 @@ public class ProfileEntity {
     @Column(name = "user_id")
     private long userId;
 
-    @Column(name = "name")
-    @Setter
-    private String name;
-
     @Column(name = "active")
     @Setter
     private boolean active;
