@@ -90,16 +90,25 @@ public class MatchMaker {
      */
     float computeRangeScore(@NotNull final RangeAnswerModel a, @NotNull final RangeAnswerModel b)
     {
+        return computeCommonRange(a, b)
+                .map(range -> {
+                    float overlappingRange = range.getMaxValue() - range.getMinValue() + 1f;
+                    float scoreA = overlappingRange / (a.getMaxValue() - a.getMinValue() + 1f);
+                    float scoreB = overlappingRange / (b.getMaxValue() - b.getMinValue() + 1f);
+
+                    return 0.5f * scoreA + 0.5f * scoreB;
+                })
+                .orElse(0f);
+    }
+
+    @NotNull
+    Optional<RangeAnswerModel> computeCommonRange(@NotNull final RangeAnswerModel a, @NotNull final RangeAnswerModel b)
+    {
         int min = Math.max(a.getMinValue(), b.getMinValue());
         int max = Math.min(a.getMaxValue(), b.getMaxValue());
         if (min > max)
-            return 0;
-
-        float overlappingRange = max - min + 1f;
-        float scoreA = overlappingRange / (a.getMaxValue() - a.getMinValue() + 1f);
-        float scoreB = overlappingRange / (b.getMaxValue() - b.getMinValue() + 1f);
-
-        return 0.5f * scoreA + 0.5f * scoreB;
+            return Optional.empty();
+        return Optional.of(new RangeAnswerModel(min, max));
     }
 
     /**
