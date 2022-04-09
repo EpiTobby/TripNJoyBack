@@ -1,11 +1,11 @@
 package fr.tobby.tripnjoyback.model.request.anwsers;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.type.SerializationException;
 
 @Getter
 @AllArgsConstructor
@@ -29,5 +29,11 @@ public class RangeAnswerModel implements AnswerModel {
             throw new IllegalArgumentException("Cannot Serialize Answer");
         }
         this.maxValue = maxValue;
+    }
+
+    @JsonIgnore
+    public boolean isInRange(final int val)
+    {
+        return minValue <= val && val <= maxValue;
     }
 }

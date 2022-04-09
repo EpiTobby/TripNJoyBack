@@ -2,10 +2,8 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.model.Gender;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
-import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
-import fr.tobby.tripnjoyback.model.request.anwsers.GenderAnswer;
-import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
-import fr.tobby.tripnjoyback.model.request.anwsers.StaticAnswerModel;
+import fr.tobby.tripnjoyback.model.ProfileModel;
+import fr.tobby.tripnjoyback.model.request.anwsers.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
@@ -16,9 +14,38 @@ import java.util.*;
 @Service
 public class MatchMaker {
 
-    float computeCorrelation(@NotNull final MatchMakingUserModel userA, @NotNull final MatchMakingUserModel userB)
+    /**
+     * Computes the matching score between 2 users. Does not check if conditions are compatible, apart from availabilities and duration
+     */
+    float computeMatchingScore(@NotNull final MatchMakingUserModel userA, @NotNull final MatchMakingUserModel userB)
     {
-        throw new UnsupportedOperationException();
+        ProfileModel profA = userA.getProfile();
+        ProfileModel profB = userB.getProfile();
+        float availabilityCorr = computeAvailabilityCorrelation(computeCommonAvailabilities(profA.getAvailabilities(), profB.getAvailabilities()));
+        if (availabilityCorr == 0) // common availability is mandatory
+            return 0;
+
+        Optional<RangeAnswerModel> commonDuration = computeCommonRange(profA.getDuration(), profB.getDuration());
+        if (commonDuration.isEmpty() || availabilityCorr < commonDuration.get().getMinValue())
+            return 0;
+
+        float res = availabilityCorr;
+        res += computeRangeScore(profA.getDuration(), profB.getDuration());
+        res += computeRangeScore(profA.getBudget(), profB.getBudget());
+        res += computeStaticChoiceScore(profA.getDestinationTypes(), profB.getDestinationTypes(), DestinationTypeAnswer.NO_PREFERENCE);
+        res += computeRangeScore(profA.getAges(), profB.getAges());
+        res += computeStaticChoiceScore(profA.getTravelWithPersonFromSameCity(), profB.getTravelWithPersonFromSameCity(), YesNoAnswer.NO_PREFERENCE);
+        res += computeStaticChoiceScore(profA.getTravelWithPersonFromSameCountry(), profB.getTravelWithPersonFromSameCountry(), YesNoAnswer.NO_PREFERENCE);
+        res += computeStaticChoiceScore(profA.getTravelWithPersonSameLanguage(), profB.getTravelWithPersonSameLanguage(), YesNoAnswer.NO_PREFERENCE);
+
+        res += computeStaticChoiceScore(profA.getGender(), profB.getGender(), GenderAnswer.MIXED);
+        res += computeRangeScore(profA.getGroupeSize(), profB.getGroupeSize());
+        res += computeStaticChoiceScore(profA.getChillOrVisit(), profB.getChillOrVisit(), ChillOrVisitAnswer.NO_PREFERENCE);
+        res += computeStaticChoiceScore(profA.getAboutFood(), profB.getAboutFood(), AboutFoodAnswer.NO_PREFERENCE);
+        res += computeStaticChoiceScore(profA.getGoOutAtNight(), profB.getGoOutAtNight(), YesNoAnswer.NO_PREFERENCE);
+        res += computeStaticChoiceScore(profA.getSport(), profB.getSport(), YesNoAnswer.NO_PREFERENCE);
+
+        return res;
     }
 
     /**
@@ -129,6 +156,11 @@ public class MatchMaker {
                 common++;
         }
         return (common * 2f) / (a.size() + b.size());
+    }
+
+    <T extends StaticAnswerModel> float computeStaticChoiceScore(@NotNull final T a, @NotNull final T b, T noPreferenceValue)
+    {
+        return computeStaticChoiceScore(List.of(a), List.of(b), noPreferenceValue);
     }
 
     /**

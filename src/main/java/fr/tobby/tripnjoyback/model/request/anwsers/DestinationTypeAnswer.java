@@ -4,5 +4,7 @@ public enum DestinationTypeAnswer implements StaticAnswerModel {
     CITY,
     COUNTRYSIDE,
     BEACH,
-    MOUNTAIN;
+    MOUNTAIN,
+    NO_PREFERENCE,
+    ;
 }
