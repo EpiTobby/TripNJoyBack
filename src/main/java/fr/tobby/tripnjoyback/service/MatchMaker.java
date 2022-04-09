@@ -11,10 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class MatchMaker {
@@ -25,14 +22,23 @@ public class MatchMaker {
     }
 
     /**
-     * Compute the maximum number of successive shared days between the two given sorted interval lists
+     * Compute the maximum number of successive shared days between the two given sorted interval lists. 0 if no matching period
      */
-    float computeAvailabilityCorrelation(@NotNull List<AvailabilityAnswerModel> a, List<AvailabilityAnswerModel> b)
+    float computeAvailabilityCorrelation(@NotNull List<AvailabilityAnswerModel> commonAvailability)
+    {
+        return commonAvailability.stream()
+                                 .map(availability -> 1 + Duration.between(availability.getStartDate().toInstant(), availability.getEndDate().toInstant()).toDays())
+                                 .max(Long::compare)
+                                 .orElse(0L);
+    }
+
+    @NotNull
+    List<AvailabilityAnswerModel> computeCommonAvailabilities(@NotNull List<AvailabilityAnswerModel> a, List<AvailabilityAnswerModel> b)
     {
         if (a.isEmpty() || b.isEmpty())
             throw new IllegalArgumentException("Availabilities cannot be empty");
 
-        int res = 0;
+        List<AvailabilityAnswerModel> res = new ArrayList<>();
 
         int indexA = 0;
         int indexB = 0;
@@ -66,8 +72,7 @@ public class MatchMaker {
             Date end = isABefore
                        ? intervalA.getEndDate()
                        : intervalB.getEndDate();
-            int days = 1 + (int) Duration.between(start.toInstant(), end.toInstant()).toDays();
-            res = Math.max(res, days);
+            res.add(new AvailabilityAnswerModel(start, end));
 
             if (isABefore)
                 indexA++;

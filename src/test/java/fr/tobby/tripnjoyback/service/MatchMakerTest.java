@@ -32,7 +32,7 @@ class MatchMakerTest {
         var a = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("05-01-2000"));
         var b = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("05-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(List.of(a), List.of(b));
+        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a), List.of(b)));
         assertEquals(5, res);
     }
 
@@ -42,7 +42,7 @@ class MatchMakerTest {
         var a = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("05-01-2000"));
         var b = new AvailabilityAnswerModel(dateFormat.parse("06-01-2000"), dateFormat.parse("11-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(List.of(a), List.of(b));
+        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a), List.of(b)));
         assertEquals(0, res);
     }
 
@@ -52,7 +52,7 @@ class MatchMakerTest {
         var a = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("05-01-2000"));
         var b = new AvailabilityAnswerModel(dateFormat.parse("03-01-2000"), dateFormat.parse("07-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(List.of(a), List.of(b));
+        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a), List.of(b)));
         assertEquals(3, res);
     }
 
@@ -65,7 +65,7 @@ class MatchMakerTest {
         var a2 = new AvailabilityAnswerModel(dateFormat.parse("10-01-2000"), dateFormat.parse("11-01-2000"));
         var b2 = new AvailabilityAnswerModel(dateFormat.parse("20-01-2000"), dateFormat.parse("21-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(List.of(a1, a2), List.of(b1, b2));
+        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
         assertEquals(3, res);
     }
 
@@ -78,7 +78,7 @@ class MatchMakerTest {
         var a2 = new AvailabilityAnswerModel(dateFormat.parse("11-01-2000"), dateFormat.parse("15-01-2000"));
         var b2 = new AvailabilityAnswerModel(dateFormat.parse("12-01-2000"), dateFormat.parse("21-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(List.of(a1, a2), List.of(b1, b2));
+        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
         assertEquals(4, res);
     }
 
@@ -91,7 +91,7 @@ class MatchMakerTest {
         var a2 = new AvailabilityAnswerModel(dateFormat.parse("07-01-2000"), dateFormat.parse("15-01-2000"));
         var b2 = new AvailabilityAnswerModel(dateFormat.parse("13-01-2000"), dateFormat.parse("21-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(List.of(a1, a2), List.of(b1, b2));
+        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
         assertEquals(4, res);
     }
 
@@ -104,14 +104,14 @@ class MatchMakerTest {
         var a2 = new AvailabilityAnswerModel(dateFormat.parse("10-01-2000"), dateFormat.parse("11-01-2000"));
         var b2 = new AvailabilityAnswerModel(dateFormat.parse("10-01-2000"), dateFormat.parse("13-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(List.of(a1, a2), List.of(b1, b2));
+        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
         assertEquals(5, res);
     }
 
     @Test
     void emptyIntervalTest()
     {
-        assertThrows(IllegalArgumentException.class, () -> matchMaker.computeAvailabilityCorrelation(List.of(), List.of()));
+        assertThrows(IllegalArgumentException.class, () -> matchMaker.computeCommonAvailabilities(List.of(), List.of()));
     }
 
     @Test
@@ -123,7 +123,7 @@ class MatchMakerTest {
         // inconsistency, overlapping a1
         var a2 = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("11-01-2000"));
         var b2 = new AvailabilityAnswerModel(dateFormat.parse("06-01-2000"), dateFormat.parse("07-01-2000"));
-        assertThrows(IllegalArgumentException.class, () -> matchMaker.computeAvailabilityCorrelation(List.of(a1, a2), List.of(b1, b2)));
+        assertThrows(IllegalArgumentException.class, () -> matchMaker.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
     }
 }
 
