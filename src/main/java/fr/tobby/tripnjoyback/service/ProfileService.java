@@ -99,12 +99,19 @@ public class ProfileService {
     @Transactional
     public void updateProfile(long userId, long profileId, ProfileUpdateRequest profileUpdateRequest) {
         ProfileEntity profileEntity = profileRepository.findByIdAndUserId(profileId, userId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
-        if (profileUpdateRequest.isActive())
-            setProfileInactive(userId);
-        profileEntity.setActive(profileUpdateRequest.isActive());
+        if (profileUpdateRequest.getActive() != null) {
+            if (profileUpdateRequest.getActive()) {
+                setProfileInactive(userId);
+            }
+            profileEntity.setActive(profileUpdateRequest.getActive());
+        }
+        if (profileUpdateRequest.getName() != null) {
+            profileEntity.setName(profileUpdateRequest.getName());
+        }
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
-        if (profileUpdateRequest.getAvailabilities() != null)
+        if (profileUpdateRequest.getAvailabilities() != null && profileUpdateRequest.getAvailabilities().size() != 0) {
             answersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList());
+        }
         if (profileUpdateRequest.getDuration() != null) {
             answersEntity.setDurationMin(profileUpdateRequest.getDuration().getMinValue());
             answersEntity.setDurationMax(profileUpdateRequest.getDuration().getMaxValue());
@@ -113,32 +120,40 @@ public class ProfileService {
             answersEntity.setBudgetMin(profileUpdateRequest.getBudget().getMinValue());
             answersEntity.setBudgetMax(profileUpdateRequest.getBudget().getMaxValue());
         }
-        if (profileUpdateRequest.getDestinationTypes() != null)
+        if (profileUpdateRequest.getDestinationTypes() != null && profileUpdateRequest.getDestinationTypes().size() != 0) {
             answersEntity.setDestinationTypes(profileUpdateRequest.getDestinationTypes().stream().map(DestinationTypeAnswer::toString).toList());
         if (profileUpdateRequest.getAges() != null) {
             answersEntity.setAgeMin(profileUpdateRequest.getAges().getMinValue());
             answersEntity.setAgeMax(profileUpdateRequest.getAges().getMaxValue());
         }
-        if (profileUpdateRequest.getTravelWithPersonFromSameCity() != null)
+        if (profileUpdateRequest.getTravelWithPersonFromSameCity() != null) {
             answersEntity.setTravelWithPersonFromSameCity(profileUpdateRequest.getTravelWithPersonFromSameCity().toBoolean());
-        if (profileUpdateRequest.getTravelWithPersonFromSameCountry() != null)
+        }
+        if (profileUpdateRequest.getTravelWithPersonFromSameCountry() != null) {
             answersEntity.setTravelWithPersonFromSameCountry(profileUpdateRequest.getTravelWithPersonFromSameCountry().toBoolean());
-        if (profileUpdateRequest.getTravelWithPersonSameLanguage() != null)
+        }
+        if (profileUpdateRequest.getTravelWithPersonSameLanguage() != null) {
             answersEntity.setTravelWithPersonSameLanguage(profileUpdateRequest.getTravelWithPersonSameLanguage().toBoolean());
-        if (profileUpdateRequest.getGender() != null)
+        }
+        if (profileUpdateRequest.getGender() != null) {
             answersEntity.setGender(profileUpdateRequest.getGender().toString());
+        }
         if (profileUpdateRequest.getGroupSize() != null) {
             answersEntity.setGroupSizeMin(profileUpdateRequest.getGroupSize().getMinValue());
             answersEntity.setGroupSizeMax(profileUpdateRequest.getGroupSize().getMaxValue());
         }
-        if (profileUpdateRequest.getChillOrVisit() != null)
+        if (profileUpdateRequest.getChillOrVisit() != null) {
             answersEntity.setChillOrVisit(profileUpdateRequest.getChillOrVisit().toString());
-        if (profileUpdateRequest.getAboutFood() != null)
+        }
+        if (profileUpdateRequest.getAboutFood() != null) {
             answersEntity.setAboutFood(profileUpdateRequest.getAboutFood().toString());
-        if (profileUpdateRequest.getGoOutAtNight() != null)
+        }
+        if (profileUpdateRequest.getGoOutAtNight() != null) {
             answersEntity.setGoOutAtNight(profileUpdateRequest.getGoOutAtNight().toBoolean());
-        if (profileUpdateRequest.getSport() != null)
+        }
+        if (profileUpdateRequest.getSport() != null) {
             answersEntity.setSport(profileUpdateRequest.getSport().toBoolean());
+        }
         answersRepository.save(answersEntity);
     }
 }
