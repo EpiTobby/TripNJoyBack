@@ -34,7 +34,7 @@ public class GroupController {
     }
 
     private void checkAuthorization(long groupId, Authentication authentication) {
-        String ownerEmail = groupService.getOwnerId(groupId);
+        String ownerEmail = groupService.getOwnerEmail(groupId);
         if (!ownerEmail.equals(authentication.getName()))
             throw new ForbiddenOperationException("You cannot perform this operation");
     }

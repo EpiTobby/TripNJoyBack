@@ -43,7 +43,7 @@ public class GroupService {
         return models;
     }
 
-    public String getOwnerId(long groupId) {
+    public String getOwnerEmail(long groupId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
         return groupEntity.getOwner().getEmail();
     }
@@ -103,13 +103,13 @@ public class GroupService {
     @Transactional
     public void UpdatePrivateGroup(long groupId, UpdateGroupRequest updateGroupRequest) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
-        if (updateGroupRequest.getName() != null){
+        if (updateGroupRequest.getName() != null) {
             groupEntity.setName(updateGroupRequest.getName());
         }
         int newMaxSize = updateGroupRequest.getMaxSize();
         if (newMaxSize != 0) {
-             if(newMaxSize < groupEntity.members.size())
-                 throw new UpdateGroupException("The maximum size of the group must be greater or equal than the current number of members in the private group");
+            if (newMaxSize < groupEntity.members.size())
+                throw new UpdateGroupException("The maximum size of the group must be greater or equal than the current number of members in the private group");
             groupEntity.setMaxSize(newMaxSize);
         }
         if (updateGroupRequest.getState() != null)
@@ -120,11 +120,10 @@ public class GroupService {
             if (updateGroupRequest.getEndOfTrip() != null)
                 groupEntity.setStartOfTrip(updateGroupRequest.getEndOfTrip());
         }
-        if (updateGroupRequest.getOwnerId() != null){
-            if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == updateGroupRequest.getOwnerId())){
+        if (updateGroupRequest.getOwnerId() != null) {
+            if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == updateGroupRequest.getOwnerId())) {
                 groupEntity.setOwner(userRepository.findById(updateGroupRequest.getOwnerId()).get());
-            }
-            else
+            } else
                 throw new UpdateGroupException("The new owner does not exist or is not in this private group");
         }
     }
