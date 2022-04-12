@@ -26,6 +26,16 @@ public class AvailabilityAnswerModel implements AnswerModel {
     private Date endDate;
 
     @JsonProperty("startDate")
+    public String getStartDate() {
+        return new SimpleDateFormat("dd-MM-yyyy").format(startDate);
+    }
+
+    @JsonProperty("endDate")
+    public String getEndDate() {
+        return new SimpleDateFormat("dd-MM-yyyy").format(endDate);
+    }
+
+    @JsonProperty("startDate")
     public void setStartDate(String startDate){
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         try{
@@ -60,15 +70,5 @@ public class AvailabilityAnswerModel implements AnswerModel {
         catch (Exception e){
             throw new BadAvailabilityException("Cannot parse availability");
         }
-    }
-
-    private long getNumberOfDaysInCommon(AvailabilityAnswerModel other){
-        AvailabilityAnswerModel earliest = startDate.before(other.getStartDate()) ? this : other;
-        AvailabilityAnswerModel latest = startDate.after(other.getStartDate()) ? this : other;
-        if (latest.getStartDate().after(earliest.getEndDate())){
-            return -1;
-        }
-        long diff = Math.abs(earliest.getEndDate().getTime() - latest.getStartDate().getTime());
-        return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
     }
 }

@@ -5,7 +5,6 @@ import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
-import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,7 +22,7 @@ public class ProfileController {
     private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
     private ProfileService profileService;
 
-    public ProfileController(ProfileService profileService){
+    public ProfileController(ProfileService profileService) {
         this.profileService = profileService;
     }
 
@@ -31,13 +30,13 @@ public class ProfileController {
     @Operation(summary = "Get all profiles from a user")
     @ApiResponse(responseCode = "200", description = "Returns list of profiles")
     @ApiResponse(responseCode = "422", description = "If the answers are not valid")
-    public List<ProfileModel> getUserProfiles(@PathVariable("id") final long userId){
+    public List<ProfileModel> getUserProfiles(@PathVariable("id") final long userId) {
         return profileService.getUserProfiles(userId);
     }
 
     @GetMapping("active")
     @PreAuthorize("hasAuthority('admin')")
-    public List<ProfileModel> getActiveProfiles(){
+    public List<ProfileModel> getActiveProfiles() {
         return profileService.getActiveProfiles();
     }
 
@@ -45,16 +44,15 @@ public class ProfileController {
     @Operation(summary = "Create a profile")
     @ApiResponse(responseCode = "200", description = "Returns the profile")
     @ApiResponse(responseCode = "422", description = "")
-    public ProfileModel createProfile(@PathVariable("id") final long userId, @RequestBody ProfileCreationRequest profileCreationRequest){
+    public ProfileModel createProfile(@PathVariable("id") final long userId, @RequestBody ProfileCreationRequest profileCreationRequest) {
         return profileService.createProfile(userId, profileCreationRequest);
     }
-
 
     @PatchMapping("{profile}/update")
     @Operation(summary = "Update a profile")
     @ApiResponse(responseCode = "200", description = "The profile is updated")
     @ApiResponse(responseCode = "422", description = "The answers are not valid")
-    public void updateProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, @RequestBody ProfileUpdateRequest profileUpdateRequest){
+    public void updateProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, @RequestBody ProfileUpdateRequest profileUpdateRequest) {
         profileService.updateProfile(userId, profileId, profileUpdateRequest);
     }
 
@@ -62,7 +60,7 @@ public class ProfileController {
     @Operation(summary = "Delete the profile of a user")
     @ApiResponse(responseCode = "200", description = "The profile is deleted")
     @ApiResponse(responseCode = "422", description = "No profile has been found")
-    public void deleteProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId){
+    public void deleteProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId) {
         profileService.deleteProfile(userId, profileId);
     }
 

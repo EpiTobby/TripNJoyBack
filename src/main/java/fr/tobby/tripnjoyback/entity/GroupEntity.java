@@ -1,18 +1,17 @@
 package fr.tobby.tripnjoyback.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Date;
 
 @Entity
-@Table(name  = "groups")
+@Table(name = "groups")
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class GroupEntity {
@@ -22,6 +21,7 @@ public class GroupEntity {
 
     private String name;
 
+    @Setter
     @ManyToOne()
     @JoinColumn(name = "state_id")
     private StateEntity stateEntity;
@@ -34,14 +34,15 @@ public class GroupEntity {
     private int maxSize;
 
     @Column(name = "created_date")
-    private Instant createdDate;
-
-    @Column(name = "destination_id")
-    private int destinationId;
+    private Date createdDate;
 
     @Column(name = "start_of_Trip")
     private Date startOfTrip;
 
     @Column(name = "end_of_Trip")
     private Date endOfTrip;
+
+    @OneToMany
+    @JoinColumn(name = "group_id")
+    public Collection<GroupMemberEntity> members;
 }
