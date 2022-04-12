@@ -15,7 +15,7 @@ import java.util.Date;
 public class UpdateGroupRequest {
     private String name;
     private State state;
-    private long ownerId;
+    private Long ownerId;
     private int maxSize;
     private Date startOfTrip;
     private Date endOfTrip;

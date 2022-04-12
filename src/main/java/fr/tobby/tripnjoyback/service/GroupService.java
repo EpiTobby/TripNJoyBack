@@ -7,7 +7,6 @@ import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
 import fr.tobby.tripnjoyback.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -97,15 +96,22 @@ public class GroupService {
         if (!userEntity.isConfirmed())
             throw new UserNotConfirmedException("The user you want to invite is not confirmed");
         groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, null)));
-        if (groupEntity.getMaxSize() > groupEntity.members.size())
+        if (groupEntity.getMaxSize() == groupEntity.members.size())
             groupEntity.setStateEntity(stateRepository.findByValue("CLOSED").get());
     }
 
     @Transactional
     public void UpdatePrivateGroup(long groupId, UpdateGroupRequest updateGroupRequest) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
-        if (updateGroupRequest.getMaxSize() != 0)
-            groupEntity.setMaxSize(updateGroupRequest.getMaxSize());
+        if (updateGroupRequest.getName() != null){
+            groupEntity.setName(updateGroupRequest.getName());
+        }
+        int newMaxSize = updateGroupRequest.getMaxSize();
+        if (newMaxSize != 0) {
+             if(newMaxSize < groupEntity.members.size())
+                 throw new UpdateGroupException("The maximum size of the group must be greater or equal than the current number of members in the private group");
+            groupEntity.setMaxSize(newMaxSize);
+        }
         if (updateGroupRequest.getState() != null)
             groupEntity.setStateEntity(stateRepository.findByValue(updateGroupRequest.getState().toString()).get());
         if (groupEntity.getStateEntity().getValue().equals("CLOSED")) {
@@ -113,6 +119,13 @@ public class GroupService {
                 groupEntity.setStartOfTrip(updateGroupRequest.getStartOfTrip());
             if (updateGroupRequest.getEndOfTrip() != null)
                 groupEntity.setStartOfTrip(updateGroupRequest.getEndOfTrip());
+        }
+        if (updateGroupRequest.getOwnerId() != null){
+            if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == updateGroupRequest.getOwnerId())){
+                groupEntity.setOwner(userRepository.findById(updateGroupRequest.getOwnerId()).get());
+            }
+            else
+                throw new UpdateGroupException("The new owner does not exist or is not in this private group");
         }
     }
 

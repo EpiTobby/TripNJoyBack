@@ -1,9 +1,6 @@
 package fr.tobby.tripnjoyback.controller;
 
-import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
-import fr.tobby.tripnjoyback.exception.GroupNotFoundException;
-import fr.tobby.tripnjoyback.exception.UserNotConfirmedException;
-import fr.tobby.tripnjoyback.exception.UserNotFoundException;
+import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.ModelWithEmail;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
@@ -19,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @RequestMapping(path = "groups")
@@ -39,8 +35,8 @@ public class GroupController {
 
     private void checkAuthorization(long groupId, Authentication authentication) {
         String ownerEmail = groupService.getOwnerId(groupId);
-        if (ownerEmail != authentication.getName())
-            throw new ForbiddenOperationException();
+        if (!ownerEmail.equals(authentication.getName()))
+            throw new ForbiddenOperationException("You cannot perform this operation");
     }
 
     @DeleteMapping("{group}/user/{id}")
@@ -112,6 +108,14 @@ public class GroupController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String getError(ForbiddenOperationException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(UpdateGroupException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(UpdateGroupException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }
