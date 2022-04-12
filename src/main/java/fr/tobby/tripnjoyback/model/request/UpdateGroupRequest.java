@@ -5,6 +5,7 @@ import fr.tobby.tripnjoyback.model.State;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 
@@ -13,10 +14,16 @@ import java.util.Date;
 @JsonAutoDetect
 @NoArgsConstructor
 public class UpdateGroupRequest {
+    @Nullable
     private String name;
+    @Nullable
     private State state;
+    @Nullable
     private Long ownerId;
-    private int maxSize;
+    @Nullable
+    private Integer maxSize;
+    @Nullable
     private Date startOfTrip;
+    @Nullable
     private Date endOfTrip;
 }
