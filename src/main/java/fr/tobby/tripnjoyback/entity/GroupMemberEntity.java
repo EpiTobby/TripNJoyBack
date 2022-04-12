@@ -16,6 +16,7 @@ import javax.persistence.*;
 public class GroupMemberEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

@@ -11,6 +11,7 @@ import java.util.Date;
 @Table(name = "groups")
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class GroupEntity {
@@ -33,10 +34,7 @@ public class GroupEntity {
     private int maxSize;
 
     @Column(name = "created_date")
-    private Instant createdDate;
-
-    @Column(name = "destination_id")
-    private int destinationId;
+    private Date createdDate;
 
     @Column(name = "start_of_Trip")
     private Date startOfTrip;
