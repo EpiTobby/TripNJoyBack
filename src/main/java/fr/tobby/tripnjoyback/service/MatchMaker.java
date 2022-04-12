@@ -48,6 +48,15 @@ public class MatchMaker {
         return res;
     }
 
+    boolean isUserCompatible(@NotNull final ProfileModel profile, @NotNull final MatchMakingUserModel user)
+    {
+        if (profile.getGender() != GenderAnswer.MIXED && profile.getGender().toGender() != user.getGender())
+            return false;
+        if (!profile.getAges().isInRange(user.getAge()))
+            return false;
+        return true;
+    }
+
     /**
      * Compute the maximum number of successive shared days between the two given sorted interval lists. 0 if no matching period
      */
