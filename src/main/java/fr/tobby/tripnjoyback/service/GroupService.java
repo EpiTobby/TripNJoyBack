@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -32,8 +33,8 @@ public class GroupService {
         this.stateRepository = stateRepository;
     }
 
-    public List<GroupModel> getUserGroups(long userId){
-        Iterable<GroupEntity> entities =  groupRepository.findAll();
+    public Collection<GroupModel> getUserGroups(long userId) {
+        Iterable<GroupEntity> entities = groupRepository.findAll();
         List<GroupModel> models = new ArrayList();
         entities.forEach(e -> {
             if (e.members.stream().anyMatch(m -> m.getUser().getId() == userId))
@@ -42,18 +43,19 @@ public class GroupService {
         return models;
     }
 
+    public String getOwnerId(long groupId) {
+        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
+        return groupEntity.getOwner().getEmail();
+    }
+
     @Transactional
-    public GroupModel createPublicGroup(long user1Id, long profile1Id, long user2Id, long profile2Id, int maxSize){
+    public GroupModel createPublicGroup(UserEntity user1Entity, ProfileEntity profile1Entity, UserEntity user2Entity, ProfileEntity profile2Entity, int maxSize) {
         GroupEntity groupEntity = GroupEntity.builder()
                 .maxSize(maxSize)
                 .createdDate(Instant.now())
                 .stateEntity(maxSize > 2 ? stateRepository.findByValue("OPEN").get() : stateRepository.findByValue("CLOSED").get())
                 .members(List.of())
                 .build();
-        UserEntity user1Entity = userRepository.findById(user1Id).orElseThrow(() -> new UserNotFoundException("No user with id " + user1Id));
-        UserEntity user2Entity = userRepository.findById(user2Id).orElseThrow(() -> new UserNotFoundException("No user with id " + user2Id));
-        ProfileEntity profile1Entity = profileRepository.findById(profile1Id).orElseThrow(() -> new ProfileNotFoundException("No profile with id " + profile1Id));
-        ProfileEntity profile2Entity = profileRepository.findById(profile2Id).orElseThrow(() -> new ProfileNotFoundException("No profile with id " + profile2Id));
         groupRepository.save(groupEntity);
         groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity)));
         groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity)));
@@ -62,7 +64,7 @@ public class GroupService {
 
 
     @Transactional
-    public GroupModel createPrivateGroup(long userId, int maxSize){
+    public GroupModel createPrivateGroup(long userId, int maxSize) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         GroupEntity groupEntity = GroupEntity.builder()
                 .maxSize(maxSize)
@@ -78,21 +80,18 @@ public class GroupService {
     }
 
     @Transactional
-    public void addUserToPublicGroup(long groupId, long userId, long profileId){
+    public void addUserToPublicGroup(long groupId, long userId, long profileId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with this id " + userId));
         ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with id " + profileId));
         groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, profileEntity)));
-        if (groupEntity.getMaxSize() > groupEntity.members.size())
+        if (groupEntity.getMaxSize() == groupEntity.members.size())
             groupEntity.setStateEntity(stateRepository.findByValue("CLOSED").get());
     }
 
     @Transactional
-    public void addUserToPrivateGroup(long groupId, String email, Authentication authentication){
+    public void addUserToPrivateGroup(long groupId, String email) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
-        UserEntity owner = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new UserNotFoundException("No user with this email " + email));
-        if (groupEntity.getOwner().getId() != owner.getId())
-            throw new ForbiddenOperationException();
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("No user with this email " + email));
         if (!userEntity.isConfirmed())
             throw new UserNotConfirmedException("The user you want to invite is not confirmed");
@@ -102,13 +101,13 @@ public class GroupService {
     }
 
     @Transactional
-    public void UpdatePrivateGroup(long groupId, UpdateGroupRequest updateGroupRequest){
+    public void UpdatePrivateGroup(long groupId, UpdateGroupRequest updateGroupRequest) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
         if (updateGroupRequest.getMaxSize() != 0)
             groupEntity.setMaxSize(updateGroupRequest.getMaxSize());
         if (updateGroupRequest.getState() != null)
             groupEntity.setStateEntity(stateRepository.findByValue(updateGroupRequest.getState().toString()).get());
-        if (groupEntity.getStateEntity().getValue().equals("CLOSED")){
+        if (groupEntity.getStateEntity().getValue().equals("CLOSED")) {
             if (updateGroupRequest.getStartOfTrip() != null)
                 groupEntity.setStartOfTrip(updateGroupRequest.getStartOfTrip());
             if (updateGroupRequest.getEndOfTrip() != null)
@@ -117,8 +116,8 @@ public class GroupService {
     }
 
     @Transactional
-    public void removeUserOfGroup(long groupId, String email){
+    public void removeUserOfGroup(long groupId, long userId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
-        groupEntity.members.removeIf(m -> m.getUser().getEmail().equals(email));
+        groupEntity.members.removeIf(m -> m.getUser().getId() == userId);
     }
 }

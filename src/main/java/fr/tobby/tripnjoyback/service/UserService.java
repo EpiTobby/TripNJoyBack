@@ -30,8 +30,7 @@ public class UserService {
     private final PasswordEncoder encoder;
     private final UserMailUtils userMailUtils;
 
-    public UserService(UserRepository userRepository, GenderRepository genderRepository, ProfileService profileService, final CityService cityService, ConfirmationCodeRepository confirmationCodeRepository, PasswordEncoder encoder, UserMailUtils userMailUtils)
-    {
+    public UserService(UserRepository userRepository, GenderRepository genderRepository, ProfileService profileService, final CityService cityService, ConfirmationCodeRepository confirmationCodeRepository, PasswordEncoder encoder, UserMailUtils userMailUtils) {
         this.userRepository = userRepository;
         this.genderRepository = genderRepository;
         this.profileService = profileService;
@@ -41,30 +40,28 @@ public class UserService {
         this.userMailUtils = userMailUtils;
     }
 
-    public Iterable<UserEntity> getAll()
-    {
+    public Iterable<UserEntity> getAll() {
         return userRepository.findAll();
     }
 
-    public Optional<UserModel> findById(final long id)
-    {
+    public Optional<UserModel> findById(final long id) {
         return userRepository.findById(id).map(UserModel::of);
     }
 
     @Transactional
-    public void updateUserInfo(long userId, UserUpdateRequest userUpdateRequest){
+    public void updateUserInfo(long userId, UserUpdateRequest userUpdateRequest) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         if (userUpdateRequest.getFirstname() != null)
             user.setFirstname(userUpdateRequest.getFirstname());
         if (userUpdateRequest.getLastname() != null)
             user.setLastname(userUpdateRequest.getLastname());
-        if (userUpdateRequest.getProfilePicture() != null )
+        if (userUpdateRequest.getProfilePicture() != null)
             user.setProfilePicture(userUpdateRequest.getProfilePicture());
         if (userUpdateRequest.getCity() != null) {
             CityEntity cityEntity = cityService.getOrAddCity(userUpdateRequest.getCity().getName());
             user.setCity(cityEntity);
         }
-        if (userUpdateRequest.getPhoneNumber() != null )
+        if (userUpdateRequest.getPhoneNumber() != null)
             user.setPhoneNumber(userUpdateRequest.getPhoneNumber());
         if (userUpdateRequest.getBirthdate() != null) {
             user.setBirthDate(userUpdateRequest.getBirthdate().toInstant());
@@ -74,16 +71,15 @@ public class UserService {
         }
     }
 
-    public Optional<UserModel> findByEmail(final String email)
-    {
+    public Optional<UserModel> findByEmail(final String email) {
         return userRepository.findByEmail(email)
-                             .map(UserModel::of);
+                .map(UserModel::of);
     }
 
     @Transactional
-    public void deleteUserAccount(long userId, DeleteUserRequest deleteUserRequest){
+    public void deleteUserAccount(long userId, DeleteUserRequest deleteUserRequest) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        if (!encoder.matches(deleteUserRequest.getPassword(),user.getPassword())) {
+        if (!encoder.matches(deleteUserRequest.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Bad Password");
         }
         profileService.deleteProfilesByUserId(userId);
@@ -92,7 +88,7 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUserByAdmin(long userId, DeleteUserByAdminRequest deleteUserByAdminRequest){
+    public void deleteUserByAdmin(long userId, DeleteUserByAdminRequest deleteUserByAdminRequest) {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         profileService.deleteProfilesByUserId(userId);
         userRepository.delete(user);

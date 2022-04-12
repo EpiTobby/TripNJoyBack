@@ -1,4 +1,5 @@
 package fr.tobby.tripnjoyback.service;
+
 import fr.tobby.tripnjoyback.entity.AnswersEntity;
 import fr.tobby.tripnjoyback.entity.AvailabiltyEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
@@ -32,7 +33,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileModel createProfile(long userId, ProfileCreationRequest profileCreationRequest){
+    public ProfileModel createProfile(long userId, ProfileCreationRequest profileCreationRequest) {
         ProfileEntity profileEntity = ProfileEntity.builder()
                 .name(profileCreationRequest.getName())
                 .userId(userId)
@@ -41,7 +42,7 @@ public class ProfileService {
         profileRepository.save(profileEntity);
         AnswersEntity answersEntity = AnswersEntity.builder()
                 .profileId(profileEntity.getId())
-                .availabilities(profileCreationRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()),dateFormat.format(a.getEndDate()))).toList())
+                .availabilities(profileCreationRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList())
                 .durationMin(profileCreationRequest.getDuration().getMinValue())
                 .durationMax(profileCreationRequest.getDuration().getMaxValue())
                 .budgetMin(profileCreationRequest.getBudget().getMinValue())
@@ -64,13 +65,13 @@ public class ProfileService {
         return ProfileModel.of(profileEntity, answersEntity);
     }
 
-    public List<ProfileModel> getUserProfiles(long userId){
+    public List<ProfileModel> getUserProfiles(long userId) {
         List<ProfileEntity> profileEntities = profileRepository.findByUserId(userId);
-        return profileEntities.stream().map(e -> ProfileModel.of(e,answersRepository.findByProfileId(e.getId()))).toList();
+        return profileEntities.stream().map(e -> ProfileModel.of(e, answersRepository.findByProfileId(e.getId()))).toList();
     }
 
     @Transactional
-    public void deleteProfilesByUserId(long userId){
+    public void deleteProfilesByUserId(long userId) {
         List<ProfileEntity> profileEntities = profileRepository.findByUserId(userId);
         for (ProfileEntity profileEntity : profileEntities) {
             AnswersEntity answersEntity = answersRepository.findByProfileId(profileEntity.getId());
@@ -78,7 +79,7 @@ public class ProfileService {
         }
     }
 
-    public List<ProfileModel> getActiveProfiles(){
+    public List<ProfileModel> getActiveProfiles() {
         List<ProfileEntity> profileEntities = profileRepository.findByActiveIsTrue();
         return profileEntities.stream().map(e -> ProfileModel.of(e, answersRepository.findByProfileId(e.getId()))).toList();
     }
@@ -92,7 +93,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public void setProfileInactive(long userId){
+    public void setProfileInactive(long userId) {
         Optional<ProfileEntity> profileEntity = profileRepository.findByActiveIsTrueAndUserId(userId);
         profileEntity.ifPresent(profile -> profile.setActive(false));
     }
@@ -105,18 +106,18 @@ public class ProfileService {
         profileEntity.setActive(profileUpdateRequest.isActive());
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
         if (profileUpdateRequest.getAvailabilities() != null)
-            answersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()),dateFormat.format(a.getEndDate()))).toList());
+            answersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList());
         if (profileUpdateRequest.getDuration() != null) {
             answersEntity.setDurationMin(profileUpdateRequest.getDuration().getMinValue());
             answersEntity.setDurationMax(profileUpdateRequest.getDuration().getMaxValue());
         }
-        if (profileUpdateRequest.getBudget() != null){
+        if (profileUpdateRequest.getBudget() != null) {
             answersEntity.setBudgetMin(profileUpdateRequest.getBudget().getMinValue());
             answersEntity.setBudgetMax(profileUpdateRequest.getBudget().getMaxValue());
         }
         if (profileUpdateRequest.getDestinationTypes() != null)
             answersEntity.setDestinationTypes(profileUpdateRequest.getDestinationTypes().stream().map(DestinationTypeAnswer::toString).toList());
-        if (profileUpdateRequest.getAges() != null){
+        if (profileUpdateRequest.getAges() != null) {
             answersEntity.setAgeMin(profileUpdateRequest.getAges().getMinValue());
             answersEntity.setAgeMax(profileUpdateRequest.getAges().getMaxValue());
         }
