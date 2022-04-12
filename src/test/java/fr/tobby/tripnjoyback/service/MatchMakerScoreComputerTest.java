@@ -5,12 +5,8 @@ import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.GenderAnswer;
 import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.StaticAnswerModel;
-import fr.tobby.tripnjoyback.repository.AnswersRepository;
-import fr.tobby.tripnjoyback.repository.ProfileRepository;
-import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,7 +23,7 @@ class MatchMakerScoreComputerTest {
     @BeforeEach
     void setUp()
     {
-        matchMakerScoreComputer = new MatchMakerScoreComputer(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
+        matchMakerScoreComputer = new MatchMakerScoreComputer();
     }
 
     @Test
@@ -137,7 +133,7 @@ class MatchMakerScoreComputerRangeTest {
     @BeforeEach
     void setUp()
     {
-        matchMakerScoreComputer = new MatchMakerScoreComputer(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
+        matchMakerScoreComputer = new MatchMakerScoreComputer();
     }
 
     @Test
@@ -183,7 +179,7 @@ class MatchMakerScoreComputerStaticChoiceTest {
     @BeforeEach
     void setUp()
     {
-        matchMakerScoreComputer = new MatchMakerScoreComputer(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
+        matchMakerScoreComputer = new MatchMakerScoreComputer();
     }
 
     @Test
@@ -253,7 +249,7 @@ class MatchMakerScoreComputerGender {
     @BeforeEach
     void setUp()
     {
-        matchMakerScoreComputer = new MatchMakerScoreComputer(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
+        matchMakerScoreComputer = new MatchMakerScoreComputer();
     }
 
     @Test
