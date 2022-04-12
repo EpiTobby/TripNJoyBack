@@ -1,5 +1,7 @@
 package fr.tobby.tripnjoyback.model;
 
+import fr.tobby.tripnjoyback.entity.CityEntity;
+import fr.tobby.tripnjoyback.entity.UserEntity;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,11 +13,11 @@ public final class MatchMakingUserModel {
 
     private final long userId;
     private final Gender gender;
-    private final CityModel model;
+    private final CityEntity model;
     private final int age;
     private final ProfileModel profile;
 
-    public MatchMakingUserModel(final long userId, @NotNull final Gender gender, @NotNull final CityModel model, final int age,
+    public MatchMakingUserModel(final long userId, @NotNull final Gender gender, @NotNull final CityEntity model, final int age,
                                 @NotNull final ProfileModel profile)
     {
         this.userId = userId;
@@ -25,20 +27,20 @@ public final class MatchMakingUserModel {
         this.profile = profile;
     }
 
-    public static MatchMakingUserModel from(@NotNull UserModel userModel, @NotNull ProfileModel profile)
+    public static MatchMakingUserModel from(@NotNull UserEntity userEntity, @NotNull ProfileModel profile)
     {
-        return from(userModel, profile, Instant.now());
+        return from(userEntity, profile, Instant.now());
     }
 
-    public static MatchMakingUserModel from(@NotNull UserModel userModel, @NotNull ProfileModel profile, @NotNull Instant now)
+    public static MatchMakingUserModel from(@NotNull UserEntity userEntity, @NotNull ProfileModel profile, @NotNull Instant now)
     {
-        long age = userModel.getBirthDate() == null
+        long age = userEntity.getBirthDate() == null
                    ? -1
-                   : Duration.between(userModel.getBirthDate(), now).toDays() / 365;
+                   : Duration.between(userEntity.getBirthDate(), now).toDays() / 365;
 
-        return new MatchMakingUserModel(userModel.getId(),
-                userModel.getGender(),
-                userModel.getCity(),
+        return new MatchMakingUserModel(userEntity.getId(),
+                Gender.of(userEntity.getGender()),
+                userEntity.getCity(),
                 (int) age,
                 profile);
     }

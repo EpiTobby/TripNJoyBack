@@ -5,8 +5,12 @@ import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.GenderAnswer;
 import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.StaticAnswerModel;
+import fr.tobby.tripnjoyback.repository.AnswersRepository;
+import fr.tobby.tripnjoyback.repository.ProfileRepository;
+import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,7 +27,7 @@ class MatchMakerTest {
     @BeforeEach
     void setUp()
     {
-        matchMaker = new MatchMaker();
+        matchMaker = new MatchMaker(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
     }
 
     @Test
@@ -133,7 +137,7 @@ class MatchMakerRangeTest {
     @BeforeEach
     void setUp()
     {
-        matchMaker = new MatchMaker();
+        matchMaker = new MatchMaker(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
     }
 
     @Test
@@ -179,7 +183,7 @@ class MatchMakerStaticChoiceTest {
     @BeforeEach
     void setUp()
     {
-        matchMaker = new MatchMaker();
+        matchMaker = new MatchMaker(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
     }
 
     @Test
@@ -249,7 +253,7 @@ class MatchMakerGender {
     @BeforeEach
     void setUp()
     {
-        matchMaker = new MatchMaker();
+        matchMaker = new MatchMaker(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
     }
 
     @Test
