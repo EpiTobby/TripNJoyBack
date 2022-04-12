@@ -122,6 +122,7 @@ public class ProfileService {
         }
         if (profileUpdateRequest.getDestinationTypes() != null && profileUpdateRequest.getDestinationTypes().size() != 0) {
             answersEntity.setDestinationTypes(profileUpdateRequest.getDestinationTypes().stream().map(DestinationTypeAnswer::toString).toList());
+        }
         if (profileUpdateRequest.getAges() != null) {
             answersEntity.setAgeMin(profileUpdateRequest.getAges().getMinValue());
             answersEntity.setAgeMax(profileUpdateRequest.getAges().getMaxValue());
