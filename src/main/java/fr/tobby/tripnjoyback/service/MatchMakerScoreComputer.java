@@ -52,6 +52,8 @@ public class MatchMakerScoreComputer {
             return false;
         if (!profile.getAges().isInRange(user.getAge()))
             return false;
+        if (computeCommonRange(profile.getGroupeSize(), user.getProfile().getGroupeSize()).isEmpty())
+            return false;
         return true;
     }
 

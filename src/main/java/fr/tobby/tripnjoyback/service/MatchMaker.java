@@ -2,8 +2,10 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.AnswersEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
+import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
+import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
 import fr.tobby.tripnjoyback.repository.AnswersRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
@@ -22,14 +24,17 @@ public class MatchMaker {
     private final UserRepository userRepository;
     private final AnswersRepository answersRepository;
     private final MatchMakerScoreComputer scoreComputer;
+    private final GroupService groupService;
 
     public MatchMaker(final ProfileRepository profileRepository, final UserRepository userRepository,
-                      final AnswersRepository answersRepository, final MatchMakerScoreComputer scoreComputer)
+                      final AnswersRepository answersRepository, final MatchMakerScoreComputer scoreComputer,
+                      final GroupService groupService)
     {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
         this.answersRepository = answersRepository;
         this.scoreComputer = scoreComputer;
+        this.groupService = groupService;
     }
 
     public void match(@NotNull final MatchMakingUserModel user)
@@ -56,7 +61,18 @@ public class MatchMaker {
               .filter(pair -> pair.right() > 0) // TODO: replace '0' by minimal matching score
               .max(Comparator.comparingDouble(Pair::right))
               .ifPresentOrElse(matched -> {
-                  // TODO: match
+                  RangeAnswerModel sizeRange = scoreComputer.computeCommonRange(user.getProfile().getGroupeSize(), matched.left().getProfile().getGroupeSize()).orElseThrow();
+                  int maxSize = (sizeRange.getMaxValue() + sizeRange.getMinValue()) / 2;
+
+                  UserEntity userEntity = userRepository.getById(user.getUserId());
+                  UserEntity matchedEntity = userRepository.getById(matched.left().getUserId());
+                  groupService.createPublicGroup(userEntity,
+                          profileRepository.getById(user.getProfile().getId()),
+                          matchedEntity,
+                          profileRepository.getById(matched.left().getProfile().getId()),
+                          maxSize);
+
+                  matchedEntity.setWaitingForGroup(false);
               }, () -> {
                   // TODO: Set user as awaiting
               });
