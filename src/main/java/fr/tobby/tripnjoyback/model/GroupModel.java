@@ -1,12 +1,15 @@
 package fr.tobby.tripnjoyback.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.tobby.tripnjoyback.entity.GroupEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -24,8 +27,13 @@ public class GroupModel {
     private int maxSize;
     private Date startOfTrip;
     private Date endOfTrip;
-    private String createdDate;
+    private Date createdDate;
     private List<String> users;
+
+    @JsonProperty("createdDate")
+    public String getCreatedDate() {
+        return new SimpleDateFormat("dd-MM-yyyy").format(createdDate);
+    }
 
     public static GroupModel of(GroupEntity groupEntity){
         return GroupModel.builder()
@@ -36,7 +44,7 @@ public class GroupModel {
                 .maxSize(groupEntity.getMaxSize())
                 .startOfTrip(groupEntity.getStartOfTrip())
                 .endOfTrip(groupEntity.getEndOfTrip())
-                .createdDate(groupEntity.getCreatedDate().toString().substring(0,10))
+                .createdDate(groupEntity.getCreatedDate())
                 .users(groupEntity.members.stream().map(m -> m.getUser().getFirstname() + " " + m.getUser().getLastname()).toList())
                 .build();
     }

@@ -34,7 +34,7 @@ public class GroupEntity {
     private int maxSize;
 
     @Column(name = "created_date")
-    private Instant createdDate;
+    private Date createdDate;
 
     @Column(name = "start_of_Trip")
     private Date startOfTrip;

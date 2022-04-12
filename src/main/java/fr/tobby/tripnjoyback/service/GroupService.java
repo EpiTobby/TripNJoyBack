@@ -14,6 +14,7 @@ import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -52,7 +53,7 @@ public class GroupService {
     public GroupModel createPublicGroup(UserEntity user1Entity, ProfileEntity profile1Entity, UserEntity user2Entity, ProfileEntity profile2Entity, int maxSize) {
         GroupEntity groupEntity = GroupEntity.builder()
                 .maxSize(maxSize)
-                .createdDate(Instant.now())
+                .createdDate(Date.from(Instant.now()))
                 .stateEntity(maxSize > 2 ? stateRepository.findByValue("OPEN").get() : stateRepository.findByValue("CLOSED").get())
                 .members(List.of())
                 .build();
@@ -68,7 +69,7 @@ public class GroupService {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         GroupEntity groupEntity = GroupEntity.builder()
                 .maxSize(maxSize)
-                .createdDate(Instant.now())
+                .createdDate(Date.from(Instant.now()))
                 .owner(userEntity)
                 .stateEntity(stateRepository.findByValue("CLOSED").get())
                 .build();
