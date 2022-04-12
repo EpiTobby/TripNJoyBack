@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.model.request.anwsers;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.istack.NotNull;
 import fr.tobby.tripnjoyback.exception.BadAvailabilityException;
@@ -13,7 +14,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 @Getter
 @AllArgsConstructor
@@ -26,24 +26,41 @@ public class AvailabilityAnswerModel implements AnswerModel {
     private Date endDate;
 
     @JsonProperty("startDate")
-    public String getStartDate() {
+    public String getStartDateStr()
+    {
         return new SimpleDateFormat("dd-MM-yyyy").format(startDate);
     }
 
     @JsonProperty("endDate")
-    public String getEndDate() {
+    public String getEndDateStr()
+    {
         return new SimpleDateFormat("dd-MM-yyyy").format(endDate);
     }
 
+    @JsonIgnore
+    public Date getStartDate()
+    {
+        return startDate;
+    }
+
+    @JsonIgnore
+    public Date getEndDate()
+    {
+        return endDate;
+    }
+
     @JsonProperty("startDate")
-    public void setStartDate(String startDate){
+    public void setStartDate(String startDate)
+    {
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        try{
+        try
+        {
             this.startDate = dateFormat.parse(startDate);
             if (endDate != null && this.startDate.after(endDate))
                 throw new BadAvailabilityException("Start date cannot be after end date");
         }
-        catch (ParseException e){
+        catch (ParseException e)
+        {
             throw new BadAvailabilityException("Cannot parse start date");
         }
     }
