@@ -18,14 +18,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class MatchMaker {
+public class MatchMakerScoreComputer {
 
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
     private final AnswersRepository answersRepository;
 
-    public MatchMaker(final ProfileRepository profileRepository, final UserRepository userRepository,
-                      final AnswersRepository answersRepository)
+    public MatchMakerScoreComputer(final ProfileRepository profileRepository, final UserRepository userRepository,
+                                   final AnswersRepository answersRepository)
     {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;

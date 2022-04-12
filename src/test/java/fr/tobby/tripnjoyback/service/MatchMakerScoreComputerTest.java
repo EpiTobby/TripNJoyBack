@@ -19,15 +19,15 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class MatchMakerTest {
+class MatchMakerScoreComputerTest {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
-    private MatchMaker matchMaker;
+    private MatchMakerScoreComputer matchMakerScoreComputer;
 
     @BeforeEach
     void setUp()
     {
-        matchMaker = new MatchMaker(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
+        matchMakerScoreComputer = new MatchMakerScoreComputer(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
     }
 
     @Test
@@ -36,7 +36,7 @@ class MatchMakerTest {
         var a = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("05-01-2000"));
         var b = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("05-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a), List.of(b)));
+        float res = matchMakerScoreComputer.computeAvailabilityCorrelation(matchMakerScoreComputer.computeCommonAvailabilities(List.of(a), List.of(b)));
         assertEquals(5, res);
     }
 
@@ -46,7 +46,7 @@ class MatchMakerTest {
         var a = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("05-01-2000"));
         var b = new AvailabilityAnswerModel(dateFormat.parse("06-01-2000"), dateFormat.parse("11-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a), List.of(b)));
+        float res = matchMakerScoreComputer.computeAvailabilityCorrelation(matchMakerScoreComputer.computeCommonAvailabilities(List.of(a), List.of(b)));
         assertEquals(0, res);
     }
 
@@ -56,7 +56,7 @@ class MatchMakerTest {
         var a = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("05-01-2000"));
         var b = new AvailabilityAnswerModel(dateFormat.parse("03-01-2000"), dateFormat.parse("07-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a), List.of(b)));
+        float res = matchMakerScoreComputer.computeAvailabilityCorrelation(matchMakerScoreComputer.computeCommonAvailabilities(List.of(a), List.of(b)));
         assertEquals(3, res);
     }
 
@@ -69,7 +69,7 @@ class MatchMakerTest {
         var a2 = new AvailabilityAnswerModel(dateFormat.parse("10-01-2000"), dateFormat.parse("11-01-2000"));
         var b2 = new AvailabilityAnswerModel(dateFormat.parse("20-01-2000"), dateFormat.parse("21-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
+        float res = matchMakerScoreComputer.computeAvailabilityCorrelation(matchMakerScoreComputer.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
         assertEquals(3, res);
     }
 
@@ -82,7 +82,7 @@ class MatchMakerTest {
         var a2 = new AvailabilityAnswerModel(dateFormat.parse("11-01-2000"), dateFormat.parse("15-01-2000"));
         var b2 = new AvailabilityAnswerModel(dateFormat.parse("12-01-2000"), dateFormat.parse("21-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
+        float res = matchMakerScoreComputer.computeAvailabilityCorrelation(matchMakerScoreComputer.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
         assertEquals(4, res);
     }
 
@@ -95,7 +95,7 @@ class MatchMakerTest {
         var a2 = new AvailabilityAnswerModel(dateFormat.parse("07-01-2000"), dateFormat.parse("15-01-2000"));
         var b2 = new AvailabilityAnswerModel(dateFormat.parse("13-01-2000"), dateFormat.parse("21-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
+        float res = matchMakerScoreComputer.computeAvailabilityCorrelation(matchMakerScoreComputer.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
         assertEquals(4, res);
     }
 
@@ -108,14 +108,14 @@ class MatchMakerTest {
         var a2 = new AvailabilityAnswerModel(dateFormat.parse("10-01-2000"), dateFormat.parse("11-01-2000"));
         var b2 = new AvailabilityAnswerModel(dateFormat.parse("10-01-2000"), dateFormat.parse("13-01-2000"));
 
-        float res = matchMaker.computeAvailabilityCorrelation(matchMaker.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
+        float res = matchMakerScoreComputer.computeAvailabilityCorrelation(matchMakerScoreComputer.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
         assertEquals(5, res);
     }
 
     @Test
     void emptyIntervalTest()
     {
-        assertThrows(IllegalArgumentException.class, () -> matchMaker.computeCommonAvailabilities(List.of(), List.of()));
+        assertThrows(IllegalArgumentException.class, () -> matchMakerScoreComputer.computeCommonAvailabilities(List.of(), List.of()));
     }
 
     @Test
@@ -127,17 +127,17 @@ class MatchMakerTest {
         // inconsistency, overlapping a1
         var a2 = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("11-01-2000"));
         var b2 = new AvailabilityAnswerModel(dateFormat.parse("06-01-2000"), dateFormat.parse("07-01-2000"));
-        assertThrows(IllegalArgumentException.class, () -> matchMaker.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
+        assertThrows(IllegalArgumentException.class, () -> matchMakerScoreComputer.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
     }
 }
 
-class MatchMakerRangeTest {
-    private MatchMaker matchMaker;
+class MatchMakerScoreComputerRangeTest {
+    private MatchMakerScoreComputer matchMakerScoreComputer;
 
     @BeforeEach
     void setUp()
     {
-        matchMaker = new MatchMaker(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
+        matchMakerScoreComputer = new MatchMakerScoreComputer(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
     }
 
     @Test
@@ -146,7 +146,7 @@ class MatchMakerRangeTest {
         var a = new RangeAnswerModel(1, 5);
         var b = new RangeAnswerModel(6, 10);
 
-        assertEquals(0, matchMaker.computeRangeScore(a, b));
+        assertEquals(0, matchMakerScoreComputer.computeRangeScore(a, b));
     }
 
     @Test
@@ -155,7 +155,7 @@ class MatchMakerRangeTest {
         var a = new RangeAnswerModel(1, 5);
         var b = new RangeAnswerModel(1, 5);
 
-        assertEquals(1, matchMaker.computeRangeScore(a, b));
+        assertEquals(1, matchMakerScoreComputer.computeRangeScore(a, b));
     }
 
     @Test
@@ -164,7 +164,7 @@ class MatchMakerRangeTest {
         var a = new RangeAnswerModel(1, 6);
         var b = new RangeAnswerModel(4, 9);
 
-        assertEquals(0.5, matchMaker.computeRangeScore(a, b));
+        assertEquals(0.5, matchMakerScoreComputer.computeRangeScore(a, b));
     }
 
     @Test
@@ -173,51 +173,51 @@ class MatchMakerRangeTest {
         var a = new RangeAnswerModel(1, 6);
         var b = new RangeAnswerModel(1, 3);
 
-        assertEquals(0.75, matchMaker.computeRangeScore(a, b));
+        assertEquals(0.75, matchMakerScoreComputer.computeRangeScore(a, b));
     }
 }
 
-class MatchMakerStaticChoiceTest {
-    private MatchMaker matchMaker;
+class MatchMakerScoreComputerStaticChoiceTest {
+    private MatchMakerScoreComputer matchMakerScoreComputer;
 
     @BeforeEach
     void setUp()
     {
-        matchMaker = new MatchMaker(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
+        matchMakerScoreComputer = new MatchMakerScoreComputer(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
     }
 
     @Test
     void distinctTest()
     {
-        float res = matchMaker.computeStaticChoiceScore(List.of(TwoValueChoice.B), List.of(TwoValueChoice.A), TwoValueChoice.NONE);
+        float res = matchMakerScoreComputer.computeStaticChoiceScore(List.of(TwoValueChoice.B), List.of(TwoValueChoice.A), TwoValueChoice.NONE);
         assertEquals(0f, res, 0.001f); // Delta for comparing floats
     }
 
     @Test
     void equalsTest()
     {
-        float res = matchMaker.computeStaticChoiceScore(List.of(TwoValueChoice.A), List.of(TwoValueChoice.A), TwoValueChoice.NONE);
+        float res = matchMakerScoreComputer.computeStaticChoiceScore(List.of(TwoValueChoice.A), List.of(TwoValueChoice.A), TwoValueChoice.NONE);
         assertEquals(1f, res, 0.001f);
     }
 
     @Test
     void noPrefTest()
     {
-        float res = matchMaker.computeStaticChoiceScore(List.of(TwoValueChoice.NONE), List.of(TwoValueChoice.A), TwoValueChoice.NONE);
+        float res = matchMakerScoreComputer.computeStaticChoiceScore(List.of(TwoValueChoice.NONE), List.of(TwoValueChoice.A), TwoValueChoice.NONE);
         assertEquals(0.8f, res, 0.001f); // 0.8 = hardcoded value if one user has no preference
     }
 
     @Test
     void multiValueOneDiffOneCommonTest()
     {
-        float res = matchMaker.computeStaticChoiceScore(List.of(FourValueChoice.A, FourValueChoice.B), List.of(FourValueChoice.B, FourValueChoice.C), FourValueChoice.NONE);
+        float res = matchMakerScoreComputer.computeStaticChoiceScore(List.of(FourValueChoice.A, FourValueChoice.B), List.of(FourValueChoice.B, FourValueChoice.C), FourValueChoice.NONE);
         assertEquals(0.5f, res, 0.001f);
     }
 
     @Test
     void multiValueOneDiffTwoCommonTest()
     {
-        float res = matchMaker.computeStaticChoiceScore(List.of(FourValueChoice.A, FourValueChoice.B, FourValueChoice.C),
+        float res = matchMakerScoreComputer.computeStaticChoiceScore(List.of(FourValueChoice.A, FourValueChoice.B, FourValueChoice.C),
                 List.of(FourValueChoice.B, FourValueChoice.C),
                 FourValueChoice.NONE);
         assertEquals(0.8f, res, 0.001f);
@@ -226,7 +226,7 @@ class MatchMakerStaticChoiceTest {
     @Test
     void multiValueTwoDiffOneCommonTest()
     {
-        float res = matchMaker.computeStaticChoiceScore(List.of(FourValueChoice.A, FourValueChoice.B, FourValueChoice.C),
+        float res = matchMakerScoreComputer.computeStaticChoiceScore(List.of(FourValueChoice.A, FourValueChoice.B, FourValueChoice.C),
                 List.of(FourValueChoice.C, FourValueChoice.D),
                 FourValueChoice.NONE);
         assertEquals(0.4f, res, 0.001f);
@@ -247,47 +247,47 @@ class MatchMakerStaticChoiceTest {
     }
 }
 
-class MatchMakerGender {
-    private MatchMaker matchMaker;
+class MatchMakerScoreComputerGender {
+    private MatchMakerScoreComputer matchMakerScoreComputer;
 
     @BeforeEach
     void setUp()
     {
-        matchMaker = new MatchMaker(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
+        matchMakerScoreComputer = new MatchMakerScoreComputer(Mockito.mock(ProfileRepository.class), Mockito.mock(UserRepository.class), Mockito.mock(AnswersRepository.class));
     }
 
     @Test
     void distinctTest()
     {
-        float res = matchMaker.compareGender(Gender.MALE, Gender.FEMALE, GenderAnswer.MALE, GenderAnswer.FEMALE);
+        float res = matchMakerScoreComputer.compareGender(Gender.MALE, Gender.FEMALE, GenderAnswer.MALE, GenderAnswer.FEMALE);
         assertEquals(0f, res, 0.001f);
     }
 
     @Test
     void matchingSameGenderTest()
     {
-        float res = matchMaker.compareGender(Gender.MALE, Gender.MALE, GenderAnswer.MALE, GenderAnswer.MALE);
+        float res = matchMakerScoreComputer.compareGender(Gender.MALE, Gender.MALE, GenderAnswer.MALE, GenderAnswer.MALE);
         assertEquals(1f, res, 0.001f);
     }
 
     @Test
     void noPrefTest()
     {
-        float res = matchMaker.compareGender(Gender.MALE, Gender.NOT_SPECIFIED, GenderAnswer.MIXED, GenderAnswer.MIXED);
+        float res = matchMakerScoreComputer.compareGender(Gender.MALE, Gender.NOT_SPECIFIED, GenderAnswer.MIXED, GenderAnswer.MIXED);
         assertEquals(0.8f, res, 0.001f);
     }
 
     @Test
     void matchingAndNoPrefTest()
     {
-        float res = matchMaker.compareGender(Gender.MALE, Gender.MALE, GenderAnswer.MALE, GenderAnswer.MIXED);
+        float res = matchMakerScoreComputer.compareGender(Gender.MALE, Gender.MALE, GenderAnswer.MALE, GenderAnswer.MIXED);
         assertEquals(0.8f, res, 0.001f);
     }
 
     @Test
     void noMatchTest()
     {
-        float res = matchMaker.compareGender(Gender.MALE, Gender.MALE, GenderAnswer.MALE, GenderAnswer.FEMALE);
+        float res = matchMakerScoreComputer.compareGender(Gender.MALE, Gender.MALE, GenderAnswer.MALE, GenderAnswer.FEMALE);
         assertEquals(0f, res, 0.001f);
     }
 }
