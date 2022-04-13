@@ -45,7 +45,7 @@ public class GroupEntity {
     @JoinColumn(name = "group_id")
     public Collection<GroupMemberEntity> members;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinTable(name = "group_profiles", joinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "profile_id", referencedColumnName = "id"))
-    private Collection<ProfileEntity> profiles;
+    private ProfileEntity profile;
 }
