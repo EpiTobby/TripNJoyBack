@@ -34,7 +34,6 @@ public class ProfileService {
     public ProfileModel createProfile(long userId, ProfileCreationRequest profileCreationRequest) {
         ProfileEntity profileEntity = ProfileEntity.builder()
                 .name(profileCreationRequest.getName())
-                .userId(userId)
                 .active(true).build();
         setProfileInactive(userId);
         profileRepository.save(profileEntity);

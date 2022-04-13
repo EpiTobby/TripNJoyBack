@@ -33,7 +33,6 @@ public class ProfileModel {
     private AboutFoodAnswer aboutFood;
     private YesNoAnswer goOutAtNight;
     private YesNoAnswer sport;
-    private long userId;
     private boolean isActive;
 
     public static ProfileModel of(ProfileEntity profileEntity, AnswersEntity answersEntity){
@@ -53,9 +52,9 @@ public class ProfileModel {
                 .aboutFood(AboutFoodAnswer.valueOf(answersEntity.getAboutFood()))
                 .goOutAtNight(YesNoAnswer.of(answersEntity.getGoOutAtNight()))
                 .sport(YesNoAnswer.of(answersEntity.getSport()))
-                .userId(profileEntity.getUserId())
                 .isActive(profileEntity.isActive())
                 .name(profileEntity.getName())
                 .build();
     }
 }
+
