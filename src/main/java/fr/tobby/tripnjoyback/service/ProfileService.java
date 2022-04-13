@@ -83,7 +83,7 @@ public class ProfileService {
 
     @Transactional
     public void deleteProfile(long userId, long profileId) {
-        ProfileEntity profileEntity = profileRepository.findByIdAndUserId(profileId, userId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
+        ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
         profileRepository.delete(profileEntity);
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
         answersRepository.deleteByProfileId(answersEntity.getProfileId());
@@ -97,7 +97,7 @@ public class ProfileService {
 
     @Transactional
     public void updateProfile(long userId, long profileId, ProfileUpdateRequest profileUpdateRequest) {
-        ProfileEntity profileEntity = profileRepository.findByIdAndUserId(profileId, userId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
+        ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
         if (profileUpdateRequest.getActive() != null) {
             if (profileUpdateRequest.getActive()) {
                 setProfileInactive(userId);

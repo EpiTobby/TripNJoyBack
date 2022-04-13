@@ -3,7 +3,6 @@ package fr.tobby.tripnjoyback.entity;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 
@@ -45,4 +44,8 @@ public class GroupEntity {
     @OneToMany
     @JoinColumn(name = "group_id")
     public Collection<GroupMemberEntity> members;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "group_profiles", joinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "profile_id", referencedColumnName = "id"))
+    private Collection<ProfileEntity> profiles;
 }
