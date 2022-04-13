@@ -46,7 +46,6 @@ public class MatchMaker {
     @Transactional
     public void match(@NotNull final MatchMakingUserModel user)
     {
-        // TODO: Find groups
         Collection<GroupEntity> groups = groupRepository.findAvailableGroups();
         Optional<GroupEntity> matchedGroup = groups.stream()
                                                    .map(group -> {
@@ -67,7 +66,8 @@ public class MatchMaker {
 
         if (matchedGroup.isPresent())
         {
-            // TODO: Join group
+            GroupEntity group = matchedGroup.get();
+            groupService.addUserToPublicGroup(group.getId(), user.getUserId(), user.getProfile().getId());
             return;
         }
 
@@ -105,7 +105,7 @@ public class MatchMaker {
 
                   matchedEntity.setWaitingForGroup(false);
               }, () -> {
-                  // TODO: Set user as awaiting
+                  userRepository.getById(user.getUserId()).setWaitingForGroup(true);
               });
     }
 }
