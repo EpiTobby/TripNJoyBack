@@ -29,6 +29,7 @@ public class GroupController {
 
     @GetMapping("{id}")
     @Operation(summary = "Get all the group of the user")
+    @ApiResponse(responseCode = "200", description = "Return the list of groups the user is in")
     private Collection<GroupModel> getUserGroups(@PathVariable("id") final long userId) {
         return groupService.getUserGroups(userId);
     }
