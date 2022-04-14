@@ -30,10 +30,12 @@ public class MatchMaker {
     private final MatchMakerScoreComputer scoreComputer;
     private final GroupService groupService;
     private final GroupRepository groupRepository;
+    private final ProfileService profileService;
 
     public MatchMaker(final ProfileRepository profileRepository, final UserRepository userRepository,
                       final AnswersRepository answersRepository, final MatchMakerScoreComputer scoreComputer,
-                      final GroupService groupService, final GroupRepository groupRepository)
+                      final GroupService groupService, final GroupRepository groupRepository,
+                      final ProfileService profileService)
     {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
@@ -41,6 +43,7 @@ public class MatchMaker {
         this.scoreComputer = scoreComputer;
         this.groupService = groupService;
         this.groupRepository = groupRepository;
+        this.profileService = profileService;
     }
 
     @Transactional
@@ -49,10 +52,7 @@ public class MatchMaker {
         Collection<GroupEntity> groups = groupRepository.findAvailableGroups();
         Optional<GroupEntity> matchedGroup = groups.stream()
                                                    .map(group -> {
-                                                       long profileId = group.getProfile().getId();
-                                                       AnswersEntity groupAnswers = answersRepository.findByProfileId(profileId);
-
-                                                       ProfileModel profileModel = ProfileModel.of(group.getProfile(), groupAnswers);
+                                                       ProfileModel profileModel = profileService.getProfile(group.getProfile());
                                                        return new Pair<>(group, profileModel);
                                                    })
                                                    .filter(pair -> scoreComputer.isUserCompatible(pair.right(), user))

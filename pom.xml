@@ -89,7 +89,11 @@
 			<artifactId>annotations</artifactId>
 			<version>23.0.0</version>
 		</dependency>
-    </dependencies>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>

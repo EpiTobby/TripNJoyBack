@@ -38,39 +38,53 @@ public class ProfileService {
         setProfileInactive(userId);
         profileRepository.save(profileEntity);
         AnswersEntity answersEntity = AnswersEntity.builder()
-                .profileId(profileEntity.getId())
-                .availabilities(profileCreationRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList())
-                .durationMin(profileCreationRequest.getDuration().getMinValue())
-                .durationMax(profileCreationRequest.getDuration().getMaxValue())
-                .budgetMin(profileCreationRequest.getBudget().getMinValue())
-                .budgetMax(profileCreationRequest.getBudget().getMaxValue())
-                .destinationTypes(profileCreationRequest.getDestinationTypes().stream().map(DestinationTypeAnswer::toString).toList())
-                .ageMin(profileCreationRequest.getAges().getMinValue())
-                .ageMax(profileCreationRequest.getAges().getMaxValue())
-                .travelWithPersonFromSameCity(profileCreationRequest.getTravelWithPersonFromSameCity().toBoolean())
-                .travelWithPersonFromSameCountry(profileCreationRequest.getTravelWithPersonFromSameCountry().toBoolean())
-                .travelWithPersonSameLanguage(profileCreationRequest.getTravelWithPersonSameLanguage().toBoolean())
-                .gender(profileCreationRequest.getGender().toString())
-                .groupSizeMin(profileCreationRequest.getGroupSize().getMinValue())
-                .groupSizeMax(profileCreationRequest.getGroupSize().getMaxValue())
-                .chillOrVisit(profileCreationRequest.getChillOrVisit().toString())
-                .aboutFood(profileCreationRequest.getAboutFood().toString())
-                .goOutAtNight(profileCreationRequest.getGoOutAtNight().toBoolean())
-                .sport(profileCreationRequest.getSport().toBoolean())
-                .build();
+                                                   .profileId(profileEntity.getId())
+                                                   .availabilities(profileCreationRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList())
+                                                   .durationMin(profileCreationRequest.getDuration().getMinValue())
+                                                   .durationMax(profileCreationRequest.getDuration().getMaxValue())
+                                                   .budgetMin(profileCreationRequest.getBudget().getMinValue())
+                                                   .budgetMax(profileCreationRequest.getBudget().getMaxValue())
+                                                   .destinationTypes(profileCreationRequest.getDestinationTypes().stream().map(DestinationTypeAnswer::toString).toList())
+                                                   .ageMin(profileCreationRequest.getAges().getMinValue())
+                                                   .ageMax(profileCreationRequest.getAges().getMaxValue())
+                                                   .travelWithPersonFromSameCity(profileCreationRequest.getTravelWithPersonFromSameCity().toBoolean())
+                                                   .travelWithPersonFromSameCountry(profileCreationRequest.getTravelWithPersonFromSameCountry().toBoolean())
+                                                   .travelWithPersonSameLanguage(profileCreationRequest.getTravelWithPersonSameLanguage().toBoolean())
+                                                   .gender(profileCreationRequest.getGender().toString())
+                                                   .groupSizeMin(profileCreationRequest.getGroupSize().getMinValue())
+                                                   .groupSizeMax(profileCreationRequest.getGroupSize().getMaxValue())
+                                                   .chillOrVisit(profileCreationRequest.getChillOrVisit().toString())
+                                                   .aboutFood(profileCreationRequest.getAboutFood().toString())
+                                                   .goOutAtNight(profileCreationRequest.getGoOutAtNight().toBoolean())
+                                                   .sport(profileCreationRequest.getSport().toBoolean())
+                                                   .build();
         answersRepository.save(answersEntity);
         return ProfileModel.of(profileEntity, answersEntity);
     }
 
-    public List<ProfileModel> getUserProfiles(long userId) {
+    public ProfileModel getProfile(long profileId)
+    {
+        return getProfile(profileRepository.findById(profileId).orElseThrow(ProfileNotFoundException::new));
+    }
+
+    ProfileModel getProfile(ProfileEntity entity)
+    {
+        AnswersEntity answersEntity = answersRepository.findByProfileId(entity.getId());
+        return ProfileModel.of(entity, answersEntity);
+    }
+
+    public List<ProfileModel> getUserProfiles(long userId)
+    {
         List<ProfileEntity> profileEntities = profileRepository.findByUserId(userId);
         return profileEntities.stream().map(e -> ProfileModel.of(e, answersRepository.findByProfileId(e.getId()))).toList();
     }
 
     @Transactional
-    public void deleteProfilesByUserId(long userId) {
+    public void deleteProfilesByUserId(long userId)
+    {
         List<ProfileEntity> profileEntities = profileRepository.findByUserId(userId);
-        for (ProfileEntity profileEntity : profileEntities) {
+        for (ProfileEntity profileEntity : profileEntities)
+        {
             AnswersEntity answersEntity = answersRepository.findByProfileId(profileEntity.getId());
             answersRepository.deleteByProfileId(answersEntity.getProfileId());
         }
