@@ -1,13 +1,10 @@
 package fr.tobby.tripnjoyback.service;
 
-import fr.tobby.tripnjoyback.entity.AnswersEntity;
 import fr.tobby.tripnjoyback.entity.GroupEntity;
-import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
-import fr.tobby.tripnjoyback.repository.AnswersRepository;
 import fr.tobby.tripnjoyback.repository.GroupRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
@@ -28,20 +25,17 @@ public class MatchMaker {
 
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
-    private final AnswersRepository answersRepository;
     private final MatchMakerScoreComputer scoreComputer;
     private final GroupService groupService;
     private final GroupRepository groupRepository;
     private final ProfileService profileService;
 
-    public MatchMaker(final ProfileRepository profileRepository, final UserRepository userRepository,
-                      final AnswersRepository answersRepository, final MatchMakerScoreComputer scoreComputer,
+    public MatchMaker(final ProfileRepository profileRepository, final UserRepository userRepository, final MatchMakerScoreComputer scoreComputer,
                       final GroupService groupService, final GroupRepository groupRepository,
                       final ProfileService profileService)
     {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
-        this.answersRepository = answersRepository;
         this.scoreComputer = scoreComputer;
         this.groupService = groupService;
         this.groupRepository = groupRepository;
@@ -77,9 +71,7 @@ public class MatchMaker {
         Collection<MatchMakingUserModel> others = userRepository.findAllByWaitingForGroupIsTrue()
                                                                 .stream()
                                                                 .map(other -> {
-                                                                    ProfileEntity profileEntity = profileRepository.findByActiveIsTrueAndUserId(other.getId()).orElseThrow(() -> new IllegalStateException("Awaiting user should have an active profile"));
-                                                                    AnswersEntity answers = answersRepository.findByProfileId(profileEntity.getId());
-                                                                    ProfileModel profileModel = ProfileModel.of(profileEntity, answers);
+                                                                    ProfileModel profileModel = profileService.getActiveProfile(other.getId()).orElseThrow();
                                                                     return MatchMakingUserModel.from(other, profileModel);
                                                                 })
                                                                 .collect(Collectors.toSet());

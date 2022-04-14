@@ -12,6 +12,6 @@ public interface GroupRepository extends CrudRepository<GroupEntity, Long> {
 
     @Query("SELECT g FROM GroupEntity g "
             + "JOIN StateEntity state ON g.stateEntity = state"
-            + " WHERE state.value = 'open'")
+            + " WHERE state.value = 'OPEN'")
     Collection<GroupEntity> findAvailableGroups();
 }
