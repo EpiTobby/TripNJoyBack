@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 @Service
 public class MatchMaker {
 
+    private static final float MINIMAL_MATCHING_SCORE = 5f;
+
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
     private final AnswersRepository answersRepository;
@@ -60,7 +62,7 @@ public class MatchMaker {
                                                        float score = scoreComputer.computeMatchingScore(user.getProfile(), pair.right());
                                                        return new Pair<>(pair.left(), score);
                                                    })
-                                                   .filter(pair -> pair.right() > 0) // TODO: replace '0' by minimal matching score
+                                                   .filter(pair -> pair.right() > MINIMAL_MATCHING_SCORE)
                                                    .max(Comparator.comparingDouble(Pair::right))
                                                    .map(Pair::left);
 
@@ -89,7 +91,7 @@ public class MatchMaker {
                   float score = scoreComputer.computeMatchingScore(user.getProfile(), other.getProfile());
                   return new Pair<>(other, score);
               })
-              .filter(pair -> pair.right() > 0) // TODO: replace '0' by minimal matching score
+              .filter(pair -> pair.right() > MINIMAL_MATCHING_SCORE)
               .max(Comparator.comparingDouble(Pair::right))
               .ifPresentOrElse(matched -> {
                   RangeAnswerModel sizeRange = scoreComputer.computeCommonRange(user.getProfile().getGroupeSize(), matched.left().getProfile().getGroupeSize()).orElseThrow();
@@ -104,8 +106,6 @@ public class MatchMaker {
                           maxSize);
 
                   matchedEntity.setWaitingForGroup(false);
-              }, () -> {
-                  userRepository.getById(user.getUserId()).setWaitingForGroup(true);
-              });
+              }, () -> userRepository.getById(user.getUserId()).setWaitingForGroup(true));
     }
 }
