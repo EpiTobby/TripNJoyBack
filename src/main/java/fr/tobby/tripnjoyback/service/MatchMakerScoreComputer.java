@@ -26,22 +26,23 @@ public class MatchMakerScoreComputer {
         Optional<RangeAnswerModel> commonDuration = computeCommonRange(profA.getDuration(), profB.getDuration());
         if (commonDuration.isEmpty() || availabilityCorr < commonDuration.get().getMinValue())
             return 0;
+        double availabilityScore = (Math.sqrt(commonDuration.get().getMaxValue()) + commonDuration.get().getMaxValue()) / availabilityCorr;
 
-        float res = availabilityCorr;
-        res += computeRangeScore(profA.getDuration(), profB.getDuration());
-        res += computeRangeScore(profA.getBudget(), profB.getBudget());
-        res += computeStaticChoiceScore(profA.getDestinationTypes(), profB.getDestinationTypes(), DestinationTypeAnswer.NO_PREFERENCE);
-        res += computeRangeScore(profA.getAges(), profB.getAges());
-        res += computeStaticChoiceScore(profA.getTravelWithPersonFromSameCity(), profB.getTravelWithPersonFromSameCity(), YesNoAnswer.NO_PREFERENCE);
+        float res = (float) availabilityScore;
+        res += computeRangeScore(profA.getDuration(), profB.getDuration()) * 0.8f;
+        res += computeRangeScore(profA.getBudget(), profB.getBudget()) * 0.8f;
+        res += computeStaticChoiceScore(profA.getDestinationTypes(), profB.getDestinationTypes(), DestinationTypeAnswer.NO_PREFERENCE) * 0.9f;
+        res += computeRangeScore(profA.getAges(), profB.getAges()) * 0.8f;
+        res += computeStaticChoiceScore(profA.getTravelWithPersonFromSameCity(), profB.getTravelWithPersonFromSameCity(), YesNoAnswer.NO_PREFERENCE) * 0.5f;
         res += computeStaticChoiceScore(profA.getTravelWithPersonFromSameCountry(), profB.getTravelWithPersonFromSameCountry(), YesNoAnswer.NO_PREFERENCE);
         res += computeStaticChoiceScore(profA.getTravelWithPersonSameLanguage(), profB.getTravelWithPersonSameLanguage(), YesNoAnswer.NO_PREFERENCE);
 
-        res += computeStaticChoiceScore(profA.getGender(), profB.getGender(), GenderAnswer.MIXED);
-        res += computeRangeScore(profA.getGroupSize(), profB.getGroupSize());
-        res += computeStaticChoiceScore(profA.getChillOrVisit(), profB.getChillOrVisit(), ChillOrVisitAnswer.NO_PREFERENCE);
-        res += computeStaticChoiceScore(profA.getAboutFood(), profB.getAboutFood(), AboutFoodAnswer.NO_PREFERENCE);
-        res += computeStaticChoiceScore(profA.getGoOutAtNight(), profB.getGoOutAtNight(), YesNoAnswer.NO_PREFERENCE);
-        res += computeStaticChoiceScore(profA.getSport(), profB.getSport(), YesNoAnswer.NO_PREFERENCE);
+        res += computeStaticChoiceScore(profA.getGender(), profB.getGender(), GenderAnswer.MIXED) * 0.9f;
+        res += computeRangeScore(profA.getGroupSize(), profB.getGroupSize()) * 0.6f;
+        res += computeStaticChoiceScore(profA.getChillOrVisit(), profB.getChillOrVisit(), ChillOrVisitAnswer.NO_PREFERENCE) * 0.8f;
+        res += computeStaticChoiceScore(profA.getAboutFood(), profB.getAboutFood(), AboutFoodAnswer.NO_PREFERENCE) * 0.5f;
+        res += computeStaticChoiceScore(profA.getGoOutAtNight(), profB.getGoOutAtNight(), YesNoAnswer.NO_PREFERENCE) * 0.7f;
+        res += computeStaticChoiceScore(profA.getSport(), profB.getSport(), YesNoAnswer.NO_PREFERENCE) * 0.8f;
 
         return res;
     }
