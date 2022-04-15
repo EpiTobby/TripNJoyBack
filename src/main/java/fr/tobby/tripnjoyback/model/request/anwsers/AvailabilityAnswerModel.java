@@ -54,7 +54,7 @@ public class AvailabilityAnswerModel implements AnswerModel {
 
     public static AvailabilityAnswerModel of(String startDate, String endDate)
     {
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         try
         {
             dateFormat.setTimeZone(TimeZone.getDefault());
