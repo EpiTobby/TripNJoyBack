@@ -4,6 +4,7 @@ import fr.tobby.tripnjoyback.entity.AnswersEntity;
 import fr.tobby.tripnjoyback.entity.AvailabiltyEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
+import fr.tobby.tripnjoyback.model.IProfile;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
@@ -31,35 +32,51 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileModel createProfile(long userId, ProfileCreationRequest profileCreationRequest) {
+    public ProfileModel createProfile(long userId, ProfileCreationRequest profileCreationRequest)
+    {
         ProfileEntity profileEntity = ProfileEntity.builder()
-                .name(profileCreationRequest.getName())
-                .active(true).build();
+                                                   .name(profileCreationRequest.getName())
+                                                   .active(true).build();
         setProfileInactive(userId);
         profileRepository.save(profileEntity);
-        AnswersEntity answersEntity = AnswersEntity.builder()
-                                                   .profileId(profileEntity.getId())
-                                                   .availabilities(profileCreationRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList())
-                                                   .durationMin(profileCreationRequest.getDuration().getMinValue())
-                                                   .durationMax(profileCreationRequest.getDuration().getMaxValue())
-                                                   .budgetMin(profileCreationRequest.getBudget().getMinValue())
-                                                   .budgetMax(profileCreationRequest.getBudget().getMaxValue())
-                                                   .destinationTypes(profileCreationRequest.getDestinationTypes().stream().map(DestinationTypeAnswer::toString).toList())
-                                                   .ageMin(profileCreationRequest.getAges().getMinValue())
-                                                   .ageMax(profileCreationRequest.getAges().getMaxValue())
-                                                   .travelWithPersonFromSameCity(profileCreationRequest.getTravelWithPersonFromSameCity().toBoolean())
-                                                   .travelWithPersonFromSameCountry(profileCreationRequest.getTravelWithPersonFromSameCountry().toBoolean())
-                                                   .travelWithPersonSameLanguage(profileCreationRequest.getTravelWithPersonSameLanguage().toBoolean())
-                                                   .gender(profileCreationRequest.getGender().toString())
-                                                   .groupSizeMin(profileCreationRequest.getGroupSize().getMinValue())
-                                                   .groupSizeMax(profileCreationRequest.getGroupSize().getMaxValue())
-                                                   .chillOrVisit(profileCreationRequest.getChillOrVisit().toString())
-                                                   .aboutFood(profileCreationRequest.getAboutFood().toString())
-                                                   .goOutAtNight(profileCreationRequest.getGoOutAtNight().toBoolean())
-                                                   .sport(profileCreationRequest.getSport().toBoolean())
-                                                   .build();
-        answersRepository.save(answersEntity);
+        AnswersEntity answersEntity = createAnswersEntity(profileCreationRequest, profileEntity.getId());
         return ProfileModel.of(profileEntity, answersEntity);
+    }
+
+    AnswersEntity createAnswersEntity(final IProfile profile, final long profileId)
+    {
+        AnswersEntity answersEntity = AnswersEntity.builder()
+                                                   .profileId(profileId)
+                                                   .availabilities(profile.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList())
+                                                   .durationMin(profile.getDuration().getMinValue())
+                                                   .durationMax(profile.getDuration().getMaxValue())
+                                                   .budgetMin(profile.getBudget().getMinValue())
+                                                   .budgetMax(profile.getBudget().getMaxValue())
+                                                   .destinationTypes(profile.getDestinationTypes().stream().map(DestinationTypeAnswer::toString).toList())
+                                                   .ageMin(profile.getAges().getMinValue())
+                                                   .ageMax(profile.getAges().getMaxValue())
+                                                   .travelWithPersonFromSameCity(profile.getTravelWithPersonFromSameCity().toBoolean())
+                                                   .travelWithPersonFromSameCountry(profile.getTravelWithPersonFromSameCountry().toBoolean())
+                                                   .travelWithPersonSameLanguage(profile.getTravelWithPersonSameLanguage().toBoolean())
+                                                   .gender(profile.getGender().toString())
+                                                   .groupSizeMin(profile.getGroupSize().getMinValue())
+                                                   .groupSizeMax(profile.getGroupSize().getMaxValue())
+                                                   .chillOrVisit(profile.getChillOrVisit().toString())
+                                                   .aboutFood(profile.getAboutFood().toString())
+                                                   .goOutAtNight(profile.getGoOutAtNight().toBoolean())
+                                                   .sport(profile.getSport().toBoolean())
+                                                   .build();
+        return answersRepository.save(answersEntity);
+    }
+
+    ProfileEntity createProfile(final ProfileModel model)
+    {
+        ProfileEntity profileEntity = profileRepository.save(ProfileEntity.builder()
+                                                                          .name(model.getName())
+                                                                          .active(true)
+                                                                          .build());
+        createAnswersEntity(model, profileEntity.getId());
+        return profileEntity;
     }
 
     public ProfileModel getProfile(long profileId)

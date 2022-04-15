@@ -1,8 +1,7 @@
 package fr.tobby.tripnjoyback.entity;
 
 import fr.tobby.tripnjoyback.model.ProfileModel;
-import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
-import fr.tobby.tripnjoyback.model.request.anwsers.*;
+import fr.tobby.tripnjoyback.model.request.anwsers.DestinationTypeAnswer;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -60,23 +59,23 @@ public class AnswersEntity {
     public static AnswersEntity of(ProfileModel profileModel){
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         return AnswersEntity.builder()
-        .availabilities(profileModel.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()),dateFormat.format(a.getEndDate()))).toList())
-        .durationMin(profileModel.getDuration().getMinValue())
-        .durationMax(profileModel.getDuration().getMaxValue())
-        .budgetMin(profileModel.getBudget().getMinValue())
-        .budgetMax(profileModel.getBudget().getMaxValue())
-        .destinationTypes(profileModel.getDestinationTypes().stream().map(DestinationTypeAnswer::toString).toList())
-        .ageMin(profileModel.getAges().getMinValue())
-        .ageMax(profileModel.getAges().getMaxValue())
-        .travelWithPersonFromSameCity(profileModel.getTravelWithPersonFromSameCity().toBoolean())
-        .travelWithPersonFromSameCountry(profileModel.getTravelWithPersonFromSameCountry().toBoolean())
-        .travelWithPersonSameLanguage(profileModel.getTravelWithPersonSameLanguage().toBoolean())
-        .gender(profileModel.getGender().toString())
-        .groupSizeMin(profileModel.getGroupeSize().getMinValue())
-        .groupSizeMax(profileModel.getGroupeSize().getMaxValue())
-        .chillOrVisit(profileModel.getChillOrVisit().toString())
-        .aboutFood(profileModel.getAboutFood().toString())
-        .goOutAtNight(profileModel.getGoOutAtNight().toBoolean())
-        .sport(profileModel.getSport().toBoolean()).build();
+                            .availabilities(profileModel.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()),dateFormat.format(a.getEndDate()))).toList())
+                            .durationMin(profileModel.getDuration().getMinValue())
+                            .durationMax(profileModel.getDuration().getMaxValue())
+                            .budgetMin(profileModel.getBudget().getMinValue())
+                            .budgetMax(profileModel.getBudget().getMaxValue())
+                            .destinationTypes(profileModel.getDestinationTypes().stream().map(DestinationTypeAnswer::toString).toList())
+                            .ageMin(profileModel.getAges().getMinValue())
+                            .ageMax(profileModel.getAges().getMaxValue())
+                            .travelWithPersonFromSameCity(profileModel.getTravelWithPersonFromSameCity().toBoolean())
+                            .travelWithPersonFromSameCountry(profileModel.getTravelWithPersonFromSameCountry().toBoolean())
+                            .travelWithPersonSameLanguage(profileModel.getTravelWithPersonSameLanguage().toBoolean())
+                            .gender(profileModel.getGender().toString())
+                            .groupSizeMin(profileModel.getGroupSize().getMinValue())
+                            .groupSizeMax(profileModel.getGroupSize().getMaxValue())
+                            .chillOrVisit(profileModel.getChillOrVisit().toString())
+                            .aboutFood(profileModel.getAboutFood().toString())
+                            .goOutAtNight(profileModel.getGoOutAtNight().toBoolean())
+                            .sport(profileModel.getSport().toBoolean()).build();
     }
 }

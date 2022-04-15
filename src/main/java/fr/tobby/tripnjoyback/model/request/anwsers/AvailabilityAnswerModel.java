@@ -68,23 +68,34 @@ public class AvailabilityAnswerModel implements AnswerModel {
     @JsonProperty("endDate")
     public void setEndDate(String endDate){
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        try{
+        try
+        {
             this.endDate = dateFormat.parse(endDate);
             if (startDate != null && this.endDate.before(startDate))
                 throw new BadAvailabilityException("Start date cannot be after end date");
         }
-        catch (ParseException e){
+        catch (ParseException e)
+        {
             throw new BadAvailabilityException("Cannot parse end date");
         }
     }
 
-    public static AvailabilityAnswerModel of(String startDate, String endDate){
+    public AvailabilityAnswerModel(AvailabilityAnswerModel other)
+    {
+        this.startDate = other.startDate;
+        this.endDate = other.endDate;
+    }
+
+    public static AvailabilityAnswerModel of(String startDate, String endDate)
+    {
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        try{
+        try
+        {
             dateFormat.setTimeZone(TimeZone.getDefault());
             return new AvailabilityAnswerModel(dateFormat.parse(startDate), dateFormat.parse(endDate));
         }
-        catch (Exception e){
+        catch (Exception e)
+        {
             throw new BadAvailabilityException("Cannot parse availability");
         }
     }

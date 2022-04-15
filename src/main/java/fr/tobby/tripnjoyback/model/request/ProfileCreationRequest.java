@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.model.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import fr.tobby.tripnjoyback.model.IProfile;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @JsonAutoDetect
-public class ProfileCreationRequest {
+public class ProfileCreationRequest implements IProfile {
     @NotNull
     private String name;
     @NotNull

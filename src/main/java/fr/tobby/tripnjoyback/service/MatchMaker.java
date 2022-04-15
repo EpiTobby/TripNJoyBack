@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.GroupEntity;
+import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
@@ -88,21 +89,32 @@ public class MatchMaker {
               .filter(pair -> pair.right() > MINIMAL_MATCHING_SCORE)
               .max(Comparator.comparingDouble(Pair::right))
               .ifPresentOrElse(matched -> {
-                  RangeAnswerModel sizeRange = scoreComputer.computeCommonRange(user.getProfile().getGroupeSize(), matched.left().getProfile().getGroupeSize()).orElseThrow();
+                  RangeAnswerModel sizeRange = scoreComputer.computeCommonRange(user.getProfile().getGroupSize(), matched.left().getProfile().getGroupSize()).orElseThrow();
                   int maxSize = (sizeRange.getMaxValue() + sizeRange.getMinValue()) / 2;
 
                   UserEntity userEntity = userRepository.getById(user.getUserId());
                   UserEntity matchedEntity = userRepository.getById(matched.left().getUserId());
 
-                  List<AvailabilityAnswerModel> commonAvailabilities = scoreComputer.computeCommonAvailabilities(user.getProfile().getAvailabilities(), matched.left().getProfile().getAvailabilities());
+
+                  ProfileEntity groupProfile = this.computeGroupProfile(user.getProfile(), matched.left().getProfile());
                   groupService.createPublicGroup(userEntity,
                           profileRepository.getById(user.getProfile().getId()),
                           matchedEntity,
                           profileRepository.getById(matched.left().getProfile().getId()),
                           maxSize,
-                          commonAvailabilities);
+                          groupProfile);
 
                   matchedEntity.setWaitingForGroup(false);
               }, () -> userRepository.getById(user.getUserId()).setWaitingForGroup(true));
+    }
+
+    private ProfileEntity computeGroupProfile(@NotNull ProfileModel profileA, @NotNull ProfileModel profileB)
+    {
+        List<AvailabilityAnswerModel> commonAvailabilities = scoreComputer.computeCommonAvailabilities(profileA.getAvailabilities(), profileB.getAvailabilities());
+
+        ProfileModel groupModel = ProfileModel.builderOf(profileA)
+                                              .availabilities(commonAvailabilities)
+                                              .build();
+        return profileService.createProfile(groupModel);
     }
 }

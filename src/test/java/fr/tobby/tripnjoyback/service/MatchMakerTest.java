@@ -108,7 +108,7 @@ class MatchMakerTest {
                            .destinationTypes(List.of(DestinationTypeAnswer.MOUNTAIN))
                            .duration(new RangeAnswerModel(2, 4))
                            .goOutAtNight(YesNoAnswer.NO_PREFERENCE)
-                           .groupeSize(new RangeAnswerModel(2, 4))
+                           .groupSize(new RangeAnswerModel(2, 4))
                            .sport(YesNoAnswer.NO_PREFERENCE)
                            .travelWithPersonFromSameCity(YesNoAnswer.NO_PREFERENCE)
                            .travelWithPersonFromSameCountry(YesNoAnswer.NO_PREFERENCE)

@@ -37,7 +37,7 @@ public class MatchMakerScoreComputer {
         res += computeStaticChoiceScore(profA.getTravelWithPersonSameLanguage(), profB.getTravelWithPersonSameLanguage(), YesNoAnswer.NO_PREFERENCE);
 
         res += computeStaticChoiceScore(profA.getGender(), profB.getGender(), GenderAnswer.MIXED);
-        res += computeRangeScore(profA.getGroupeSize(), profB.getGroupeSize());
+        res += computeRangeScore(profA.getGroupSize(), profB.getGroupSize());
         res += computeStaticChoiceScore(profA.getChillOrVisit(), profB.getChillOrVisit(), ChillOrVisitAnswer.NO_PREFERENCE);
         res += computeStaticChoiceScore(profA.getAboutFood(), profB.getAboutFood(), AboutFoodAnswer.NO_PREFERENCE);
         res += computeStaticChoiceScore(profA.getGoOutAtNight(), profB.getGoOutAtNight(), YesNoAnswer.NO_PREFERENCE);
@@ -52,7 +52,7 @@ public class MatchMakerScoreComputer {
             return false;
         if (!profile.getAges().isInRange(user.getAge()))
             return false;
-        if (computeCommonRange(profile.getGroupeSize(), user.getProfile().getGroupeSize()).isEmpty())
+        if (computeCommonRange(profile.getGroupSize(), user.getProfile().getGroupSize()).isEmpty())
             return false;
         return true;
     }

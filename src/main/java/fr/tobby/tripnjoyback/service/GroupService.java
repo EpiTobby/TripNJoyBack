@@ -7,7 +7,6 @@ import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
-import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +53,7 @@ public class GroupService {
 
     @Transactional
     public GroupModel createPublicGroup(UserEntity user1Entity, ProfileEntity profile1Entity, UserEntity user2Entity, ProfileEntity profile2Entity,
-                                        int maxSize, List<AvailabilityAnswerModel> commonAvailabilities)
+                                        int maxSize, ProfileEntity groupProfile)
     {
         GroupEntity groupEntity = GroupEntity.builder()
                                              .maxSize(maxSize)
@@ -63,13 +62,13 @@ public class GroupService {
                                                           ? stateRepository.findByValue("OPEN").get()
                                                           : stateRepository.findByValue("CLOSED").get())
                                              .members(List.of())
+                                             .profile(groupProfile)
                                              .build();
         groupRepository.save(groupEntity);
         groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity)));
         groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity)));
         return GroupModel.of(groupEntity);
     }
-
 
     @Transactional
     public GroupModel createPrivateGroup(long userId, int maxSize) {
