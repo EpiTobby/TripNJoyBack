@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.model.request.anwsers;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.istack.NotNull;
 import fr.tobby.tripnjoyback.exception.BadAvailabilityException;
@@ -37,6 +38,7 @@ public class AvailabilityAnswerModel implements AnswerModel {
     }
 
     @JsonProperty("startDate")
+    @JsonFormat(timezone = "GMT+01:00")
     public void setStartDate(Date startDate)
     {
         this.startDate = startDate;
@@ -45,6 +47,7 @@ public class AvailabilityAnswerModel implements AnswerModel {
     }
 
     @JsonProperty("endDate")
+    @JsonFormat(timezone = "GMT+01:00")
     public void setEndDate(Date endDate)
     {
         this.endDate = endDate;
