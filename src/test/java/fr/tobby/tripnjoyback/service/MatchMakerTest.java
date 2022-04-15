@@ -154,7 +154,7 @@ class MatchMakerTest {
 
         matchMaker.match(modelA);
 
-        verify(groupService).createPublicGroup(any(), any(), any(), any(), anyInt());
+        verify(groupService).createPublicGroup(any(), any(), any(), any(), anyInt(), any());
         Assertions.assertFalse(userB.isWaitingForGroup());
     }
 
@@ -179,7 +179,7 @@ class MatchMakerTest {
 
         matchMaker.match(modelA);
 
-        verify(groupService, times(0)).createPublicGroup(any(), any(), any(), any(), anyInt());
+        verify(groupService, times(0)).createPublicGroup(any(), any(), any(), any(), anyInt(), any());
         Assertions.assertTrue(userA.isWaitingForGroup());
         Assertions.assertTrue(userB.isWaitingForGroup());
     }

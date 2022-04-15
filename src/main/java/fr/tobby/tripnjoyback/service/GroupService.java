@@ -1,9 +1,13 @@
 package fr.tobby.tripnjoyback.service;
 
-import fr.tobby.tripnjoyback.entity.*;
+import fr.tobby.tripnjoyback.entity.GroupEntity;
+import fr.tobby.tripnjoyback.entity.GroupMemberEntity;
+import fr.tobby.tripnjoyback.entity.ProfileEntity;
+import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
+import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,13 +53,17 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupModel createPublicGroup(UserEntity user1Entity, ProfileEntity profile1Entity, UserEntity user2Entity, ProfileEntity profile2Entity, int maxSize) {
+    public GroupModel createPublicGroup(UserEntity user1Entity, ProfileEntity profile1Entity, UserEntity user2Entity, ProfileEntity profile2Entity,
+                                        int maxSize, List<AvailabilityAnswerModel> commonAvailabilities)
+    {
         GroupEntity groupEntity = GroupEntity.builder()
-                .maxSize(maxSize)
-                .createdDate(Date.from(Instant.now()))
-                .stateEntity(maxSize > 2 ? stateRepository.findByValue("OPEN").get() : stateRepository.findByValue("CLOSED").get())
-                .members(List.of())
-                .build();
+                                             .maxSize(maxSize)
+                                             .createdDate(Date.from(Instant.now()))
+                                             .stateEntity(maxSize > 2
+                                                          ? stateRepository.findByValue("OPEN").get()
+                                                          : stateRepository.findByValue("CLOSED").get())
+                                             .members(List.of())
+                                             .build();
         groupRepository.save(groupEntity);
         groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity)));
         groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity)));

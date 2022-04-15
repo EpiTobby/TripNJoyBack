@@ -4,6 +4,7 @@ import fr.tobby.tripnjoyback.entity.GroupEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
+import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
 import fr.tobby.tripnjoyback.repository.GroupRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -91,11 +93,14 @@ public class MatchMaker {
 
                   UserEntity userEntity = userRepository.getById(user.getUserId());
                   UserEntity matchedEntity = userRepository.getById(matched.left().getUserId());
+
+                  List<AvailabilityAnswerModel> commonAvailabilities = scoreComputer.computeCommonAvailabilities(user.getProfile().getAvailabilities(), matched.left().getProfile().getAvailabilities());
                   groupService.createPublicGroup(userEntity,
                           profileRepository.getById(user.getProfile().getId()),
                           matchedEntity,
                           profileRepository.getById(matched.left().getProfile().getId()),
-                          maxSize);
+                          maxSize,
+                          commonAvailabilities);
 
                   matchedEntity.setWaitingForGroup(false);
               }, () -> userRepository.getById(user.getUserId()).setWaitingForGroup(true));
