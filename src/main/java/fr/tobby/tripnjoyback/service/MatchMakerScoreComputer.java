@@ -4,6 +4,7 @@ import fr.tobby.tripnjoyback.model.Gender;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
+import fr.tobby.tripnjoyback.utils.DateUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
@@ -86,20 +87,21 @@ public class MatchMakerScoreComputer {
             AvailabilityAnswerModel intervalB = b.get(indexB);
 
             // If not overlapping, skipping to next interval
+            boolean overlapping = true;
             if (intervalA.getStartDate().after(intervalB.getEndDate()))
             {
                 indexB++;
-                continue;
+                overlapping = false;
             }
             else if (intervalB.getStartDate().after(intervalA.getEndDate()))
             {
                 indexA++;
-                continue;
+                overlapping = false;
             }
+            if (!overlapping)
+                continue;
             // Overlapping, get shared start & end
-            Date start = intervalA.getStartDate().before(intervalB.getStartDate())
-                         ? intervalB.getStartDate()
-                         : intervalA.getStartDate();
+            Date start = DateUtils.max(intervalA.getStartDate(), intervalB.getStartDate());
             boolean isABefore = intervalA.getEndDate().before(intervalB.getEndDate());
             Date end = isABefore
                        ? intervalA.getEndDate()
