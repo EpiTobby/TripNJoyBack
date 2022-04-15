@@ -4,6 +4,7 @@ import fr.tobby.tripnjoyback.entity.AnswersEntity;
 import fr.tobby.tripnjoyback.entity.AvailabiltyEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
+import fr.tobby.tripnjoyback.exception.UserNotConfirmedException;
 import fr.tobby.tripnjoyback.model.IProfile;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
@@ -11,6 +12,7 @@ import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
 import fr.tobby.tripnjoyback.model.request.anwsers.DestinationTypeAnswer;
 import fr.tobby.tripnjoyback.repository.AnswersRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
+import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -23,11 +25,15 @@ import java.util.Optional;
 public class ProfileService {
     private final ProfileRepository profileRepository;
     private final AnswersRepository answersRepository;
+    private final UserRepository userRepository;
     private final DateFormat dateFormat;
 
-    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository) {
+    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository,
+                          final UserRepository userRepository)
+    {
         this.profileRepository = profileRepository;
         this.answersRepository = answersRepository;
+        this.userRepository = userRepository;
         this.dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     }
 
@@ -37,6 +43,8 @@ public class ProfileService {
         ProfileEntity profileEntity = ProfileEntity.builder()
                                                    .name(profileCreationRequest.getName())
                                                    .active(true).build();
+        userRepository.findById(userId).orElseThrow(UserNotConfirmedException::new)
+                      .getProfiles().add(profileEntity);
         setProfileInactive(userId);
         profileRepository.save(profileEntity);
         AnswersEntity answersEntity = createAnswersEntity(profileCreationRequest, profileEntity.getId());
