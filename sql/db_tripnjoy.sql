@@ -271,3 +271,8 @@ INSERT INTO states
 VALUES (1, 'CLOSED');
 INSERT INTO states
 VALUES (2, 'ARCHIVED');
+
+INSERT INTO roles (name)
+VALUES ('default');
+INSERT INTO roles (name)
+VALUES ('admin');
