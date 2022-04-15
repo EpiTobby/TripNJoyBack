@@ -113,18 +113,6 @@ class MatchMakerScoreComputerTest {
     {
         assertThrows(IllegalArgumentException.class, () -> matchMakerScoreComputer.computeCommonAvailabilities(List.of(), List.of()));
     }
-
-    @Test
-    void inconsistentIntervalTest() throws ParseException
-    {
-        var a1 = new AvailabilityAnswerModel(dateFormat.parse("02-01-2000"), dateFormat.parse("05-01-2000"));
-        var b1 = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("05-01-2000"));
-
-        // inconsistency, overlapping a1
-        var a2 = new AvailabilityAnswerModel(dateFormat.parse("01-01-2000"), dateFormat.parse("11-01-2000"));
-        var b2 = new AvailabilityAnswerModel(dateFormat.parse("06-01-2000"), dateFormat.parse("07-01-2000"));
-        assertThrows(IllegalArgumentException.class, () -> matchMakerScoreComputer.computeCommonAvailabilities(List.of(a1, a2), List.of(b1, b2)));
-    }
 }
 
 class MatchMakerScoreComputerRangeTest {

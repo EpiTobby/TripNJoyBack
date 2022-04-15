@@ -80,15 +80,10 @@ public class MatchMakerScoreComputer {
         int indexA = 0;
         int indexB = 0;
 
-        Date start = null;
         while (indexA < a.size() && indexB < b.size())
         {
             AvailabilityAnswerModel intervalA = a.get(indexA);
             AvailabilityAnswerModel intervalB = b.get(indexB);
-
-            // FIXME: don't check sorting ? (for performance)
-            if (start != null && (intervalA.getStartDate().before(start) || intervalB.getStartDate().before(start)))
-                throw new IllegalArgumentException("Unsorted interval list");
 
             // If not overlapping, skipping to next interval
             if (intervalA.getStartDate().after(intervalB.getEndDate()))
@@ -102,9 +97,9 @@ public class MatchMakerScoreComputer {
                 continue;
             }
             // Overlapping, get shared start & end
-            start = intervalA.getStartDate().before(intervalB.getStartDate())
-                    ? intervalB.getStartDate()
-                    : intervalA.getStartDate();
+            Date start = intervalA.getStartDate().before(intervalB.getStartDate())
+                         ? intervalB.getStartDate()
+                         : intervalA.getStartDate();
             boolean isABefore = intervalA.getEndDate().before(intervalB.getEndDate());
             Date end = isABefore
                        ? intervalA.getEndDate()
