@@ -58,7 +58,7 @@ public class AnswersEntity {
     private Boolean sport;
 
     public static AnswersEntity of(ProfileModel profileModel){
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        DateFormat dateFormat = new SimpleDateFormat(AvailabilityAnswerModel.DATE_FORMAT);
         return AnswersEntity.builder()
         .availabilities(profileModel.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()),dateFormat.format(a.getEndDate()))).toList())
         .durationMin(profileModel.getDuration().getMinValue())

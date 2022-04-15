@@ -7,6 +7,7 @@ import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
+import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.DestinationTypeAnswer;
 import fr.tobby.tripnjoyback.repository.AnswersRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
@@ -22,12 +23,10 @@ import java.util.Optional;
 public class ProfileService {
     private final ProfileRepository profileRepository;
     private final AnswersRepository answersRepository;
-    private final DateFormat dateFormat;
 
     public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository) {
         this.profileRepository = profileRepository;
         this.answersRepository = answersRepository;
-        this.dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     }
 
     @Transactional
@@ -40,7 +39,7 @@ public class ProfileService {
         profileRepository.save(profileEntity);
         AnswersEntity answersEntity = AnswersEntity.builder()
                 .profileId(profileEntity.getId())
-                .availabilities(profileCreationRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList())
+                .availabilities(profileCreationRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(a.getStartDate(), a.getEndDate())).toList())
                 .durationMin(profileCreationRequest.getDuration().getMinValue())
                 .durationMax(profileCreationRequest.getDuration().getMaxValue())
                 .budgetMin(profileCreationRequest.getBudget().getMinValue())
@@ -110,7 +109,7 @@ public class ProfileService {
         }
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
         if (profileUpdateRequest.getAvailabilities() != null && profileUpdateRequest.getAvailabilities().size() != 0) {
-            answersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList());
+            answersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(a.getStartDate(), a.getEndDate())).toList());
         }
         if (profileUpdateRequest.getDuration() != null) {
             answersEntity.setDurationMin(profileUpdateRequest.getDuration().getMinValue());
