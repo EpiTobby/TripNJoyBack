@@ -37,13 +37,8 @@ public class GroupService {
     }
 
     public Collection<GroupModel> getUserGroups(long userId) {
-        Iterable<GroupEntity> entities = groupRepository.findAll();
-        List<GroupModel> models = new ArrayList();
-        entities.forEach(e -> {
-            if (e.members.stream().anyMatch(m -> m.getUser().getId() == userId))
-                models.add(GroupModel.of(e));
-        });
-        return models;
+        List<GroupEntity> groups = groupRepository.findAll();
+        return groups.stream().filter(g -> g.members.stream().anyMatch(m -> m.getUser().getId() == userId)).map(GroupModel::of).toList();
     }
 
     public String getOwnerEmail(long groupId) {
