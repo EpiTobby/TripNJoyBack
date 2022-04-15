@@ -151,17 +151,17 @@ create table roles
     name varchar(8) not null
 );
 
-create table user_roles
+create table users_roles
 (
     user_id int not null
-        constraint user_roles_users_id_fk
+        constraint users_roles_users_id_fk
             references users
             on delete cascade,
     role_id int not null
-        constraint user_roles_roles_id_fk
+        constraint users_roles_roles_id_fk
             references roles
             on delete cascade,
-    constraint user_roles_pk
+    constraint users_roles_pk
         primary key (user_id, role_id)
 );
 
