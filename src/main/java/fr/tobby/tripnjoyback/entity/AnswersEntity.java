@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.entity;
 
 import fr.tobby.tripnjoyback.model.ProfileModel;
+import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.DestinationTypeAnswer;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;

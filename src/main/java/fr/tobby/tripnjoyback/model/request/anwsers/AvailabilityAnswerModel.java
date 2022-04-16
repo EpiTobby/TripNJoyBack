@@ -1,8 +1,8 @@
 package fr.tobby.tripnjoyback.model.request.anwsers;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.istack.NotNull;
 import fr.tobby.tripnjoyback.exception.BadAvailabilityException;
@@ -25,6 +25,12 @@ public class AvailabilityAnswerModel implements AnswerModel {
     private Date startDate;
     @NotNull
     private Date endDate;
+
+    public AvailabilityAnswerModel(AvailabilityAnswerModel other)
+    {
+        this.startDate = other.startDate;
+        this.endDate = other.endDate;
+    }
 
     @JsonProperty("startDate")
     public String getStartDateStr()
