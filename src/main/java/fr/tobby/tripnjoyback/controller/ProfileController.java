@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.controller;
 
 import fr.tobby.tripnjoyback.exception.BadAvailabilityException;
+import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +33,7 @@ public class ProfileController {
     @ApiResponse(responseCode = "200", description = "Returns list of profiles")
     @ApiResponse(responseCode = "422", description = "If the answers are not valid")
     public List<ProfileModel> getUserProfiles(@PathVariable("id") final long userId) {
+        profileService.checkId(userId);
         return profileService.getUserProfiles(userId);
     }
 
@@ -45,6 +48,7 @@ public class ProfileController {
     @ApiResponse(responseCode = "200", description = "Returns the profile")
     @ApiResponse(responseCode = "422", description = "")
     public ProfileModel createProfile(@PathVariable("id") final long userId, @RequestBody ProfileCreationRequest profileCreationRequest) {
+        profileService.checkId(userId);
         return profileService.createProfile(userId, profileCreationRequest);
     }
 
@@ -53,6 +57,7 @@ public class ProfileController {
     @ApiResponse(responseCode = "200", description = "The profile is updated")
     @ApiResponse(responseCode = "422", description = "The answers are not valid")
     public void updateProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, @RequestBody ProfileUpdateRequest profileUpdateRequest) {
+        profileService.checkId(userId);
         profileService.updateProfile(userId, profileId, profileUpdateRequest);
     }
 
@@ -61,6 +66,7 @@ public class ProfileController {
     @ApiResponse(responseCode = "200", description = "The profile is deleted")
     @ApiResponse(responseCode = "422", description = "No profile has been found")
     public void deleteProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId) {
+        profileService.checkId(userId);
         profileService.deleteProfile(userId, profileId);
     }
 
@@ -84,6 +90,14 @@ public class ProfileController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(IllegalArgumentException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(ForbiddenOperationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String getError(ForbiddenOperationException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }

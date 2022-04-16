@@ -9,6 +9,7 @@ import fr.tobby.tripnjoyback.model.IProfile;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
+import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.DestinationTypeAnswer;
 import fr.tobby.tripnjoyback.repository.AnswersRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
@@ -16,21 +17,18 @@ import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ProfileService {
+public class ProfileService extends IdCheckerService {
     private final ProfileRepository profileRepository;
     private final AnswersRepository answersRepository;
     private final UserRepository userRepository;
     private final DateFormat dateFormat;
 
-    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository,
-                          final UserRepository userRepository)
-    {
+    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository, UserRepository userRepository) {
+        super(userRepository);
         this.profileRepository = profileRepository;
         this.answersRepository = answersRepository;
         this.userRepository = userRepository;
@@ -55,7 +53,7 @@ public class ProfileService {
     {
         AnswersEntity answersEntity = AnswersEntity.builder()
                                                    .profileId(profileId)
-                                                   .availabilities(profile.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList())
+                                                   .availabilities(profile.getAvailabilities().stream().map(a -> new AvailabiltyEntity(a.getStartDate(), a.getEndDate())).toList())
                                                    .durationMin(profile.getDuration().getMinValue())
                                                    .durationMax(profile.getDuration().getMaxValue())
                                                    .budgetMin(profile.getBudget().getMinValue())
@@ -159,7 +157,7 @@ public class ProfileService {
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
         if (profileUpdateRequest.getAvailabilities() != null && !profileUpdateRequest.getAvailabilities().isEmpty())
         {
-            answersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList());
+            answersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(a.getStartDate(), a.getEndDate())).toList());
         }
         if (profileUpdateRequest.getDuration() != null)
         {

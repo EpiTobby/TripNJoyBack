@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.model.request.anwsers;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.istack.NotNull;
 import fr.tobby.tripnjoyback.exception.BadAvailabilityException;
@@ -10,7 +11,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -20,6 +20,7 @@ import java.util.TimeZone;
 @JsonAutoDetect
 @NoArgsConstructor
 public class AvailabilityAnswerModel implements AnswerModel {
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
     @NotNull
     private Date startDate;
     @NotNull
@@ -28,13 +29,13 @@ public class AvailabilityAnswerModel implements AnswerModel {
     @JsonProperty("startDate")
     public String getStartDateStr()
     {
-        return new SimpleDateFormat("dd-MM-yyyy").format(startDate);
+        return new SimpleDateFormat(DATE_FORMAT).format(startDate);
     }
 
     @JsonProperty("endDate")
     public String getEndDateStr()
     {
-        return new SimpleDateFormat("dd-MM-yyyy").format(endDate);
+        return new SimpleDateFormat(DATE_FORMAT).format(endDate);
     }
 
     @JsonIgnore
@@ -50,45 +51,26 @@ public class AvailabilityAnswerModel implements AnswerModel {
     }
 
     @JsonProperty("startDate")
-    public void setStartDate(String startDate)
+    @JsonFormat(timezone = "GMT+01:00")
+    public void setStartDate(Date startDate)
     {
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        try
-        {
-            this.startDate = dateFormat.parse(startDate);
-            if (endDate != null && this.startDate.after(endDate))
-                throw new BadAvailabilityException("Start date cannot be after end date");
-        }
-        catch (ParseException e)
-        {
-            throw new BadAvailabilityException("Cannot parse start date");
-        }
+        this.startDate = startDate;
+        if (endDate != null && this.startDate.after(endDate))
+            throw new BadAvailabilityException("Start date cannot be after end date");
     }
 
     @JsonProperty("endDate")
-    public void setEndDate(String endDate){
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        try
-        {
-            this.endDate = dateFormat.parse(endDate);
-            if (startDate != null && this.endDate.before(startDate))
-                throw new BadAvailabilityException("Start date cannot be after end date");
-        }
-        catch (ParseException e)
-        {
-            throw new BadAvailabilityException("Cannot parse end date");
-        }
-    }
-
-    public AvailabilityAnswerModel(AvailabilityAnswerModel other)
+    @JsonFormat(timezone = "GMT+01:00")
+    public void setEndDate(Date endDate)
     {
-        this.startDate = other.startDate;
-        this.endDate = other.endDate;
+        this.endDate = endDate;
+        if (startDate != null && this.endDate.before(startDate))
+            throw new BadAvailabilityException("Start date cannot be after end date");
     }
 
     public static AvailabilityAnswerModel of(String startDate, String endDate)
     {
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         try
         {
             dateFormat.setTimeZone(TimeZone.getDefault());
