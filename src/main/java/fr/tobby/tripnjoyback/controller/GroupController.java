@@ -5,6 +5,7 @@ import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.ModelWithEmail;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
+import fr.tobby.tripnjoyback.service.AuthService;
 import fr.tobby.tripnjoyback.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,7 +24,7 @@ public class GroupController {
     private static final Logger logger = LoggerFactory.getLogger(GroupController.class);
     private final GroupService groupService;
 
-    public GroupController(GroupService groupService) {
+    public GroupController(GroupService groupService, AuthService authService) {
         this.groupService = groupService;
     }
 
@@ -34,7 +35,7 @@ public class GroupController {
         return groupService.getUserGroups(userId);
     }
 
-    private void checkAuthorization(long groupId, Authentication authentication) {
+    private void checkOwnership(long groupId, Authentication authentication) {
         String ownerEmail = groupService.getOwnerEmail(groupId);
         if (!ownerEmail.equals(authentication.getName()))
             throw new ForbiddenOperationException("You cannot perform this operation");
@@ -45,7 +46,8 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "The user has left the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
     private void leaveGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
-        groupService.removeUserOfGroup(groupId, userId);
+        groupService.checkId(userId);
+        groupService.removeUserFromGroup(groupId, userId);
     }
 
     @PostMapping("private/{id}")
@@ -53,6 +55,7 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "Returns the created group")
     @ApiResponse(responseCode = "422", description = "User or Group does not exist")
     public GroupModel createPrivateGroup(@PathVariable("id") final long userId, CreatePrivateGroupRequest createPrivateGroupRequest) {
+        groupService.checkId(userId);
         return groupService.createPrivateGroup(userId, createPrivateGroupRequest.getMaxSize());
     }
 
@@ -63,7 +66,7 @@ public class GroupController {
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
     public void addUserToPrivateGroup(@PathVariable("group") final long groupId, @RequestBody ModelWithEmail model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        checkAuthorization(groupId, authentication);
+        checkOwnership(groupId, authentication);
         groupService.addUserToPrivateGroup(groupId, model.getEmail());
     }
 
@@ -74,8 +77,8 @@ public class GroupController {
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
     public void RemoveUserFromPrivateGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        checkAuthorization(groupId, authentication);
-        groupService.removeUserOfGroup(groupId, userId);
+        checkOwnership(groupId, authentication);
+        groupService.removeUserFromGroup(groupId, userId);
     }
 
     @PatchMapping("private/{group}")
@@ -85,7 +88,7 @@ public class GroupController {
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
     public void UpdatePrivateGroup(@PathVariable("group") final long groupId, @RequestBody UpdateGroupRequest updateGroupRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        checkAuthorization(groupId, authentication);
+        checkOwnership(groupId, authentication);
         groupService.UpdatePrivateGroup(groupId, updateGroupRequest);
     }
 

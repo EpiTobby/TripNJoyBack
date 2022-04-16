@@ -11,23 +11,21 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 @Service
-public class GroupService {
+public class GroupService extends IdCheckerService {
     private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
     private final GroupRepository groupRepository;
-    private final UserRepository userRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final ProfileRepository profileRepository;
     private final StateRepository stateRepository;
 
     public GroupService(GroupRepository groupRepository, UserRepository userRepository, GroupMemberRepository groupMemberRepository, ProfileRepository profileRepository, StateRepository stateRepository) {
+        super(userRepository);
         this.groupRepository = groupRepository;
-        this.userRepository = userRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.profileRepository = profileRepository;
         this.stateRepository = stateRepository;
@@ -124,7 +122,7 @@ public class GroupService {
     }
 
     @Transactional
-    public void removeUserOfGroup(long groupId, long userId) {
+    public void removeUserFromGroup(long groupId, long userId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
         groupEntity.members.removeIf(m -> m.getUser().getId() == userId);
     }
