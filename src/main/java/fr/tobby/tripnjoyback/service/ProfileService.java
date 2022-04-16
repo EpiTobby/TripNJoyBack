@@ -11,20 +11,20 @@ import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.DestinationTypeAnswer;
 import fr.tobby.tripnjoyback.repository.AnswersRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
+import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ProfileService {
+public class ProfileService extends IdCheckerService {
     private final ProfileRepository profileRepository;
     private final AnswersRepository answersRepository;
 
-    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository) {
+    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository, UserRepository userRepository) {
+        super(userRepository);
         this.profileRepository = profileRepository;
         this.answersRepository = answersRepository;
     }

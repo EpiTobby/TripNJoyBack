@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.controller;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
 import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
+import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.DeleteUserByAdminRequest;
@@ -59,11 +60,13 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User information have been updated")
     @ApiResponse(responseCode = "422", description = "If the user does not exist")
     public void updateUserInfo(@PathVariable("id") final long userId, @RequestBody UserUpdateRequest userUpdateRequest) {
+        userService.checkId(userId, SecurityContextHolder.getContext().getAuthentication().getName());
         userService.updateUserInfo(userId, userUpdateRequest);
     }
 
     @DeleteMapping("{id}")
     public void deleteUserAccount(@PathVariable("id") final long userId, @RequestBody DeleteUserRequest deleteUserRequest) {
+        userService.checkId(userId, SecurityContextHolder.getContext().getAuthentication().getName());
         userService.deleteUserAccount(userId, deleteUserRequest);
     }
 
@@ -101,6 +104,14 @@ public class UserController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String getError(BadCredentialsException exception) {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(ForbiddenOperationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String getError(ForbiddenOperationException exception) {
+        logger.debug("Error on request", exception);
         return exception.getMessage();
     }
 }
