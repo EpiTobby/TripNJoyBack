@@ -12,6 +12,8 @@ import fr.tobby.tripnjoyback.repository.ProfileRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import fr.tobby.tripnjoyback.utils.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 @Service
 public class MatchMaker {
 
+    private static final Logger logger = LoggerFactory.getLogger(MatchMaker.class);
     private static final float MINIMAL_MATCHING_SCORE = 5f;
 
     private final ProfileRepository profileRepository;
@@ -48,6 +51,7 @@ public class MatchMaker {
     @Transactional
     public void match(@NotNull final MatchMakingUserModel user)
     {
+        logger.info("Starting matchmaking for user {}", user.getUserId());
         Collection<GroupEntity> groups = groupRepository.findAvailableGroups();
         Optional<GroupEntity> matchedGroup = groups.stream()
                                                    .map(group -> {
@@ -66,6 +70,7 @@ public class MatchMaker {
         if (matchedGroup.isPresent())
         {
             GroupEntity group = matchedGroup.get();
+            logger.info("User {} joining group {}", user.getUserId(), group.getId());
             groupService.addUserToPublicGroup(group.getId(), user.getUserId(), user.getProfile().getId());
             return;
         }
@@ -89,6 +94,7 @@ public class MatchMaker {
               .filter(pair -> pair.right() > MINIMAL_MATCHING_SCORE)
               .max(Comparator.comparingDouble(Pair::right))
               .ifPresentOrElse(matched -> {
+                  logger.info("Creating new group with user {} and user {}", user.getUserId(), matched.left().getUserId());
                   RangeAnswerModel sizeRange = scoreComputer.computeCommonRange(user.getProfile().getGroupSize(), matched.left().getProfile().getGroupSize()).orElseThrow();
                   int maxSize = (sizeRange.getMaxValue() + sizeRange.getMinValue()) / 2;
 
@@ -105,7 +111,10 @@ public class MatchMaker {
                           groupProfile);
 
                   matchedEntity.setWaitingForGroup(false);
-              }, () -> userRepository.getById(user.getUserId()).setWaitingForGroup(true));
+              }, () -> {
+                  logger.info("No match found for user {}. Set as waiting for match", user.getUserId());
+                  userRepository.getById(user.getUserId()).setWaitingForGroup(true);
+              });
     }
 
     private ProfileEntity computeGroupProfile(@NotNull ProfileModel profileA, @NotNull ProfileModel profileB)
