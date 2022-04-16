@@ -60,13 +60,13 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User information have been updated")
     @ApiResponse(responseCode = "422", description = "If the user does not exist")
     public void updateUserInfo(@PathVariable("id") final long userId, @RequestBody UserUpdateRequest userUpdateRequest) {
-        userService.checkId(userId, SecurityContextHolder.getContext().getAuthentication().getName());
+        userService.checkId(userId);
         userService.updateUserInfo(userId, userUpdateRequest);
     }
 
     @DeleteMapping("{id}")
     public void deleteUserAccount(@PathVariable("id") final long userId, @RequestBody DeleteUserRequest deleteUserRequest) {
-        userService.checkId(userId, SecurityContextHolder.getContext().getAuthentication().getName());
+        userService.checkId(userId);
         userService.deleteUserAccount(userId, deleteUserRequest);
     }
 

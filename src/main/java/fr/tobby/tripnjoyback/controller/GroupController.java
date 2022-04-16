@@ -46,7 +46,7 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "The user has left the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
     private void leaveGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
-        groupService.checkId(userId, SecurityContextHolder.getContext().getAuthentication().getName());
+        groupService.checkId(userId);
         groupService.removeUserFromGroup(groupId, userId);
     }
 
@@ -55,7 +55,7 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "Returns the created group")
     @ApiResponse(responseCode = "422", description = "User or Group does not exist")
     public GroupModel createPrivateGroup(@PathVariable("id") final long userId, CreatePrivateGroupRequest createPrivateGroupRequest) {
-        groupService.checkId(userId, SecurityContextHolder.getContext().getAuthentication().getName());
+        groupService.checkId(userId);
         return groupService.createPrivateGroup(userId, createPrivateGroupRequest.getMaxSize());
     }
 

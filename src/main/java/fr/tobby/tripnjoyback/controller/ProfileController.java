@@ -33,7 +33,7 @@ public class ProfileController {
     @ApiResponse(responseCode = "200", description = "Returns list of profiles")
     @ApiResponse(responseCode = "422", description = "If the answers are not valid")
     public List<ProfileModel> getUserProfiles(@PathVariable("id") final long userId) {
-        profileService.checkId(userId, SecurityContextHolder.getContext().getAuthentication().getName());
+        profileService.checkId(userId);
         return profileService.getUserProfiles(userId);
     }
 
@@ -48,7 +48,7 @@ public class ProfileController {
     @ApiResponse(responseCode = "200", description = "Returns the profile")
     @ApiResponse(responseCode = "422", description = "")
     public ProfileModel createProfile(@PathVariable("id") final long userId, @RequestBody ProfileCreationRequest profileCreationRequest) {
-        profileService.checkId(userId, SecurityContextHolder.getContext().getAuthentication().getName());
+        profileService.checkId(userId);
         return profileService.createProfile(userId, profileCreationRequest);
     }
 
@@ -57,7 +57,7 @@ public class ProfileController {
     @ApiResponse(responseCode = "200", description = "The profile is updated")
     @ApiResponse(responseCode = "422", description = "The answers are not valid")
     public void updateProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, @RequestBody ProfileUpdateRequest profileUpdateRequest) {
-        profileService.checkId(userId, SecurityContextHolder.getContext().getAuthentication().getName());
+        profileService.checkId(userId);
         profileService.updateProfile(userId, profileId, profileUpdateRequest);
     }
 
@@ -66,7 +66,7 @@ public class ProfileController {
     @ApiResponse(responseCode = "200", description = "The profile is deleted")
     @ApiResponse(responseCode = "422", description = "No profile has been found")
     public void deleteProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId) {
-        profileService.checkId(userId, SecurityContextHolder.getContext().getAuthentication().getName());
+        profileService.checkId(userId);
         profileService.deleteProfile(userId, profileId);
     }
 
