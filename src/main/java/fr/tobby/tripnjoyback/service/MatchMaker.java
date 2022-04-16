@@ -49,6 +49,12 @@ public class MatchMaker {
     }
 
     @Transactional
+    public void match(@NotNull UserEntity entity, @NotNull ProfileModel profile)
+    {
+        this.match(MatchMakingUserModel.from(entity, profile));
+    }
+
+    @Transactional
     public void match(@NotNull final MatchMakingUserModel user)
     {
         logger.info("Starting matchmaking for user {}", user.getUserId());
