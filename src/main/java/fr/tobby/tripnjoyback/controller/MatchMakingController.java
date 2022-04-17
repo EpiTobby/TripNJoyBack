@@ -7,6 +7,7 @@ import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import fr.tobby.tripnjoyback.service.MatchMaker;
 import fr.tobby.tripnjoyback.service.ProfileService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,5 +34,13 @@ public class MatchMakingController {
 
         matchMaker.match(userEntity, profile);
         return "ok";
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    String onIllegalStateException(IllegalStateException e)
+    {
+        return e.getMessage();
     }
 }

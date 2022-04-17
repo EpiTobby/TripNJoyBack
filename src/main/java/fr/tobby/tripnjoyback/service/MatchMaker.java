@@ -49,8 +49,10 @@ public class MatchMaker {
     }
 
     @Transactional
-    public void match(@NotNull UserEntity entity, @NotNull ProfileModel profile)
+    public void match(@NotNull UserEntity entity, @NotNull ProfileModel profile) throws IllegalStateException
     {
+        if (profileService.getActiveProfile(entity.getId()).isPresent())
+            throw new IllegalStateException("User " + entity.getId() + " already has an active profile");
         this.match(MatchMakingUserModel.from(entity, profile));
     }
 
