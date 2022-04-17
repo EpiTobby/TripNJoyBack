@@ -85,7 +85,7 @@ public class MatchMaker {
         Collection<MatchMakingUserModel> others = userRepository.findAllByWaitingForGroupIsTrue()
                                                                 .stream()
                                                                 .map(other -> {
-                                                                    ProfileModel profileModel = profileService.getActiveProfile(other.getId()).orElseThrow();
+                                                                    ProfileModel profileModel = profileService.getActiveProfileModel(other.getId()).orElseThrow();
                                                                     return MatchMakingUserModel.from(other, profileModel);
                                                                 })
                                                                 .collect(Collectors.toSet());

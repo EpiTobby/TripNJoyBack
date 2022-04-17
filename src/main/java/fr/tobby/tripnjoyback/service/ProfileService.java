@@ -120,10 +120,19 @@ public class ProfileService extends IdCheckerService {
         return profileEntities.stream().map(e -> ProfileModel.of(e, answersRepository.findByProfileId(e.getId()))).toList();
     }
 
-    public Optional<ProfileModel> getActiveProfile(long userId)
+    Optional<ProfileModel> getActiveProfileModel(long userId)
     {
-        return profileRepository.findByActiveIsTrueAndUserId(userId)
-                                .map(this::getProfile);
+        return getActiveProfile(userId).map(this::getProfile);
+    }
+
+    public Optional<ProfileEntity> getActiveProfile(long userId)
+    {
+        return userRepository.findById(userId)
+                             .flatMap(userEntity -> userEntity.getProfiles()
+                                                              .stream()
+                                                              .filter(ProfileEntity::isActive)
+                                                              .findAny()
+                             );
     }
 
     @Transactional
@@ -136,9 +145,10 @@ public class ProfileService extends IdCheckerService {
     }
 
     @Transactional
-    public void setProfileInactive(long userId) {
-        Optional<ProfileEntity> profileEntity = profileRepository.findByActiveIsTrueAndUserId(userId);
-        profileEntity.ifPresent(profile -> profile.setActive(false));
+    public void setProfileInactive(long userId)
+    {
+        this.getActiveProfile(userId)
+            .ifPresent(profile -> profile.setActive(false));
     }
 
     @Transactional

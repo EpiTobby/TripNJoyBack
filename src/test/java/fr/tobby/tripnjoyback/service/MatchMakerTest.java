@@ -147,7 +147,7 @@ class MatchMakerTest {
 
         when(profileService.getProfile(1)).thenReturn(profileA);
         when(profileService.getProfile(2)).thenReturn(profileB);
-        when(profileService.getActiveProfile(userB.getId())).thenReturn(Optional.of(profileB));
+        when(profileService.getActiveProfileModel(userB.getId())).thenReturn(Optional.of(profileB));
 
         Instant now = dateFormat.parse("01-01-2021").toInstant();
         MatchMakingUserModel modelA = MatchMakingUserModel.from(userA, profileA, now);
@@ -172,7 +172,7 @@ class MatchMakerTest {
 
         when(profileService.getProfile(1)).thenReturn(profileA);
         when(profileService.getProfile(2)).thenReturn(profileB);
-        when(profileService.getActiveProfile(userB.getId())).thenReturn(Optional.of(profileB));
+        when(profileService.getActiveProfileModel(userB.getId())).thenReturn(Optional.of(profileB));
 
         Instant now = dateFormat.parse("01-01-2021").toInstant();
         MatchMakingUserModel modelA = MatchMakingUserModel.from(userA, profileA, now);
