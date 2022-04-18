@@ -86,10 +86,21 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "The group is updated")
     @ApiResponse(responseCode = "403", description = "The client is not the owner of the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
-    public void UpdatePrivateGroup(@PathVariable("group") final long groupId, @RequestBody UpdateGroupRequest updateGroupRequest) {
+    public void updatePrivateGroup(@PathVariable("group") final long groupId, @RequestBody UpdateGroupRequest updateGroupRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         checkOwnership(groupId, authentication);
-        groupService.UpdatePrivateGroup(groupId, updateGroupRequest);
+        groupService.updatePrivateGroup(groupId, updateGroupRequest);
+    }
+
+    @DeleteMapping("private/{group}")
+    @Operation(summary = "Delete the private group")
+    @ApiResponse(responseCode = "200", description = "The group is deleted")
+    @ApiResponse(responseCode = "403", description = "The client is not the owner of the group")
+    @ApiResponse(responseCode = "422", description = "Group or User does not exist")
+    public void deletePrivateGroup(@PathVariable("group") final long groupId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        checkOwnership(groupId, authentication);
+        groupService.deletePrivateGroup(groupId);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
