@@ -102,7 +102,7 @@ public class GroupService extends IdCheckerService {
     }
 
     @Transactional
-    public void UpdatePrivateGroup(long groupId, UpdateGroupRequest updateGroupRequest) {
+    public void updatePrivateGroup(long groupId, UpdateGroupRequest updateGroupRequest) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
         if (updateGroupRequest.getName() != null) {
             groupEntity.setName(updateGroupRequest.getName());
@@ -130,8 +130,19 @@ public class GroupService extends IdCheckerService {
     }
 
     @Transactional
+    public void deletePrivateGroup(long groupId) {
+        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
+        groupMemberRepository.deleteByGroupId(groupId);
+        groupRepository.delete(groupEntity);
+    }
+
+    @Transactional
     public void removeUserFromGroup(long groupId, long userId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
         groupEntity.members.removeIf(m -> m.getUser().getId() == userId);
+        if (groupEntity.members.size() == 0) {
+            groupMemberRepository.deleteByGroupId(groupId);
+            groupRepository.delete(groupEntity);
+        }
     }
 }
