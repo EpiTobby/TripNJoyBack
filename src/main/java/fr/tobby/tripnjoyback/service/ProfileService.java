@@ -33,18 +33,18 @@ public class ProfileService extends IdCheckerService {
         this.profileRepository = profileRepository;
         this.answersRepository = answersRepository;
         this.userRepository = userRepository;
-        this.dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        this.dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     }
 
     @Transactional
     public ProfileModel createProfile(long userId, ProfileCreationRequest profileCreationRequest)
     {
+        setProfileInactive(userId);
         ProfileEntity profileEntity = ProfileEntity.builder()
                                                    .name(profileCreationRequest.getName())
                                                    .active(true).build();
         userRepository.findById(userId).orElseThrow(UserNotConfirmedException::new)
                       .getProfiles().add(profileEntity);
-        setProfileInactive(userId);
         profileRepository.save(profileEntity);
         AnswersEntity answersEntity = createAnswersEntity(profileCreationRequest, profileEntity.getId());
         return ProfileModel.of(profileEntity, answersEntity);
@@ -118,6 +118,12 @@ public class ProfileService extends IdCheckerService {
     {
         List<ProfileEntity> profileEntities = profileRepository.findByActiveIsTrue();
         return profileEntities.stream().map(e -> ProfileModel.of(e, answersRepository.findByProfileId(e.getId()))).toList();
+    }
+
+    @Transactional
+    void setActiveProfile(long profileId, boolean active)
+    {
+        profileRepository.getById(profileId).setActive(active);
     }
 
     Optional<ProfileModel> getActiveProfileModel(long userId)

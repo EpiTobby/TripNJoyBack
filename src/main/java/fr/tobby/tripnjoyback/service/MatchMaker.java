@@ -51,8 +51,6 @@ public class MatchMaker {
     @Transactional
     public void match(@NotNull UserEntity entity, @NotNull ProfileModel profile) throws IllegalStateException
     {
-        if (profileService.getActiveProfile(entity.getId()).isPresent())
-            throw new IllegalStateException("User " + entity.getId() + " already has an active profile");
         this.match(MatchMakingUserModel.from(entity, profile));
     }
 
@@ -79,6 +77,7 @@ public class MatchMaker {
         {
             GroupEntity group = matchedGroup.get();
             logger.info("User {} joining group {}", user.getUserId(), group.getId());
+            profileService.setActiveProfile(user.getProfile().getId(), false);
             groupService.addUserToPublicGroup(group.getId(), user.getUserId(), user.getProfile().getId());
             return;
         }
@@ -119,6 +118,8 @@ public class MatchMaker {
                           groupProfile);
 
                   matchedEntity.setWaitingForGroup(false);
+                  profileService.setActiveProfile(matched.left().getProfile().getId(), false);
+                  profileService.setActiveProfile(user.getProfile().getId(), false);
               }, () -> {
                   logger.info("No match found for user {}. Set as waiting for match", user.getUserId());
                   userRepository.getById(user.getUserId()).setWaitingForGroup(true);
