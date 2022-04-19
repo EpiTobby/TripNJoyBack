@@ -56,10 +56,11 @@ public class GroupService extends IdCheckerService {
                                                           : stateRepository.findByValue("CLOSED").get())
                                              .members(List.of())
                                              .profile(groupProfile)
+                                             .owner(user1Entity)
                                              .build();
         groupRepository.save(groupEntity);
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity)));
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity)));
+        groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity));
+        groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity));
         return GroupModel.of(groupEntity);
     }
 
