@@ -36,6 +36,8 @@ public class MatchMaker {
     private final GroupRepository groupRepository;
     private final ProfileService profileService;
 
+    private long taskIndex = 1L;
+
     public MatchMaker(final ProfileRepository profileRepository, final UserRepository userRepository, final MatchMakerScoreComputer scoreComputer,
                       final GroupService groupService, final GroupRepository groupRepository,
                       final ProfileService profileService)
@@ -49,13 +51,13 @@ public class MatchMaker {
     }
 
     @Transactional
-    public void match(@NotNull UserEntity entity, @NotNull ProfileModel profile) throws IllegalStateException
+    public long match(@NotNull UserEntity entity, @NotNull ProfileModel profile) throws IllegalStateException
     {
-        this.match(MatchMakingUserModel.from(entity, profile));
+        return this.match(MatchMakingUserModel.from(entity, profile));
     }
 
     @Transactional
-    public void match(@NotNull final MatchMakingUserModel user)
+    public long match(@NotNull final MatchMakingUserModel user)
     {
         logger.info("Starting matchmaking for user {}", user.getUserId());
         Collection<GroupEntity> groups = groupRepository.findAvailableGroups();
@@ -79,7 +81,7 @@ public class MatchMaker {
             logger.info("User {} joining group {}", user.getUserId(), group.getId());
             profileService.setActiveProfile(user.getProfile().getId(), false);
             groupService.addUserToPublicGroup(group.getId(), user.getUserId(), user.getProfile().getId());
-            return;
+            return taskIndex++;
         }
 
 
@@ -124,6 +126,8 @@ public class MatchMaker {
                   logger.info("No match found for user {}. Set as waiting for match", user.getUserId());
                   userRepository.getById(user.getUserId()).setWaitingForGroup(true);
               });
+
+        return taskIndex++;
     }
 
     private ProfileEntity computeGroupProfile(@NotNull ProfileModel profileA, @NotNull ProfileModel profileB)
