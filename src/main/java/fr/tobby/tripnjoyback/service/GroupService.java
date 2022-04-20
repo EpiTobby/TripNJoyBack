@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.entity.*;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
+import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
 import fr.tobby.tripnjoyback.repository.*;
@@ -51,8 +52,8 @@ public class GroupService extends IdCheckerService {
                 .members(List.of())
                 .build();
         groupRepository.save(groupEntity);
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity)));
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity)));
+        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity, true)));
+        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity, true)));
         return GroupModel.of(groupEntity);
     }
 
@@ -68,7 +69,7 @@ public class GroupService extends IdCheckerService {
                 .stateEntity(stateRepository.findByValue("CLOSED").get())
                 .build();
         groupRepository.save(groupEntity);
-        GroupMemberEntity groupMemberEntity = new GroupMemberEntity(groupEntity, userEntity, null);
+        GroupMemberEntity groupMemberEntity = new GroupMemberEntity(groupEntity, userEntity, null, false);
         groupMemberRepository.save(groupMemberEntity);
         groupEntity.members = List.of(groupMemberEntity);
         return GroupModel.of(groupEntity);
@@ -79,20 +80,17 @@ public class GroupService extends IdCheckerService {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with this id " + userId));
         ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with id " + profileId));
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, profileEntity)));
-        if (groupEntity.getMaxSize() == groupEntity.members.size())
-            groupEntity.setStateEntity(stateRepository.findByValue("CLOSED").get());
+        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, profileEntity, true)));
     }
 
     @Transactional
-    public void addUserToPrivateGroup(long groupId, String email) {
+    public void inviteUserInPrivateGroup(long groupId, String email) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("No user with this email " + email));
         if (!userEntity.isConfirmed())
             throw new UserNotConfirmedException("The user you want to invite is not confirmed");
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, null)));
-        if (groupEntity.getMaxSize() == groupEntity.members.size())
-            groupEntity.setStateEntity(stateRepository.findByValue("CLOSED").get());
+        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, null, true)));
+
     }
 
     @Transactional
@@ -103,12 +101,15 @@ public class GroupService extends IdCheckerService {
         }
         int newMaxSize = updateGroupRequest.getMaxSize();
         if (newMaxSize != 0) {
-            if (newMaxSize < groupEntity.members.size())
+            if (newMaxSize < groupEntity.getNumberOfNonPendingUsers())
                 throw new UpdateGroupException("The maximum size of the group must be greater or equal than the current number of members in the private group");
             groupEntity.setMaxSize(newMaxSize);
         }
-        if (updateGroupRequest.getState() != null)
+        if (updateGroupRequest.getState() != null) {
+            if (updateGroupRequest.getState() == State.CLOSED)
+                groupEntity.members.stream().filter(m -> m.isPending()).forEach(groupMemberRepository::delete);
             groupEntity.setStateEntity(stateRepository.findByValue(updateGroupRequest.getState().toString()).get());
+        }
         if (groupEntity.getStateEntity().getValue().equals("CLOSED")) {
             if (updateGroupRequest.getStartOfTrip() != null)
                 groupEntity.setStartOfTrip(updateGroupRequest.getStartOfTrip());
@@ -131,10 +132,22 @@ public class GroupService extends IdCheckerService {
     }
 
     @Transactional
+    public void joinGroup(long groupId, long userId) {
+        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
+        GroupMemberEntity invitedUser = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not invited or does not exist"));
+        invitedUser.setPending(false);
+        if (groupEntity.getMaxSize() == groupEntity.getNumberOfNonPendingUsers()) {
+            groupEntity.members.stream().filter(m -> m.isPending()).forEach(groupMemberRepository::delete);
+            groupEntity.setStateEntity(stateRepository.findByValue("CLOSED").get());
+        }
+    }
+
+    @Transactional
     public void removeUserFromGroup(long groupId, long userId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
-        groupEntity.members.removeIf(m -> m.getUser().getId() == userId);
-        if (groupEntity.members.size() == 0) {
+        GroupMemberEntity groupMemberEntity = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not found in this group or does not exist"));
+        groupMemberRepository.delete(groupMemberEntity);
+        if (groupEntity.getNumberOfNonPendingUsers() == 0) {
             groupMemberRepository.deleteByGroupId(groupId);
             groupRepository.delete(groupEntity);
         }
