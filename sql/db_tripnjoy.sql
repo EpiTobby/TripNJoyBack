@@ -25,7 +25,6 @@ CREATE TABLE "groups" (
                           "owner_id" int,
                           "max_size" int,
                           "created_date" timestamp,
-                          "destination_id" int,
                           "start_of_trip" timestamp,
                           "end_of_trip" timestamp
 );
@@ -48,18 +47,9 @@ CREATE TABLE "users_groups" (
 
 CREATE TABLE "profiles" (
                             "id" SERIAL PRIMARY KEY,
-                            "user_id" int
-);
-
-CREATE TABLE "profile_criteria" (
-                                    "profile_id" int,
-                                    "question_id" int,
-                                    "answer" text
-);
-
-CREATE TABLE "questions" (
-                             "id" SERIAL PRIMARY KEY,
-                             "value" varchar
+                            "user_id" int,
+                            name varchar,
+                            "active" bool
 );
 
 CREATE TABLE "reviews" (
@@ -187,13 +177,7 @@ ALTER TABLE "groups" ADD FOREIGN KEY ("state_id") REFERENCES "states" ("id");
 
 ALTER TABLE "users" ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
 
-ALTER TABLE "groups" ADD FOREIGN KEY ("destination_id") REFERENCES "cities" ("id");
-
-ALTER TABLE "profiles" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
-
-ALTER TABLE "profile_criteria" ADD FOREIGN KEY ("profile_id") REFERENCES "profiles" ("id");
-
-ALTER TABLE "profile_criteria" ADD FOREIGN KEY ("question_id") REFERENCES "questions" ("id");
+ALTER TABLE "profiles" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")  on delete cascade;
 
 ALTER TABLE "users_groups" ADD FOREIGN KEY ("profile_id") REFERENCES "profiles" ("id");
 

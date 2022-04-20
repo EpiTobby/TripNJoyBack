@@ -11,16 +11,14 @@ public class CityService {
 
     private final CityRepository cityRepository;
 
-    public CityService(final CityRepository cityRepository)
-    {
+    public CityService(final CityRepository cityRepository) {
         this.cityRepository = cityRepository;
     }
 
     @NonNull
     @Transactional
-    CityEntity getOrAddCity(final String name)
-    {
+    CityEntity getOrAddCity(final String name) {
         return cityRepository.findByName(name)
-                             .orElseGet(() -> cityRepository.save(new CityEntity(name)));
+                .orElseGet(() -> cityRepository.save(new CityEntity(name)));
     }
 }

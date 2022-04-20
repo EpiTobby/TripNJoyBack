@@ -21,4 +21,16 @@ public class UserCreationRequest extends ModelWithEmail {
     private Date birthDate;
     private String phoneNumber;
 
+    public UserCreationRequest(final String email, final String firstname, final String lastname, final String password, final String gender,
+                               final Date birthDate,
+                               final String phoneNumber)
+    {
+        super(email);
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.password = password;
+        this.gender = gender;
+        this.birthDate = birthDate;
+        this.phoneNumber = phoneNumber;
+    }
 }

@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.controller;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.BadConfirmationCodeException;
 import fr.tobby.tripnjoyback.exception.ExpiredCodeException;
+import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.DeleteUserByAdminRequest;
@@ -20,6 +21,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping(path = "/users")
 public class UserController {
@@ -27,28 +31,26 @@ public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService)
-    {
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping("")
     @PreAuthorize("hasAuthority('admin')")
-    public Iterable<UserEntity> getAll()
-    {
-        return userService.getAll();
+    public List<UserEntity> getAll() {
+        List<UserEntity> userEntities = new ArrayList<UserEntity>();
+        userService.getAll().forEach(userEntities::add);
+        return userEntities;
     }
 
     @GetMapping("{id}")
     @PreAuthorize("hasAuthority('admin')")
-    public UserModel getUserById(@PathVariable("id") final long userId)
-    {
+    public UserModel getUserById(@PathVariable("id") final long userId) {
         return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
     }
 
     @GetMapping("me")
-    public UserModel getCurrentUser()
-    {
+    public UserModel getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return userService.findByEmail(authentication.getName()).orElseThrow(() -> new UserNotFoundException("Current user is not associated to a registered user"));
     }
@@ -57,27 +59,27 @@ public class UserController {
     @Operation(summary = "Used to update the user information")
     @ApiResponse(responseCode = "200", description = "User information have been updated")
     @ApiResponse(responseCode = "422", description = "If the user does not exist")
-    public void updateUserInfo(@PathVariable("id") final long userId, @RequestBody UserUpdateRequest userUpdateRequest){
-        userService.updateUserInfo(userId,userUpdateRequest);
+    public void updateUserInfo(@PathVariable("id") final long userId, @RequestBody UserUpdateRequest userUpdateRequest) {
+        userService.checkId(userId);
+        userService.updateUserInfo(userId, userUpdateRequest);
     }
 
     @DeleteMapping("{id}")
-    public void deleteUserAccount(@PathVariable("id") final long userId, @RequestBody DeleteUserRequest deleteUserRequest){
+    public void deleteUserAccount(@PathVariable("id") final long userId, @RequestBody DeleteUserRequest deleteUserRequest) {
+        userService.checkId(userId);
         userService.deleteUserAccount(userId, deleteUserRequest);
     }
 
     @DeleteMapping("{id}/admin")
     @PreAuthorize("hasAuthority('admin')")
-    public void deleteUserByAdmin(@PathVariable("id") final long userId, @RequestBody DeleteUserByAdminRequest deleteUserByAdminRequest)
-    {
-         userService.deleteUserByAdmin(userId, deleteUserByAdminRequest);
+    public void deleteUserByAdmin(@PathVariable("id") final long userId, @RequestBody DeleteUserByAdminRequest deleteUserByAdminRequest) {
+        userService.deleteUserByAdmin(userId, deleteUserByAdminRequest);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(UserNotFoundException exception)
-    {
+    public String getError(UserNotFoundException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }
@@ -85,8 +87,7 @@ public class UserController {
     @ExceptionHandler(BadConfirmationCodeException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(BadConfirmationCodeException exception)
-    {
+    public String getError(BadConfirmationCodeException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }
@@ -94,8 +95,7 @@ public class UserController {
     @ExceptionHandler(ExpiredCodeException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public String getError(ExpiredCodeException exception)
-    {
+    public String getError(ExpiredCodeException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }
@@ -103,8 +103,15 @@ public class UserController {
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String getError(BadCredentialsException exception)
-    {
+    public String getError(BadCredentialsException exception) {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(ForbiddenOperationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String getError(ForbiddenOperationException exception) {
+        logger.debug("Error on request", exception);
         return exception.getMessage();
     }
 }

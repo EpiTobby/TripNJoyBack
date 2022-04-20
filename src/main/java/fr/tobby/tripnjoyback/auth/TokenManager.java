@@ -17,7 +17,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 
 @Component
-public final class TokenManager {
+public class TokenManager {
 
     private final String jwtSecret;
     private final UserDetailsService userDetailsService;
