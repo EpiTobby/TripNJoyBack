@@ -27,6 +27,7 @@ public class MatchMakerScoreComputer {
         Optional<RangeAnswerModel> commonDuration = computeCommonRange(profA.getDuration(), profB.getDuration());
         if (commonDuration.isEmpty() || availabilityCorr < commonDuration.get().getMinValue())
             return 0;
+        // Compute availability score with respect to the duration
         double availabilityScore = (Math.sqrt(commonDuration.get().getMaxValue()) + commonDuration.get().getMaxValue()) / availabilityCorr;
 
         float res = (float) availabilityScore;
@@ -54,9 +55,7 @@ public class MatchMakerScoreComputer {
             return false;
         if (!profile.getAges().isInRange(user.getAge()))
             return false;
-        if (computeCommonRange(profile.getGroupSize(), user.getProfile().getGroupSize()).isEmpty())
-            return false;
-        return true;
+        return computeCommonRange(profile.getGroupSize(), user.getProfile().getGroupSize()).isPresent();
     }
 
     /**

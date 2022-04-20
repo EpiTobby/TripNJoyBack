@@ -60,20 +60,7 @@ public class MatchMaker {
     public long match(@NotNull final MatchMakingUserModel user)
     {
         logger.info("Starting matchmaking for user {}", user.getUserId());
-        Collection<GroupEntity> groups = groupRepository.findAvailableGroups();
-        Optional<GroupEntity> matchedGroup = groups.stream()
-                                                   .map(group -> {
-                                                       ProfileModel profileModel = profileService.getProfile(group.getProfile());
-                                                       return new Pair<>(group, profileModel);
-                                                   })
-                                                   .filter(pair -> scoreComputer.isUserCompatible(pair.right(), user))
-                                                   .map(pair -> {
-                                                       float score = scoreComputer.computeMatchingScore(user.getProfile(), pair.right());
-                                                       return new Pair<>(pair.left(), score);
-                                                   })
-                                                   .filter(pair -> pair.right() > MINIMAL_MATCHING_SCORE)
-                                                   .max(Comparator.comparingDouble(Pair::right))
-                                                   .map(Pair::left);
+        Optional<GroupEntity> matchedGroup = findMatchingGroup(user);
 
         if (matchedGroup.isPresent())
         {
@@ -84,7 +71,57 @@ public class MatchMaker {
             return taskIndex++;
         }
 
+        findMatchingUser(user).ifPresentOrElse(matched -> {
+            logger.info("Creating new group with user {} and user {}", user.getUserId(), matched.getUserId());
+            RangeAnswerModel sizeRange = scoreComputer.computeCommonRange(user.getProfile().getGroupSize(), matched.getProfile().getGroupSize()).orElseThrow();
+            int maxSize = (sizeRange.getMaxValue() + sizeRange.getMinValue()) / 2;
 
+            UserEntity userEntity = userRepository.getById(user.getUserId());
+            UserEntity matchedEntity = userRepository.getById(matched.getUserId());
+
+
+            ProfileEntity groupProfile = this.computeGroupProfile(user.getProfile(), matched.getProfile());
+            groupService.createPublicGroup(userEntity,
+                    profileRepository.getById(user.getProfile().getId()),
+                    matchedEntity,
+                    profileRepository.getById(matched.getProfile().getId()),
+                    maxSize,
+                    groupProfile);
+
+            matchedEntity.setWaitingForGroup(false);
+            profileService.setActiveProfile(matched.getProfile().getId(), false);
+            profileService.setActiveProfile(user.getProfile().getId(), false);
+        }, () -> {
+            logger.info("No match found for user {}. Set as waiting for match", user.getUserId());
+            userRepository.getById(user.getUserId()).setWaitingForGroup(true);
+        });
+
+        return taskIndex++;
+    }
+
+    /**
+     * Go through all groups and return the one that matches the user the best
+     */
+    private Optional<GroupEntity> findMatchingGroup(final @NotNull MatchMakingUserModel user)
+    {
+        Collection<GroupEntity> groups = groupRepository.findAvailableGroups();
+        return groups.stream()
+                     .map(group -> {
+                         ProfileModel profileModel = profileService.getProfile(group.getProfile());
+                         return new Pair<>(group, profileModel);
+                     })
+                     .filter(pair -> scoreComputer.isUserCompatible(pair.right(), user))
+                     .map(pair -> {
+                         float score = scoreComputer.computeMatchingScore(user.getProfile(), pair.right());
+                         return new Pair<>(pair.left(), score);
+                     })
+                     .filter(pair -> pair.right() > MINIMAL_MATCHING_SCORE)
+                     .max(Comparator.comparingDouble(Pair::right))
+                     .map(Pair::left);
+    }
+
+    private Optional<MatchMakingUserModel> findMatchingUser(@NotNull MatchMakingUserModel user)
+    {
         Collection<MatchMakingUserModel> others = userRepository.findAllByWaitingForGroupIsTrue()
                                                                 .stream()
                                                                 .map(other -> {
@@ -94,40 +131,15 @@ public class MatchMaker {
                                                                 .collect(Collectors.toSet());
 
 
-        others.stream()
-              .filter(other -> scoreComputer.isUserCompatible(user.getProfile(), other) && scoreComputer.isUserCompatible(other.getProfile(), user))
-              .map(other -> {
-                  float score = scoreComputer.computeMatchingScore(user.getProfile(), other.getProfile());
-                  return new Pair<>(other, score);
-              })
-              .filter(pair -> pair.right() > MINIMAL_MATCHING_SCORE)
-              .max(Comparator.comparingDouble(Pair::right))
-              .ifPresentOrElse(matched -> {
-                  logger.info("Creating new group with user {} and user {}", user.getUserId(), matched.left().getUserId());
-                  RangeAnswerModel sizeRange = scoreComputer.computeCommonRange(user.getProfile().getGroupSize(), matched.left().getProfile().getGroupSize()).orElseThrow();
-                  int maxSize = (sizeRange.getMaxValue() + sizeRange.getMinValue()) / 2;
-
-                  UserEntity userEntity = userRepository.getById(user.getUserId());
-                  UserEntity matchedEntity = userRepository.getById(matched.left().getUserId());
-
-
-                  ProfileEntity groupProfile = this.computeGroupProfile(user.getProfile(), matched.left().getProfile());
-                  groupService.createPublicGroup(userEntity,
-                          profileRepository.getById(user.getProfile().getId()),
-                          matchedEntity,
-                          profileRepository.getById(matched.left().getProfile().getId()),
-                          maxSize,
-                          groupProfile);
-
-                  matchedEntity.setWaitingForGroup(false);
-                  profileService.setActiveProfile(matched.left().getProfile().getId(), false);
-                  profileService.setActiveProfile(user.getProfile().getId(), false);
-              }, () -> {
-                  logger.info("No match found for user {}. Set as waiting for match", user.getUserId());
-                  userRepository.getById(user.getUserId()).setWaitingForGroup(true);
-              });
-
-        return taskIndex++;
+        return others.stream()
+                     .filter(other -> scoreComputer.isUserCompatible(user.getProfile(), other) && scoreComputer.isUserCompatible(other.getProfile(), user))
+                     .map(other -> {
+                         float score = scoreComputer.computeMatchingScore(user.getProfile(), other.getProfile());
+                         return new Pair<>(other, score);
+                     })
+                     .filter(pair -> pair.right() > MINIMAL_MATCHING_SCORE)
+                     .max(Comparator.comparingDouble(Pair::right))
+                     .map(Pair::left);
     }
 
     private ProfileEntity computeGroupProfile(@NotNull ProfileModel profileA, @NotNull ProfileModel profileB)
