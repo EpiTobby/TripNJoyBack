@@ -45,7 +45,7 @@ public class GroupModel {
                 .startOfTrip(groupEntity.getStartOfTrip())
                 .endOfTrip(groupEntity.getEndOfTrip())
                 .createdDate(groupEntity.getCreatedDate())
-                .members(groupEntity.members.stream().filter(m -> m.isPending()).map(m -> MemberModel.of(m.getUser())).toList())
+                .members(groupEntity.members.stream().filter(m -> !m.isPending()).map(m -> MemberModel.of(m.getUser())).toList())
                 .build();
     }
 }
