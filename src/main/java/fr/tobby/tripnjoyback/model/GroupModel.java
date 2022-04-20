@@ -28,7 +28,7 @@ public class GroupModel {
     private Date startOfTrip;
     private Date endOfTrip;
     private Date createdDate;
-    private List<String> users;
+    private List<UserModel> users;
 
     @JsonProperty("createdDate")
     public String getCreatedDate() {
@@ -45,7 +45,7 @@ public class GroupModel {
                 .startOfTrip(groupEntity.getStartOfTrip())
                 .endOfTrip(groupEntity.getEndOfTrip())
                 .createdDate(groupEntity.getCreatedDate())
-                .users(groupEntity.members.stream().map(m -> m.getUser().getFirstname() + " " + m.getUser().getLastname()).toList())
+                .users(groupEntity.members.stream().map(m -> UserModel.of(m.getUser())).toList())
                 .build();
     }
 }
