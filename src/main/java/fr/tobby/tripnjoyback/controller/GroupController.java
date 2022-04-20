@@ -54,9 +54,9 @@ public class GroupController {
     @Operation(summary = "Create a private group")
     @ApiResponse(responseCode = "200", description = "Returns the created group")
     @ApiResponse(responseCode = "422", description = "User or Group does not exist")
-    public GroupModel createPrivateGroup(@PathVariable("id") final long userId, CreatePrivateGroupRequest createPrivateGroupRequest) {
+    public GroupModel createPrivateGroup(@PathVariable("id") final long userId, @RequestBody CreatePrivateGroupRequest createPrivateGroupRequest) {
         groupService.checkId(userId);
-        return groupService.createPrivateGroup(userId, createPrivateGroupRequest.getMaxSize());
+        return groupService.createPrivateGroup(userId, createPrivateGroupRequest);
     }
 
     @PostMapping("private/{group}/user")

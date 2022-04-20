@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.entity.*;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
+import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
 import fr.tobby.tripnjoyback.repository.*;
 import org.slf4j.Logger;
@@ -57,10 +58,11 @@ public class GroupService extends IdCheckerService {
 
 
     @Transactional
-    public GroupModel createPrivateGroup(long userId, int maxSize) {
+    public GroupModel createPrivateGroup(long userId, CreatePrivateGroupRequest createPrivateGroupRequest) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         GroupEntity groupEntity = GroupEntity.builder()
-                .maxSize(maxSize)
+                .name(createPrivateGroupRequest.getName())
+                .maxSize(createPrivateGroupRequest.getMaxSize())
                 .createdDate(Date.from(Instant.now()))
                 .owner(userEntity)
                 .stateEntity(stateRepository.findByValue("CLOSED").get())

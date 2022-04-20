@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 @JsonAutoDetect
 @NoArgsConstructor
 public class CreatePrivateGroupRequest {
+    private String name;
     private int maxSize;
 }
