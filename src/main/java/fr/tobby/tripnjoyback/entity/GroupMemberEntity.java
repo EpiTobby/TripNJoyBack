@@ -31,9 +31,12 @@ public class GroupMemberEntity {
     @JoinColumn(name = "profile_id")
     private ProfileEntity profile;
 
-    public GroupMemberEntity(GroupEntity groupEntity, UserEntity userEntity, ProfileEntity profileEntity) {
+    private boolean pending;
+
+    public GroupMemberEntity(GroupEntity groupEntity, UserEntity userEntity, ProfileEntity profileEntity, boolean pending) {
         this.group = groupEntity;
         this.user = userEntity;
         this.profile = profileEntity;
+        this.pending = pending;
     }
 }
