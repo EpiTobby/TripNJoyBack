@@ -130,7 +130,7 @@ public class GroupService extends IdCheckerService {
         if (updateGroupRequest.getState() != null)
         {
             if (updateGroupRequest.getState() == State.CLOSED)
-                groupEntity.members.stream().filter(m -> m.isPending()).forEach(groupMemberRepository::delete);
+                groupEntity.members.stream().filter(GroupMemberEntity::isPending).forEach(groupMemberRepository::delete);
             groupEntity.setStateEntity(updateGroupRequest.getState().getEntity());
         }
         if (groupEntity.getStateEntity().getValue().equals("CLOSED"))
@@ -166,7 +166,7 @@ public class GroupService extends IdCheckerService {
         GroupMemberEntity invitedUser = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not invited or does not exist"));
         invitedUser.setPending(false);
         if (groupEntity.getMaxSize() == groupEntity.getNumberOfNonPendingUsers()) {
-            groupEntity.members.stream().filter(m -> m.isPending()).forEach(groupMemberRepository::delete);
+            groupEntity.members.stream().filter(GroupMemberEntity::isPending).forEach(groupMemberRepository::delete);
             groupEntity.setStateEntity(State.CLOSED.getEntity());
         }
     }
