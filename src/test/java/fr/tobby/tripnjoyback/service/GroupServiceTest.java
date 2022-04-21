@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.SpringContext;
 import fr.tobby.tripnjoyback.entity.*;
 import fr.tobby.tripnjoyback.exception.UserNotConfirmedException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.ApplicationContext;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -38,12 +40,11 @@ public class GroupServiceTest {
     private GroupRepository groupRepository;
     @Autowired
     private GroupMemberRepository groupMemberRepository;
-    @Autowired
-    private UserRoleRepository userRoleRepository;
-    @Autowired
-    private StateRepository stateRepository;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     private GroupService groupService;
+
+    @Autowired
+    private ApplicationContext context;
 
     @BeforeAll
     static void beforeAll(@Autowired GenderRepository genderRepository, @Autowired StateRepository stateRepository, @Autowired UserRoleRepository userRoleRepository) {
@@ -59,7 +60,8 @@ public class GroupServiceTest {
 
     @BeforeEach
     void initGroupService(){
-        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, stateRepository);
+        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository);
+        SpringContext.setContext(context);
     }
 
     @NotNull
