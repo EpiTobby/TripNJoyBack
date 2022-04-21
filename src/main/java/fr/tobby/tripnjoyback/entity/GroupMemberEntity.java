@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.*;
 
@@ -29,6 +30,7 @@ public class GroupMemberEntity {
 
     @ManyToOne
     @JoinColumn(name = "profile_id")
+    @Nullable
     private ProfileEntity profile;
 
     private boolean pending;

@@ -119,6 +119,7 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "The user has joined the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
     public void joinGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
+        groupService.checkId(userId);
         groupService.joinGroup(groupId, userId);
     }
 
@@ -150,6 +151,22 @@ public class GroupController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(UpdateGroupException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(GroupCreationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(GroupCreationException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(UserAlreadyInGroupException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(UserAlreadyInGroupException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }

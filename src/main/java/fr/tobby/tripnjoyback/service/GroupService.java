@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -81,17 +82,16 @@ public class GroupService extends IdCheckerService {
     @Transactional
     public GroupModel createPrivateGroup(long userId, CreatePrivateGroupRequest createPrivateGroupRequest) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        GroupEntity groupEntity = GroupEntity.builder()
-                                             .name(createPrivateGroupRequest.getName())
-                                             .maxSize(createPrivateGroupRequest.getMaxSize())
-                                             .createdDate(Date.from(Instant.now()))
-                                             .owner(userEntity)
-                                             .stateEntity(State.CLOSED.getEntity())
-                                             .build();
-        groupRepository.save(groupEntity);
+        GroupEntity groupEntity = groupRepository.save(GroupEntity.builder()
+                .name(createPrivateGroupRequest.getName())
+                .maxSize(createPrivateGroupRequest.getMaxSize())
+                .createdDate(Date.from(Instant.now()))
+                .owner(userEntity)
+                                                                  .stateEntity(State.CLOSED.getEntity())
+                .members(new ArrayList<>())
+                .build());
         GroupMemberEntity groupMemberEntity = new GroupMemberEntity(groupEntity, userEntity, null, false);
         groupMemberRepository.save(groupMemberEntity);
-        groupEntity.members = List.of(groupMemberEntity);
         return GroupModel.of(groupEntity);
     }
 
@@ -99,8 +99,10 @@ public class GroupService extends IdCheckerService {
     public void addUserToPublicGroup(long groupId, long userId, long profileId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with this id " + userId));
+        if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == userEntity.getId()))
+            throw new UserAlreadyInGroupException("User already in group");
         ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with id " + profileId));
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, profileEntity, true)));
+        groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, profileEntity, true));
     }
 
     @Transactional
@@ -109,8 +111,9 @@ public class GroupService extends IdCheckerService {
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("No user with this email " + email));
         if (!userEntity.isConfirmed())
             throw new UserNotConfirmedException("The user you want to invite is not confirmed");
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, null, true)));
-
+        if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == userEntity.getId()))
+            throw new UserAlreadyInGroupException("User already in group");
+        groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, null, true));
     }
 
     @Transactional
@@ -133,12 +136,14 @@ public class GroupService extends IdCheckerService {
                 groupEntity.members.stream().filter(GroupMemberEntity::isPending).forEach(groupMemberRepository::delete);
             groupEntity.setStateEntity(updateGroupRequest.getState().getEntity());
         }
-        if (groupEntity.getStateEntity().getValue().equals("CLOSED"))
-        {
+        if (updateGroupRequest.getPicture() != null){
+            groupEntity.setPicture(updateGroupRequest.getPicture());
+        }
+        if (groupEntity.getStateEntity().getValue().equals("CLOSED")) {
             if (updateGroupRequest.getStartOfTrip() != null)
                 groupEntity.setStartOfTrip(updateGroupRequest.getStartOfTrip());
             if (updateGroupRequest.getEndOfTrip() != null)
-                groupEntity.setStartOfTrip(updateGroupRequest.getEndOfTrip());
+                groupEntity.setEndOfTrip(updateGroupRequest.getEndOfTrip());
         }
         if (updateGroupRequest.getOwnerId() != null)
         {
