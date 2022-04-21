@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.Collection;
 
 @Entity
-@Table(name  = "users")
+@Table(name = "users")
 @Builder
 @Getter
 @NoArgsConstructor
@@ -49,7 +49,16 @@ public class UserEntity {
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Collection<RoleEntity> roles;
 
-    public UserEntity(String firstname, String lastname, String password, String email, Instant birthDate, GenderEntity gender, String profilePicture, CityEntity city, Instant createdDate, String phoneNumber) {
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_profiles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "profile_id", referencedColumnName = "id"))
+    private Collection<ProfileEntity> profiles;
+
+    @Setter
+    private boolean waitingForGroup;
+
+    public UserEntity(String firstname, String lastname, String password, String email, Instant birthDate, GenderEntity gender, String profilePicture,
+                      CityEntity city, Instant createdDate, String phoneNumber)
+    {
         this.id = null;
         this.firstname = firstname;
         this.lastname = lastname;

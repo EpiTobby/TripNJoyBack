@@ -1,16 +1,17 @@
 CREATE TABLE "users" (
-                         "id" SERIAL PRIMARY KEY,
-                         "first_name" varchar,
-                         "last_name" varchar,
-                         "password" text,
-                         "email" varchar,
-                         "gender_id" int,
-                         "birthdate" varchar,
-                         "profile_picture" text,
-                         "phone_number" varchar,
-                         "city_id" int,
-                         "created_date" timestamp,
-                         "confirmed" boolean
+                         "id"                SERIAL PRIMARY KEY,
+                         "first_name"        varchar,
+                         "last_name"         varchar,
+                         "password"          text,
+                         "email"             varchar,
+                         "gender_id"         int,
+                         "birthdate"         varchar,
+                         "profile_picture"   text,
+                         "phone_number"      varchar,
+                         "city_id"           int,
+                         "created_date"      timestamp,
+                         "confirmed"         boolean,
+                         "waiting_for_group" boolean default false not null
 );
 
 CREATE TABLE "genders" (
@@ -47,7 +48,6 @@ CREATE TABLE "users_groups" (
 
 CREATE TABLE "profiles" (
                             "id" SERIAL PRIMARY KEY,
-                            "user_id" int,
                             name varchar,
                             "active" bool
 );
@@ -151,45 +151,87 @@ create table roles
     name varchar(8) not null
 );
 
-create table user_roles
+create table users_roles
 (
     user_id int not null
-        constraint user_roles_users_id_fk
-        references users
-        on delete cascade,
+        constraint users_roles_users_id_fk
+            references users
+            on delete cascade,
     role_id int not null
-        constraint user_roles_roles_id_fk
-        references roles
-        on delete cascade,
-    constraint user_roles_pk
+        constraint users_roles_roles_id_fk
+            references roles
+            on delete cascade,
+    constraint users_roles_pk
         primary key (user_id, role_id)
 );
 
-ALTER TABLE "users" ADD FOREIGN KEY ("gender_id") REFERENCES "genders" ("id");
+create table user_profiles
+(
+    user_id    int
+        constraint user_profiles_users_id_fk
+            references users
+            on update cascade on delete cascade,
+    profile_id int,
+    constraint user_profiles_pk
+        primary key (user_id, profile_id)
+);
 
-ALTER TABLE "users_groups" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+create table group_profiles
+(
+    group_id   int not null
+        constraint group_profiles_groups_id_fk
+            references groups
+            on update cascade on delete cascade,
+    profile_id int not null,
+    constraint group_profiles_pk
+        primary key (group_id, profile_id)
+);
 
-ALTER TABLE "users_groups" ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id");
+alter table user_profiles
+    add constraint user_profiles_profiles_id_fk
+        foreign key (profile_id) references profiles
+            on update cascade on delete cascade;
 
-ALTER TABLE "groups" ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id");
+alter table group_profiles
+    add constraint group_profiles_profiles_id_fk
+        foreign key (profile_id) references profiles
+            on update cascade on delete cascade;
 
-ALTER TABLE "groups" ADD FOREIGN KEY ("state_id") REFERENCES "states" ("id");
+ALTER TABLE "users"
+    ADD FOREIGN KEY ("gender_id") REFERENCES "genders" ("id");
 
-ALTER TABLE "users" ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
+ALTER TABLE "users_groups"
+    ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE "profiles" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")  on delete cascade;
+ALTER TABLE "users_groups"
+    ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE "users_groups" ADD FOREIGN KEY ("profile_id") REFERENCES "profiles" ("id");
+ALTER TABLE "groups"
+    ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id");
 
-ALTER TABLE "reviews" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "groups"
+    ADD FOREIGN KEY ("state_id") REFERENCES "states" ("id");
 
-ALTER TABLE "reviews" ADD FOREIGN KEY ("reviewer_id") REFERENCES "users" ("id");
+ALTER TABLE "users"
+    ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
 
-ALTER TABLE "report" ADD FOREIGN KEY ("submitter_id") REFERENCES "users" ("id");
+ALTER TABLE "users_groups"
+    ADD FOREIGN KEY ("profile_id") REFERENCES "profiles" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE "report" ADD FOREIGN KEY ("reported_id") REFERENCES "users" ("id");
+ALTER TABLE "reviews"
+    ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "activities" ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id");
+ALTER TABLE "reviews"
+    ADD FOREIGN KEY ("reviewer_id") REFERENCES "users" ("id");
+
+ALTER TABLE "report"
+    ADD FOREIGN KEY ("submitter_id") REFERENCES "users" ("id");
+
+ALTER TABLE "report"
+    ADD FOREIGN KEY ("reported_id") REFERENCES "users" ("id");
+
+ALTER TABLE "activities"
+    ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id");
 
 ALTER TABLE "activities_members" ADD FOREIGN KEY ("activity_id") REFERENCES "activities" ("id");
 
@@ -215,12 +257,29 @@ ALTER TABLE "expenses" ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id");
 
 ALTER TABLE "expenses_members" ADD FOREIGN KEY ("expense_id") REFERENCES "expenses" ("id");
 
-ALTER TABLE "suggestions" ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
+ALTER TABLE "suggestions"
+    ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
 
-ALTER TABLE "confirmation_codes" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id")  on delete cascade;
+ALTER TABLE "confirmation_codes"
+    ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") on delete cascade;
 
-INSERT INTO "genders" (value) VALUES ('male');
+INSERT INTO "genders" (value)
+VALUES ('male');
 
-INSERT INTO "genders" (value) VALUES ('female');
+INSERT INTO "genders" (value)
+VALUES ('female');
 
-INSERT INTO "genders" (value) VALUES ('other');
+INSERT INTO "genders" (value)
+VALUES ('other');
+
+INSERT INTO states
+VALUES (0, 'OPEN');
+INSERT INTO states
+VALUES (1, 'CLOSED');
+INSERT INTO states
+VALUES (2, 'ARCHIVED');
+
+INSERT INTO roles (name)
+VALUES ('default');
+INSERT INTO roles (name)
+VALUES ('admin');

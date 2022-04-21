@@ -2,7 +2,7 @@ package fr.tobby.tripnjoyback.model.request.anwsers;
 
 import com.mongodb.lang.Nullable;
 
-public enum YesNoAnswer implements AnswerModel{
+public enum YesNoAnswer implements StaticAnswerModel{
     YES,
     NO,
     NO_PREFERENCE;
