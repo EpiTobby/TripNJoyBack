@@ -8,6 +8,8 @@ import fr.tobby.tripnjoyback.model.response.MatchMakingResponse;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import fr.tobby.tripnjoyback.service.MatchMaker;
 import fr.tobby.tripnjoyback.service.ProfileService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +31,8 @@ public class MatchMakingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
+    @Operation(summary = "Create a profile and start the matchmaking")
+    @ApiResponse(responseCode = "202", description = "Matchmaking started")
     public MatchMakingResponse match(@RequestParam("user_id") long userId, @RequestBody ProfileCreationRequest profileCreationRequest)
     {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(UserNotConfirmedException::new);
