@@ -140,10 +140,16 @@ public class GroupService extends IdCheckerService {
             if (updateGroupRequest.getEndOfTrip() != null)
                 groupEntity.setStartOfTrip(updateGroupRequest.getEndOfTrip());
         }
-        if (updateGroupRequest.getOwnerId() != null) {
-            if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == updateGroupRequest.getOwnerId())) {
-                groupEntity.setOwner(userRepository.findById(updateGroupRequest.getOwnerId()).get());
-            } else
+        if (updateGroupRequest.getOwnerId() != null)
+        {
+            long newOwnerId = updateGroupRequest.getOwnerId();
+            if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == newOwnerId))
+            {
+                UserEntity newOwner = userRepository.findById(updateGroupRequest.getOwnerId())
+                                                    .orElseThrow(() -> new UserNotFoundException(updateGroupRequest.getOwnerId()));
+                groupEntity.setOwner(newOwner);
+            }
+            else
                 throw new UpdateGroupException("The new owner does not exist or is not in this private group");
         }
     }
