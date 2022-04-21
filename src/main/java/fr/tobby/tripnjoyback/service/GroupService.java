@@ -35,7 +35,12 @@ public class GroupService extends IdCheckerService {
 
     public Collection<GroupModel> getUserGroups(long userId) {
         List<GroupEntity> groups = groupRepository.findAll();
-        return groups.stream().filter(g -> g.members.stream().anyMatch(m -> m.getUser().getId() == userId)).map(GroupModel::of).toList();
+        return groups.stream().filter(g -> g.members.stream().anyMatch(m -> m.getUser().getId() == userId && !m.isPending())).map(GroupModel::of).toList();
+    }
+
+    public Collection<GroupModel> getUserInvites(long userId) {
+        List<GroupEntity> groups = groupRepository.findAll();
+        return groups.stream().filter(g -> g.members.stream().anyMatch(m -> m.getUser().getId() == userId && m.isPending())).map(GroupModel::of).toList();
     }
 
     public String getOwnerEmail(long groupId) {
@@ -52,8 +57,8 @@ public class GroupService extends IdCheckerService {
                 .members(List.of())
                 .build();
         groupRepository.save(groupEntity);
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity, true)));
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity, true)));
+        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity, false)));
+        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity, false)));
         return GroupModel.of(groupEntity);
     }
 
