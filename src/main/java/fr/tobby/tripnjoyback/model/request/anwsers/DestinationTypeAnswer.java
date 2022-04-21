@@ -1,8 +1,10 @@
 package fr.tobby.tripnjoyback.model.request.anwsers;
 
-public enum DestinationTypeAnswer implements AnswerModel {
+public enum DestinationTypeAnswer implements StaticAnswerModel {
     CITY,
     COUNTRYSIDE,
     BEACH,
-    MOUNTAIN;
+    MOUNTAIN,
+    NO_PREFERENCE,
+    ;
 }

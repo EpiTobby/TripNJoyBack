@@ -1,9 +1,9 @@
 package fr.tobby.tripnjoyback.entity;
 
 import lombok.*;
+import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.*;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 
@@ -28,6 +28,7 @@ public class GroupEntity {
 
     @ManyToOne()
     @JoinColumn(name = "owner_id")
+    @Nullable
     private UserEntity owner;
 
     @Column(name = "max_size")
@@ -52,4 +53,8 @@ public class GroupEntity {
     public long getNumberOfNonPendingUsers(){
         return members.stream().filter(m -> !m.isPending()).count();
     }
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinTable(name = "group_profiles", joinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "profile_id", referencedColumnName = "id"))
+    private ProfileEntity profile;
 }

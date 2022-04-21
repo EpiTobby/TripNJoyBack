@@ -1,17 +1,20 @@
 package fr.tobby.tripnjoyback.model.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import fr.tobby.tripnjoyback.model.IProfile;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
 @JsonAutoDetect
-public class ProfileCreationRequest {
+public class ProfileCreationRequest implements IProfile {
     @NotNull
     private String name;
     @NotNull
@@ -42,4 +45,21 @@ public class ProfileCreationRequest {
     private YesNoAnswer goOutAtNight;
     @NotNull
     private YesNoAnswer sport;
+
+    @JsonProperty("availabilities")
+    public void setAvailabilities(List<AvailabilityAnswerModel> availabilities)
+    {
+        if (!availabilities.isEmpty())
+        {
+            Date date = availabilities.get(0).getEndDate();
+            for (int i = 1; i < availabilities.size(); i++)
+            {
+                AvailabilityAnswerModel current = availabilities.get(i);
+                if (current.getStartDate().before(date))
+                    throw new IllegalArgumentException("Availability list should be ordered");
+                date = current.getEndDate();
+            }
+        }
+        this.availabilities = availabilities;
+    }
 }

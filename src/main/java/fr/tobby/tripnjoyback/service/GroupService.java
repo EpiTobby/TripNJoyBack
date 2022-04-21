@@ -1,6 +1,9 @@
 package fr.tobby.tripnjoyback.service;
 
-import fr.tobby.tripnjoyback.entity.*;
+import fr.tobby.tripnjoyback.entity.GroupEntity;
+import fr.tobby.tripnjoyback.entity.GroupMemberEntity;
+import fr.tobby.tripnjoyback.entity.ProfileEntity;
+import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.State;
@@ -44,19 +47,23 @@ public class GroupService extends IdCheckerService {
     }
 
     @Transactional
-    public GroupModel createPublicGroup(UserEntity user1Entity, ProfileEntity profile1Entity, UserEntity user2Entity, ProfileEntity profile2Entity, int maxSize) {
+    public GroupModel createPublicGroup(UserEntity user1Entity, ProfileEntity profile1Entity, UserEntity user2Entity, ProfileEntity profile2Entity,
+                                        int maxSize, ProfileEntity groupProfile)
+    {
         GroupEntity groupEntity = GroupEntity.builder()
-                .maxSize(maxSize)
-                .createdDate(Date.from(Instant.now()))
-                .stateEntity(maxSize > 2 ? stateRepository.findByValue("OPEN").get() : stateRepository.findByValue("CLOSED").get())
-                .members(List.of())
-                .build();
+                                             .maxSize(maxSize)
+                                             .createdDate(Date.from(Instant.now()))
+                                             .stateEntity(maxSize > 2
+                                                          ? stateRepository.findByValue("OPEN").get()
+                                                          : stateRepository.findByValue("CLOSED").get())
+                                             .members(List.of())
+                                             .profile(groupProfile)
+                                             .build();
         groupRepository.save(groupEntity);
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity, true)));
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity, true)));
+        groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity, true));
+        groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity, true));
         return GroupModel.of(groupEntity);
     }
-
 
     @Transactional
     public GroupModel createPrivateGroup(long userId, CreatePrivateGroupRequest createPrivateGroupRequest) {
@@ -127,7 +134,6 @@ public class GroupService extends IdCheckerService {
     @Transactional
     public void deletePrivateGroup(long groupId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
-        groupMemberRepository.deleteByGroupId(groupId);
         groupRepository.delete(groupEntity);
     }
 
@@ -148,7 +154,6 @@ public class GroupService extends IdCheckerService {
         GroupMemberEntity groupMemberEntity = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not found in this group or does not exist"));
         groupMemberRepository.delete(groupMemberEntity);
         if (groupEntity.getNumberOfNonPendingUsers() == 0) {
-            groupMemberRepository.deleteByGroupId(groupId);
             groupRepository.delete(groupEntity);
         }
     }
