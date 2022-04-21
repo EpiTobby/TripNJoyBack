@@ -135,7 +135,6 @@ public class GroupService extends IdCheckerService {
     @Transactional
     public void deletePrivateGroup(long groupId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
-        groupMemberRepository.deleteByGroupId(groupId);
         groupRepository.delete(groupEntity);
     }
 
@@ -156,7 +155,6 @@ public class GroupService extends IdCheckerService {
         GroupMemberEntity groupMemberEntity = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not found in this group or does not exist"));
         groupMemberRepository.delete(groupMemberEntity);
         if (groupEntity.getNumberOfNonPendingUsers() == 0) {
-            groupMemberRepository.deleteByGroupId(groupId);
             groupRepository.delete(groupEntity);
         }
     }
