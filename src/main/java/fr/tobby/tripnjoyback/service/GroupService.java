@@ -116,21 +116,25 @@ public class GroupService extends IdCheckerService {
     @Transactional
     public void updatePrivateGroup(long groupId, UpdateGroupRequest updateGroupRequest) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-        if (updateGroupRequest.getName() != null) {
+        if (updateGroupRequest.getName() != null)
+        {
             groupEntity.setName(updateGroupRequest.getName());
         }
-        int newMaxSize = updateGroupRequest.getMaxSize();
-        if (newMaxSize != 0) {
+        if (updateGroupRequest.getMaxSize() != null && updateGroupRequest.getMaxSize() != 0)
+        {
+            int newMaxSize = updateGroupRequest.getMaxSize();
             if (newMaxSize < groupEntity.getNumberOfNonPendingUsers())
                 throw new UpdateGroupException("The maximum size of the group must be greater or equal than the current number of members in the private group");
             groupEntity.setMaxSize(newMaxSize);
         }
-        if (updateGroupRequest.getState() != null) {
+        if (updateGroupRequest.getState() != null)
+        {
             if (updateGroupRequest.getState() == State.CLOSED)
                 groupEntity.members.stream().filter(m -> m.isPending()).forEach(groupMemberRepository::delete);
             groupEntity.setStateEntity(updateGroupRequest.getState().getEntity());
         }
-        if (groupEntity.getStateEntity().getValue().equals("CLOSED")) {
+        if (groupEntity.getStateEntity().getValue().equals("CLOSED"))
+        {
             if (updateGroupRequest.getStartOfTrip() != null)
                 groupEntity.setStartOfTrip(updateGroupRequest.getStartOfTrip());
             if (updateGroupRequest.getEndOfTrip() != null)
