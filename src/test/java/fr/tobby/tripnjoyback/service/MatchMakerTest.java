@@ -210,6 +210,7 @@ class MatchMakerTest {
                 new Date(),
                 null,
                 null,
+                "",
                 List.of(mock(GroupMemberEntity.class)),
                 groupProfileEntity));
 
