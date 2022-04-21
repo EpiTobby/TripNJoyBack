@@ -201,10 +201,10 @@ ALTER TABLE "users"
     ADD FOREIGN KEY ("gender_id") REFERENCES "genders" ("id");
 
 ALTER TABLE "users_groups"
-    ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+    ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE "users_groups"
-    ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id");
+    ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE "groups"
     ADD FOREIGN KEY ("owner_id") REFERENCES "users" ("id");
@@ -212,19 +212,26 @@ ALTER TABLE "groups"
 ALTER TABLE "groups"
     ADD FOREIGN KEY ("state_id") REFERENCES "states" ("id");
 
-ALTER TABLE "users" ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
+ALTER TABLE "users"
+    ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
 
-ALTER TABLE "users_groups" ADD FOREIGN KEY ("profile_id") REFERENCES "profiles" ("id");
+ALTER TABLE "users_groups"
+    ADD FOREIGN KEY ("profile_id") REFERENCES "profiles" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE "reviews" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "reviews"
+    ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "reviews" ADD FOREIGN KEY ("reviewer_id") REFERENCES "users" ("id");
+ALTER TABLE "reviews"
+    ADD FOREIGN KEY ("reviewer_id") REFERENCES "users" ("id");
 
-ALTER TABLE "report" ADD FOREIGN KEY ("submitter_id") REFERENCES "users" ("id");
+ALTER TABLE "report"
+    ADD FOREIGN KEY ("submitter_id") REFERENCES "users" ("id");
 
-ALTER TABLE "report" ADD FOREIGN KEY ("reported_id") REFERENCES "users" ("id");
+ALTER TABLE "report"
+    ADD FOREIGN KEY ("reported_id") REFERENCES "users" ("id");
 
-ALTER TABLE "activities" ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id");
+ALTER TABLE "activities"
+    ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id");
 
 ALTER TABLE "activities_members" ADD FOREIGN KEY ("activity_id") REFERENCES "activities" ("id");
 
