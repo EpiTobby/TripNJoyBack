@@ -54,9 +54,9 @@ public class GroupController {
     @Operation(summary = "Create a private group")
     @ApiResponse(responseCode = "200", description = "Returns the created group")
     @ApiResponse(responseCode = "422", description = "User or Group does not exist")
-    public GroupModel createPrivateGroup(@PathVariable("id") final long userId, CreatePrivateGroupRequest createPrivateGroupRequest) {
+    public GroupModel createPrivateGroup(@PathVariable("id") final long userId, @RequestBody CreatePrivateGroupRequest createPrivateGroupRequest) {
         groupService.checkId(userId);
-        return groupService.createPrivateGroup(userId, createPrivateGroupRequest.getMaxSize());
+        return groupService.createPrivateGroup(userId, createPrivateGroupRequest);
     }
 
     @PostMapping("private/{group}/user")
@@ -64,10 +64,10 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "The user is added to the group")
     @ApiResponse(responseCode = "403", description = "The client is not the owner of the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
-    public void addUserToPrivateGroup(@PathVariable("group") final long groupId, @RequestBody ModelWithEmail model) {
+    public void inviteUserInPrivateGroup(@PathVariable("group") final long groupId, @RequestBody ModelWithEmail model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         checkOwnership(groupId, authentication);
-        groupService.addUserToPrivateGroup(groupId, model.getEmail());
+        groupService.inviteUserInPrivateGroup(groupId, model.getEmail());
     }
 
     @DeleteMapping("private/{group}/user/{id}")
@@ -101,6 +101,14 @@ public class GroupController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         checkOwnership(groupId, authentication);
         groupService.deletePrivateGroup(groupId);
+    }
+
+    @PatchMapping("{group}/join/{id}")
+    @Operation(summary = "Accept the invitation to the group")
+    @ApiResponse(responseCode = "200", description = "The user has joined the group")
+    @ApiResponse(responseCode = "422", description = "Group or User does not exist")
+    public void joinGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
+        groupService.joinGroup(groupId, userId);
     }
 
     @ExceptionHandler(UserNotFoundException.class)

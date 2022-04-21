@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -28,7 +27,8 @@ public class GroupModel {
     private Date startOfTrip;
     private Date endOfTrip;
     private Date createdDate;
-    private List<String> users;
+    private String picture;
+    private List<MemberModel> members;
 
     @JsonProperty("createdDate")
     public String getCreatedDate() {
@@ -45,7 +45,7 @@ public class GroupModel {
                 .startOfTrip(groupEntity.getStartOfTrip())
                 .endOfTrip(groupEntity.getEndOfTrip())
                 .createdDate(groupEntity.getCreatedDate())
-                .users(groupEntity.members.stream().map(m -> m.getUser().getFirstname() + " " + m.getUser().getLastname()).toList())
+                .members(groupEntity.members.stream().filter(m -> !m.isPending()).map(m -> MemberModel.of(m.getUser())).toList())
                 .build();
     }
 }
