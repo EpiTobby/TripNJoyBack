@@ -105,7 +105,7 @@ public class GroupService extends IdCheckerService {
 
     @Transactional
     public void inviteUserInPrivateGroup(long groupId, String email) {
-        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
+        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("No user with this email " + email));
         if (!userEntity.isConfirmed())
             throw new UserNotConfirmedException("The user you want to invite is not confirmed");
@@ -115,7 +115,7 @@ public class GroupService extends IdCheckerService {
 
     @Transactional
     public void updatePrivateGroup(long groupId, UpdateGroupRequest updateGroupRequest) {
-        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
+        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         if (updateGroupRequest.getName() != null) {
             groupEntity.setName(updateGroupRequest.getName());
         }
@@ -146,13 +146,13 @@ public class GroupService extends IdCheckerService {
 
     @Transactional
     public void deletePrivateGroup(long groupId) {
-        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
+        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         groupRepository.delete(groupEntity);
     }
 
     @Transactional
     public void joinGroup(long groupId, long userId) {
-        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
+        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         GroupMemberEntity invitedUser = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not invited or does not exist"));
         invitedUser.setPending(false);
         if (groupEntity.getMaxSize() == groupEntity.getNumberOfNonPendingUsers()) {
@@ -163,7 +163,7 @@ public class GroupService extends IdCheckerService {
 
     @Transactional
     public void removeUserFromGroup(long groupId, long userId) {
-        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
+        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         GroupMemberEntity groupMemberEntity = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not found in this group or does not exist"));
         groupMemberRepository.delete(groupMemberEntity);
         if (groupEntity.getNumberOfNonPendingUsers() == 0) {
