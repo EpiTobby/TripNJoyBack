@@ -111,7 +111,7 @@ public class GroupService extends IdCheckerService {
         if (updateGroupRequest.getName() != null) {
             groupEntity.setName(updateGroupRequest.getName());
         }
-        int newMaxSize = updateGroupRequest.getMaxSize();
+        int newMaxSize = updateGroupRequest.getMaxSize() != null ? updateGroupRequest.getMaxSize() : 0;
         if (newMaxSize != 0) {
             if (newMaxSize < groupEntity.getNumberOfNonPendingUsers())
                 throw new UpdateGroupException("The maximum size of the group must be greater or equal than the current number of members in the private group");
