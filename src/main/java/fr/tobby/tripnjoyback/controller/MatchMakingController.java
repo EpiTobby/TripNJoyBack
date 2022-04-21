@@ -36,7 +36,7 @@ public class MatchMakingController {
     public MatchMakingResponse match(@RequestParam("user_id") long userId, @RequestBody ProfileCreationRequest profileCreationRequest)
     {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(UserNotConfirmedException::new);
-        ProfileModel profile = profileService.createProfile(userId, profileCreationRequest);
+        ProfileModel profile = profileService.createUserProfile(userId, profileCreationRequest);
 
         long taskId = matchMaker.match(userEntity, profile);
         return new MatchMakingResponse(taskId, "");

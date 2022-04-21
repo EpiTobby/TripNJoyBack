@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,7 +48,7 @@ public class ProfileController {
     @ApiResponse(responseCode = "422", description = "")
     public ProfileModel createProfile(@PathVariable("id") final long userId, @RequestBody ProfileCreationRequest profileCreationRequest) {
         profileService.checkId(userId);
-        return profileService.createProfile(userId, profileCreationRequest);
+        return profileService.createUserProfile(userId, profileCreationRequest);
     }
 
     @PatchMapping("{profile}/update")

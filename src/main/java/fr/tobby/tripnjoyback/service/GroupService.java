@@ -91,8 +91,10 @@ public class GroupService extends IdCheckerService {
     public void addUserToPublicGroup(long groupId, long userId, long profileId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with this id " + userId));
+        if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == userEntity.getId()))
+            throw new UserAlreadyInGroupException("User already in group");
         ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with id " + profileId));
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, profileEntity, true)));
+        groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, profileEntity, true));
     }
 
     @Transactional
@@ -101,8 +103,9 @@ public class GroupService extends IdCheckerService {
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("No user with this email " + email));
         if (!userEntity.isConfirmed())
             throw new UserNotConfirmedException("The user you want to invite is not confirmed");
-        groupEntity.members.add(groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, null, true)));
-
+        if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == userEntity.getId()))
+            throw new UserAlreadyInGroupException("User already in group");
+        groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, null, true));
     }
 
     @Transactional
@@ -111,7 +114,7 @@ public class GroupService extends IdCheckerService {
         if (updateGroupRequest.getName() != null) {
             groupEntity.setName(updateGroupRequest.getName());
         }
-        int newMaxSize = updateGroupRequest.getMaxSize();
+        int newMaxSize = updateGroupRequest.getMaxSize() == null ? 0 : updateGroupRequest.getMaxSize();
         if (newMaxSize != 0) {
             if (newMaxSize < groupEntity.getNumberOfNonPendingUsers())
                 throw new UpdateGroupException("The maximum size of the group must be greater or equal than the current number of members in the private group");
@@ -122,11 +125,14 @@ public class GroupService extends IdCheckerService {
                 groupEntity.members.stream().filter(m -> m.isPending()).forEach(groupMemberRepository::delete);
             groupEntity.setStateEntity(stateRepository.findByValue(updateGroupRequest.getState().toString()).get());
         }
+        if (updateGroupRequest.getPicture() != null){
+            groupEntity.setPicture(updateGroupRequest.getPicture());
+        }
         if (groupEntity.getStateEntity().getValue().equals("CLOSED")) {
             if (updateGroupRequest.getStartOfTrip() != null)
                 groupEntity.setStartOfTrip(updateGroupRequest.getStartOfTrip());
             if (updateGroupRequest.getEndOfTrip() != null)
-                groupEntity.setStartOfTrip(updateGroupRequest.getEndOfTrip());
+                groupEntity.setEndOfTrip(updateGroupRequest.getEndOfTrip());
         }
         if (updateGroupRequest.getOwnerId() != null) {
             if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == updateGroupRequest.getOwnerId())) {

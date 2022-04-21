@@ -37,7 +37,7 @@ public class ProfileService extends IdCheckerService {
     }
 
     @Transactional
-    public ProfileModel createProfile(long userId, ProfileCreationRequest profileCreationRequest)
+    public ProfileModel createUserProfile(long userId, ProfileCreationRequest profileCreationRequest)
     {
         setProfileInactive(userId);
         ProfileEntity profileEntity = ProfileEntity.builder()
