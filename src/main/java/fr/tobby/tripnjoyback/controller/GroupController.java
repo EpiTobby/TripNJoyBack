@@ -5,7 +5,6 @@ import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.ModelWithEmail;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
-import fr.tobby.tripnjoyback.service.AuthService;
 import fr.tobby.tripnjoyback.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,21 +23,24 @@ public class GroupController {
     private static final Logger logger = LoggerFactory.getLogger(GroupController.class);
     private final GroupService groupService;
 
-    public GroupController(GroupService groupService, AuthService authService) {
+    public GroupController(GroupService groupService)
+    {
         this.groupService = groupService;
     }
 
     @GetMapping("{id}")
     @Operation(summary = "Get all the group of the user")
     @ApiResponse(responseCode = "200", description = "Return the list of groups the user is in")
-    private Collection<GroupModel> getUserGroups(@PathVariable("id") final long userId) {
+    public Collection<GroupModel> getUserGroups(@PathVariable("id") final long userId)
+    {
         return groupService.getUserGroups(userId);
     }
 
     @GetMapping("invites/{id}")
     @Operation(summary = "Get all the group invitation of the user")
     @ApiResponse(responseCode = "200", description = "Return the list of groups the user is invited to")
-    private Collection<GroupModel> getUserInvites(@PathVariable("id") final long userId) {
+    public Collection<GroupModel> getUserInvites(@PathVariable("id") final long userId)
+    {
         return groupService.getUserInvites(userId);
     }
 
@@ -52,7 +54,8 @@ public class GroupController {
     @Operation(summary = "Remove the user from a group")
     @ApiResponse(responseCode = "200", description = "The user has left the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
-    private void leaveGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
+    public void leaveGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId)
+    {
         groupService.checkId(userId);
         groupService.removeUserFromGroup(groupId, userId);
     }
@@ -82,7 +85,8 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "The user is removed")
     @ApiResponse(responseCode = "403", description = "The client is not the owner of the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
-    public void RemoveUserFromPrivateGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
+    public void removeUserFromPrivateGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId)
+    {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         checkOwnership(groupId, authentication);
         groupService.removeUserFromGroup(groupId, userId);
