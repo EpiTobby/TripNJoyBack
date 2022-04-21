@@ -40,10 +40,11 @@ CREATE TABLE "states" (
                           "value" varchar
 );
 
-CREATE TABLE "users_groups" (
-                                "user_id" int,
-                                "group_id" int,
-                                "profile_id" int
+CREATE TABLE "users_groups"(
+                               "id"         SERIAL PRIMARY KEY,
+                               "user_id"    int,
+                               "group_id"   int,
+                               "profile_id" int
 );
 
 CREATE TABLE "profiles" (
