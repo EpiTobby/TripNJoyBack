@@ -103,7 +103,7 @@ public class GroupServiceTest {
     }
 
     @Test
-    void CheckOwner() throws ParseException {
+    void checkOwner() throws ParseException {
         CreatePrivateGroupRequest request = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
         UserEntity owner = anyUser();
         GroupModel model = groupService.createPrivateGroup(owner.getId(), request);
@@ -146,7 +146,7 @@ public class GroupServiceTest {
 
     @Test
     @Disabled
-    void CheckMaxSize() throws ParseException {
+    void checkMaxSize() throws ParseException {
         CreatePrivateGroupRequest request = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
         UserEntity owner = anyUser();
         GroupModel model = groupService.createPrivateGroup(owner.getId(), request);

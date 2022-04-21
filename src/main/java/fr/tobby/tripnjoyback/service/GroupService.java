@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -73,17 +74,16 @@ public class GroupService extends IdCheckerService {
     @Transactional
     public GroupModel createPrivateGroup(long userId, CreatePrivateGroupRequest createPrivateGroupRequest) {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        GroupEntity groupEntity = GroupEntity.builder()
+        GroupEntity groupEntity = groupRepository.save(GroupEntity.builder()
                 .name(createPrivateGroupRequest.getName())
                 .maxSize(createPrivateGroupRequest.getMaxSize())
                 .createdDate(Date.from(Instant.now()))
                 .owner(userEntity)
                 .stateEntity(stateRepository.findByValue("CLOSED").get())
-                .build();
-        groupRepository.save(groupEntity);
+                .members(new ArrayList<>())
+                .build());
         GroupMemberEntity groupMemberEntity = new GroupMemberEntity(groupEntity, userEntity, null, false);
         groupMemberRepository.save(groupMemberEntity);
-        groupEntity.members = List.of(groupMemberEntity);
         return GroupModel.of(groupEntity);
     }
 
