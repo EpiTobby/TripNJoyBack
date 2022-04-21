@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -59,7 +58,7 @@ public class GroupServiceTest {
 
     @BeforeEach
     void initGroupService(){
-        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, stateRepository);
+        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository);
     }
 
     @NotNull
