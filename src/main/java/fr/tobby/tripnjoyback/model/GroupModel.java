@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,11 +23,15 @@ public class GroupModel {
     private long id;
     private String name;
     private State state;
-    private String owner;
+    @Nullable
+    private UserModel owner;
     private int maxSize;
+    @Nullable
     private Date startOfTrip;
+    @Nullable
     private Date endOfTrip;
     private Date createdDate;
+    @Nullable
     private String picture;
     private List<MemberModel> members;
 
@@ -37,15 +42,15 @@ public class GroupModel {
 
     public static GroupModel of(GroupEntity groupEntity){
         return GroupModel.builder()
-                .id(groupEntity.getId())
-                .name(groupEntity.getName())
-                .state(State.valueOf(groupEntity.getStateEntity().getValue()))
-                .owner(groupEntity.getOwner().getFirstname() + " " + groupEntity.getOwner().getLastname())
-                .maxSize(groupEntity.getMaxSize())
-                .startOfTrip(groupEntity.getStartOfTrip())
-                .endOfTrip(groupEntity.getEndOfTrip())
-                .createdDate(groupEntity.getCreatedDate())
-                .members(groupEntity.members.stream().filter(m -> !m.isPending()).map(m -> MemberModel.of(m.getUser())).toList())
-                .build();
+                         .id(groupEntity.getId())
+                         .name(groupEntity.getName())
+                         .state(State.valueOf(groupEntity.getStateEntity().getValue()))
+                         .owner(groupEntity.getOwner() == null ? null : UserModel.of(groupEntity.getOwner()))
+                         .maxSize(groupEntity.getMaxSize())
+                         .startOfTrip(groupEntity.getStartOfTrip())
+                         .endOfTrip(groupEntity.getEndOfTrip())
+                         .createdDate(groupEntity.getCreatedDate())
+                         .members(groupEntity.members.stream().filter(m -> !m.isPending()).map(m -> MemberModel.of(m.getUser())).toList())
+                         .build();
     }
 }

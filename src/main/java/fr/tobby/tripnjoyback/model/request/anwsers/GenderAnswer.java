@@ -1,7 +1,21 @@
 package fr.tobby.tripnjoyback.model.request.anwsers;
 
-public enum GenderAnswer implements AnswerModel{
-    MALE,
-    FEMALE,
-    MIXED;
+import fr.tobby.tripnjoyback.model.Gender;
+
+public enum GenderAnswer implements StaticAnswerModel{
+    MALE(Gender.MALE),
+    FEMALE(Gender.FEMALE),
+    MIXED(Gender.NOT_SPECIFIED);
+
+    private final Gender gender;
+
+    GenderAnswer(final Gender gender)
+    {
+        this.gender = gender;
+    }
+
+    public Gender toGender()
+    {
+        return gender;
+    }
 }

@@ -1,33 +1,29 @@
 package fr.tobby.tripnjoyback.model.request.anwsers;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.type.SerializationException;
 
 @Getter
-@AllArgsConstructor
 @JsonAutoDetect
-@NoArgsConstructor
 public class RangeAnswerModel implements AnswerModel {
-    private int minValue;
-    private int maxValue;
+    private final int minValue;
+    private final int maxValue;
 
-    @JsonProperty("minValue")
-    public void setMinValue(int minValue){
-        if (minValue <= 0 || (maxValue != 0 && minValue > maxValue)){
+    public RangeAnswerModel(@JsonProperty("minValue") final int minValue, @JsonProperty("maxValue") final int maxValue)
+    {
+        if (minValue <= 0 || maxValue <= 0 || (maxValue != 0 && minValue > maxValue))
+        {
             throw new IllegalArgumentException("Cannot Serialize range Answer");
         }
         this.minValue = minValue;
+        this.maxValue = maxValue;
     }
 
-    @JsonProperty("maxValue")
-    public void setMaxValue(int maxValue){
-        if (maxValue <= 0 || (minValue != 0 & minValue > maxValue)){
-            throw new IllegalArgumentException("Cannot Serialize Answer");
-        }
-        this.maxValue = maxValue;
+    @JsonIgnore
+    public boolean isInRange(final int val)
+    {
+        return minValue <= val && val <= maxValue;
     }
 }
