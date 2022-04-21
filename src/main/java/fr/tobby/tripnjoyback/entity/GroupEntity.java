@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.entity;
 
 import lombok.*;
+import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -27,6 +28,7 @@ public class GroupEntity {
 
     @ManyToOne()
     @JoinColumn(name = "owner_id")
+    @Nullable
     private UserEntity owner;
 
     @Column(name = "max_size")

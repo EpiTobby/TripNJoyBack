@@ -58,7 +58,6 @@ public class GroupService extends IdCheckerService {
                                                           : stateRepository.findByValue("CLOSED").get())
                                              .members(List.of())
                                              .profile(groupProfile)
-                                             .owner(user1Entity)
                                              .build();
         groupRepository.save(groupEntity);
         groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity, true));
