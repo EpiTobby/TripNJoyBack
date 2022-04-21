@@ -12,12 +12,12 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @DataJpaTest
 public class GroupServiceTest {
@@ -103,26 +103,26 @@ public class GroupServiceTest {
     }
 
     @Test
-    void checkOwner() throws ParseException {
+    void testOwner() throws ParseException {
         CreatePrivateGroupRequest request = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
         UserEntity owner = anyUser();
         GroupModel model = groupService.createPrivateGroup(owner.getId(), request);
-        Assertions.assertTrue(model.getOwner().getId() == owner.getId());
+        Assertions.assertEquals(model.getOwner().getId(), (long) owner.getId());
     }
 
     @Test
-    void checkUpdateGroupNull() throws ParseException{
+    void testUpdateGroupNull() throws ParseException{
         UpdateGroupRequest updateGroupRequest = new UpdateGroupRequest();
         CreatePrivateGroupRequest createPrivateGroupRequest = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
         UserEntity owner = anyUser();
         GroupModel model = groupService.createPrivateGroup(owner.getId(), createPrivateGroupRequest);
         groupService.updatePrivateGroup(model.getId(), updateGroupRequest);
-        Assertions.assertTrue(model.getName().equals("grouptest"));
-        Assertions.assertTrue(model.getMaxSize() == 3);
+        Assertions.assertEquals("grouptest", model.getName());
+        Assertions.assertEquals(3, model.getMaxSize());
     }
 
     @Test
-    void checkUpdateGroupManyFields() throws ParseException{
+    void testUpdateGroupManyFields() throws ParseException{
         Date newStartDate = dateFormat.parse("01-07-2025");
         Date newEndDate = dateFormat.parse("06-07-2025");
         UpdateGroupRequest updateGroupRequest = new UpdateGroupRequest().builder()
@@ -137,16 +137,15 @@ public class GroupServiceTest {
         GroupModel model = groupService.createPrivateGroup(owner.getId(), createPrivateGroupRequest);
         groupService.updatePrivateGroup(model.getId(), updateGroupRequest);
         GroupEntity entity = groupRepository.findById(model.getId()).get();
-        Assertions.assertTrue(entity.getName().equals("new name"));
-        Assertions.assertTrue(entity.getMaxSize() == 5);
-        Assertions.assertTrue(entity.getPicture().equals("group.png"));
-        Assertions.assertTrue(entity.getStartOfTrip().compareTo(newStartDate) == 0);
-        Assertions.assertTrue(entity.getEndOfTrip().compareTo(newEndDate) == 0);
+        Assertions.assertEquals("new name", entity.getName());
+        Assertions.assertEquals(5, entity.getMaxSize());
+        Assertions.assertEquals("group.png", entity.getPicture());
+        Assertions.assertEquals(0, entity.getStartOfTrip().compareTo(newStartDate));
+        Assertions.assertEquals(0, entity.getEndOfTrip().compareTo(newEndDate));
     }
 
     @Test
-    @Disabled
-    void checkMaxSize() throws ParseException {
+    void testDeletePendingInvites() throws ParseException {
         CreatePrivateGroupRequest request = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
         UserEntity owner = anyUser();
         GroupModel model = groupService.createPrivateGroup(owner.getId(), request);
@@ -158,8 +157,31 @@ public class GroupServiceTest {
         groupService.inviteUserInPrivateGroup(model.getId(), user3.getEmail());
         groupService.joinGroup(model.getId(), user1.getId());
         groupService.joinGroup(model.getId(), user2.getId());
-        Assertions.assertTrue(model.getState() == State.CLOSED);
+        Assertions.assertEquals(model.getState(),State.CLOSED);
         Assertions.assertThrows(UserNotFoundException.class, () -> groupService.joinGroup(model.getId(), user3.getId()));
+    }
+
+    @Test
+    void testLeaveGroup() throws ParseException {
+        CreatePrivateGroupRequest request = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
+        UserEntity owner = anyUser();
+        GroupModel model = groupService.createPrivateGroup(owner.getId(), request);
+        UserEntity user1 = anyUserWithEmail("userwillleave@gmail.com");
+        groupService.inviteUserInPrivateGroup(model.getId(), user1.getEmail());
+        groupService.joinGroup(model.getId(), user1.getId());
+        groupService.removeUserFromGroup(model.getId(), user1.getId());
+        GroupEntity entity = groupRepository.findById(model.getId()).get();
+        Assertions.assertFalse(entity.members.stream().anyMatch(m -> m.getUser().getId() == user1.getId()));
+    }
+
+    @Test
+    void testGroupIsDeletedIfEmpty() throws ParseException {
+        CreatePrivateGroupRequest request = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
+        UserEntity owner = anyUser();
+        GroupModel model = groupService.createPrivateGroup(owner.getId(), request);
+        groupService.removeUserFromGroup(model.getId(), owner.getId());
+        Optional<GroupEntity> entity = groupRepository.findById(model.getId());
+        Assertions.assertTrue(entity.isEmpty());
     }
 
     @AfterEach

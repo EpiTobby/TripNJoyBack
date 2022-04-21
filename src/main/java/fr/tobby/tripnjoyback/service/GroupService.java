@@ -84,6 +84,7 @@ public class GroupService extends IdCheckerService {
                 .build());
         GroupMemberEntity groupMemberEntity = new GroupMemberEntity(groupEntity, userEntity, null, false);
         groupMemberRepository.save(groupMemberEntity);
+        groupEntity.members.add(groupMemberEntity);
         return GroupModel.of(groupEntity);
     }
 
@@ -105,7 +106,8 @@ public class GroupService extends IdCheckerService {
             throw new UserNotConfirmedException("The user you want to invite is not confirmed");
         if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == userEntity.getId()))
             throw new UserAlreadyInGroupException("User already in group");
-        groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, null, true));
+        GroupMemberEntity groupMemberEntity = groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, null, true));
+        groupEntity.members.add(groupMemberEntity);
     }
 
     @Transactional
@@ -155,6 +157,7 @@ public class GroupService extends IdCheckerService {
         invitedUser.setPending(false);
         if (groupEntity.getMaxSize() == groupEntity.getNumberOfNonPendingUsers()) {
             groupEntity.members.stream().filter(m -> m.isPending()).forEach(groupMemberRepository::delete);
+            groupEntity.members.removeIf(m -> m.isPending());
             groupEntity.setStateEntity(stateRepository.findByValue("CLOSED").get());
         }
     }
@@ -163,6 +166,7 @@ public class GroupService extends IdCheckerService {
     public void removeUserFromGroup(long groupId, long userId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException("No group found with id " + groupId));
         GroupMemberEntity groupMemberEntity = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not found in this group or does not exist"));
+        groupEntity.members.removeIf(m -> m.getUser().getId() == userId);
         groupMemberRepository.delete(groupMemberEntity);
         if (groupEntity.getNumberOfNonPendingUsers() == 0) {
             groupRepository.delete(groupEntity);
