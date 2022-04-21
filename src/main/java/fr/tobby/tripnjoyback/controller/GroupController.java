@@ -35,6 +35,13 @@ public class GroupController {
         return groupService.getUserGroups(userId);
     }
 
+    @GetMapping("invites/{id}")
+    @Operation(summary = "Get all the group invitation of the user")
+    @ApiResponse(responseCode = "200", description = "Return the list of groups the user is invited to")
+    private Collection<GroupModel> getUserInvites(@PathVariable("id") final long userId) {
+        return groupService.getUserInvites(userId);
+    }
+
     private void checkOwnership(long groupId, Authentication authentication) {
         String ownerEmail = groupService.getOwnerEmail(groupId);
         if (!ownerEmail.equals(authentication.getName()))
