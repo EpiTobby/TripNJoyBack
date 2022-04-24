@@ -1,19 +1,29 @@
 package fr.tobby.tripnjoyback.controller;
 
-import fr.tobby.tripnjoyback.model.websocket.Greeting;
-import fr.tobby.tripnjoyback.model.websocket.HelloMessage;
+import fr.tobby.tripnjoyback.entity.messaging.MessageEntity;
+import fr.tobby.tripnjoyback.model.request.messaging.PostMessageRequest;
+import fr.tobby.tripnjoyback.service.MessageService;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 @Controller
 public class MessagingController {
 
-    @MessageMapping("/chat")
-    @SendTo("/topic/response")
-    public Greeting test(HelloMessage message)
+    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final MessageService messageService;
+
+    public MessagingController(final SimpMessagingTemplate simpMessagingTemplate, final MessageService messageService)
     {
-        System.out.println("Received message " + message.getName());
-        return new Greeting(String.format("Hello %s!", message.getName()));
+        this.simpMessagingTemplate = simpMessagingTemplate;
+        this.messageService = messageService;
+    }
+
+    @MessageMapping("/chat/{channelId}")
+    public void test(@DestinationVariable("channelId") int channelId, final PostMessageRequest message)
+    {
+        MessageEntity createdMessage = messageService.postMessage(channelId, message);
+        simpMessagingTemplate.convertAndSend("/topic/response/" + channelId, createdMessage);
     }
 }
