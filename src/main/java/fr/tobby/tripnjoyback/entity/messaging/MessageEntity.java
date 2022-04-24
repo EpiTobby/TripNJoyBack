@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.entity.messaging;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -24,6 +25,8 @@ public class MessageEntity {
     private String content;
     private Date sendDate;
     private Date modifiedDate;
+    @Setter
+    private boolean pinned;
 
     public MessageEntity(final UserEntity user, final ChannelEntity channel, final String content)
     {
