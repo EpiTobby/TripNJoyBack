@@ -1,6 +1,6 @@
 package fr.tobby.tripnjoyback.exception;
 
-public class UserNotFoundException extends RuntimeException {
+public class UserNotFoundException extends EntityNotFoundException {
 
     public UserNotFoundException()
     {

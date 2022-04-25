@@ -1,10 +1,15 @@
 package fr.tobby.tripnjoyback.controller;
 
 import fr.tobby.tripnjoyback.entity.messaging.MessageEntity;
+import fr.tobby.tripnjoyback.exception.EntityNotFoundException;
+import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.model.request.messaging.PostMessageRequest;
 import fr.tobby.tripnjoyback.model.response.messaging.MessageResponse;
 import fr.tobby.tripnjoyback.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -18,6 +23,7 @@ import java.util.List;
 
 @Controller
 public class MessagingController {
+    private static final Logger logger = LoggerFactory.getLogger(MessagingController.class);
 
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final MessageService messageService;
@@ -48,5 +54,23 @@ public class MessagingController {
                              .stream()
                              .map(MessageResponse::of)
                              .toList();
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String onEntityNotFound(@NotNull final EntityNotFoundException exception)
+    {
+        logger.debug(exception.getMessage());
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(ForbiddenOperationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String onEntityNotFound(@NotNull final ForbiddenOperationException exception)
+    {
+        logger.debug(exception.getMessage());
+        return "You are not authorized to perform this operation.";
     }
 }

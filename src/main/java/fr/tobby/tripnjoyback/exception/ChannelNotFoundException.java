@@ -1,6 +1,6 @@
 package fr.tobby.tripnjoyback.exception;
 
-public class ChannelNotFoundException extends RuntimeException {
+public class ChannelNotFoundException extends EntityNotFoundException {
 
     public ChannelNotFoundException()
     {
