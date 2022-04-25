@@ -56,6 +56,19 @@ public class MessagingController {
                              .toList();
     }
 
+    @GetMapping("/chat/{channel_id}/pinned")
+    @Operation(summary = "Get all pinned messages")
+    @ResponseBody
+    public List<MessageResponse> getPinnedMessages(@PathVariable("channel_id") long channelId)
+    {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        return messageService.getChannelPinnedMessages(channelId, authentication.getName())
+                             .stream()
+                             .map(MessageResponse::of)
+                             .toList();
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)

@@ -48,12 +48,32 @@ public class MessageService {
 
     public List<MessageEntity> getChannelMessages(final long channelId, final String username, final int page)
     {
+        checkUserIsInChannelGroup(channelId, username);
+
+        return messageRepository.findAllByChannelIdOrderBySendDateDesc(channelId, PageRequest.of(page, 50));
+    }
+
+    public List<MessageEntity> getChannelPinnedMessages(final long channelId, final String username)
+    {
+        checkUserIsInChannelGroup(channelId, username);
+
+        return messageRepository.findAllByChannelIdAndPinnedIsTrueOrderBySendDateDesc(channelId);
+    }
+
+    /**
+     * Check that a user is a member of the channel's group. Throw an exception otherwise
+     *
+     * @throws UserNotFoundException If the user does not exist
+     * @throws ChannelNotFoundException If the channel does not exist
+     * @throws ForbiddenOperationException If the user is not a member of the group
+     */
+    private void checkUserIsInChannelGroup(final long channelId, final String username)
+            throws UserNotFoundException, ChannelNotFoundException, ForbiddenOperationException
+    {
         UserEntity user = userRepository.findByEmail(username).orElseThrow(UserNotFoundException::new);
         ChannelEntity channel = channelRepository.findById(channelId).orElseThrow(() -> new ChannelNotFoundException(channelId));
 
         if (channel.getGroup().getMembers().stream().noneMatch(member -> member.getId().equals(user.getId())))
             throw new ForbiddenOperationException("User " + username + " does not belong to group id " + channel.getGroup().getId());
-
-        return messageRepository.findAllByChannelIdOrderBySendDateDesc(channelId, PageRequest.of(page, 50));
     }
 }

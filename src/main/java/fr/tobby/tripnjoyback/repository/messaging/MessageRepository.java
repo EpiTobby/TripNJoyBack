@@ -10,5 +10,5 @@ public interface MessageRepository extends CrudRepository<MessageEntity, Long> {
 
     List<MessageEntity> findAllByChannelIdOrderBySendDateDesc(long channelId, Pageable pageable);
 
-    List<MessageEntity> findAllByChannelIdAndPinnedIsFalseOrderBySendDateDesc(long channelId);
+    List<MessageEntity> findAllByChannelIdAndPinnedIsTrueOrderBySendDateDesc(long channelId);
 }
