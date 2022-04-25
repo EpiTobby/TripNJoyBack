@@ -4,6 +4,7 @@ import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.entity.messaging.ChannelEntity;
 import fr.tobby.tripnjoyback.entity.messaging.MessageEntity;
 import fr.tobby.tripnjoyback.exception.ChannelNotFoundException;
+import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.request.messaging.PostMessageRequest;
 import fr.tobby.tripnjoyback.repository.UserRepository;
@@ -11,9 +12,11 @@ import fr.tobby.tripnjoyback.repository.messaging.ChannelRepository;
 import fr.tobby.tripnjoyback.repository.messaging.MessageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class MessageService {
@@ -41,5 +44,16 @@ public class MessageService {
         MessageEntity created = messageRepository.save(new MessageEntity(sender, channel, message.getContent(), new Date()));
         logger.debug("Posted message in channel {} by user {}, content: {}", channel.getName(), sender.getEmail(), message.getContent());
         return created;
+    }
+
+    public List<MessageEntity> getChannelMessages(final long channelId, final String username, final int page)
+    {
+        UserEntity user = userRepository.findByEmail(username).orElseThrow(UserNotFoundException::new);
+        ChannelEntity channel = channelRepository.findById(channelId).orElseThrow(() -> new ChannelNotFoundException(channelId));
+
+        if (channel.getGroup().getMembers().stream().noneMatch(member -> member.getId().equals(user.getId())))
+            throw new ForbiddenOperationException("User " + username + " does not belong to group id " + channel.getGroup().getId());
+
+        return messageRepository.findAllByChannelIdOrderBySendDateDesc(channelId, PageRequest.of(page, 50));
     }
 }
