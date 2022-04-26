@@ -12,7 +12,6 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class ProfileEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Setter

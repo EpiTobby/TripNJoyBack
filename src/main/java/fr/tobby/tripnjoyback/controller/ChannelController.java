@@ -1,0 +1,75 @@
+package fr.tobby.tripnjoyback.controller;
+
+import fr.tobby.tripnjoyback.exception.ChannelNotFoundException;
+import fr.tobby.tripnjoyback.exception.GroupNotFoundException;
+import fr.tobby.tripnjoyback.model.ChannelModel;
+import fr.tobby.tripnjoyback.model.request.CreateChannelRequest;
+import fr.tobby.tripnjoyback.model.request.UpdateChannelRequest;
+import fr.tobby.tripnjoyback.service.ChannelService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Collection;
+
+@RestController
+@RequestMapping(path = "channels")
+public class ChannelController {
+    private static final Logger logger = LoggerFactory.getLogger(ChannelController.class);
+    private final ChannelService channelService;
+
+    public ChannelController(ChannelService channelService) {
+        this.channelService = channelService;
+    }
+
+    @GetMapping("{group}")
+    @Operation(summary = "Get all the channels from a group")
+    @ApiResponse(responseCode = "200", description = "Return the list of channels of a group")
+    @ApiResponse(responseCode = "422", description = "The group does not exist")
+    public Collection<ChannelModel> getGroupChannels(@PathVariable("group") long groupId){
+        return channelService.getGroupChannels(groupId);
+    }
+
+    @PostMapping("{group}")
+    @Operation(summary = "Create a channel")
+    @ApiResponse(responseCode = "200", description = "Return the created channel")
+    @ApiResponse(responseCode = "422", description = "The group id does not correspond to an existing group")
+    public ChannelModel createChannel(@PathVariable("group") long groupId, @RequestBody CreateChannelRequest createChannelRequest){
+        return channelService.createChannel(groupId, createChannelRequest);
+    }
+
+    @PatchMapping("{id}")
+    @Operation(summary = "Update a channel")
+    @ApiResponse(responseCode = "200", description = "The channel has been updated")
+    @ApiResponse(responseCode = "422", description = "The channel does not exist")
+    public void updateChannel(@PathVariable("id") long channelId, @RequestBody  UpdateChannelRequest updateChannelRequest){
+        channelService.updateChannel(channelId, updateChannelRequest);
+    }
+
+    @DeleteMapping("{id}")
+    @Operation(summary = "Delete a channel")
+    @ApiResponse(responseCode = "200", description = "The channel has been deleted")
+    @ApiResponse(responseCode = "422", description = "The channel does not exist")
+    public void deleteChannel(@PathVariable("id") long channelId){
+        channelService.deleteChannel(channelId);
+    }
+
+    @ExceptionHandler(ChannelNotFoundException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(ChannelNotFoundException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(GroupNotFoundException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(GroupNotFoundException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+}
