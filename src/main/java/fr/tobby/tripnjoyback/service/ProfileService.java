@@ -25,14 +25,12 @@ import java.util.Optional;
 public class ProfileService extends IdCheckerService {
     private final ProfileRepository profileRepository;
     private final AnswersRepository answersRepository;
-    private final UserRepository userRepository;
     private final DateFormat dateFormat;
 
     public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository, UserRepository userRepository) {
         super(userRepository);
         this.profileRepository = profileRepository;
         this.answersRepository = answersRepository;
-        this.userRepository = userRepository;
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     }
 

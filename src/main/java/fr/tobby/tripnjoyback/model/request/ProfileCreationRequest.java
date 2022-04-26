@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.tobby.tripnjoyback.model.IProfile;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import javax.validation.constraints.NotNull;
@@ -14,6 +15,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @JsonAutoDetect
+@Builder
 public class ProfileCreationRequest implements IProfile {
     @NotNull
     private String name;
