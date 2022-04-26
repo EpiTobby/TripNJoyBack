@@ -69,6 +69,14 @@ public class MessagingController {
                              .toList();
     }
 
+    @PatchMapping("/chat/{message_id}/pinned")
+    @Operation(summary = "Pin a message")
+    @ResponseBody
+    public MessageResponse pinMessage(@PathVariable("message_id") long messageId)
+    {
+        return MessageResponse.of(messageService.pinMessage(messageId));
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)

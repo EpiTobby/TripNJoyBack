@@ -5,6 +5,7 @@ import fr.tobby.tripnjoyback.entity.messaging.ChannelEntity;
 import fr.tobby.tripnjoyback.entity.messaging.MessageEntity;
 import fr.tobby.tripnjoyback.exception.ChannelNotFoundException;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
+import fr.tobby.tripnjoyback.exception.MessageNotFoundException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.request.messaging.PostMessageRequest;
 import fr.tobby.tripnjoyback.repository.UserRepository;
@@ -58,6 +59,14 @@ public class MessageService {
         checkUserIsInChannelGroup(channelId, username);
 
         return messageRepository.findAllByChannelIdAndPinnedIsTrueOrderBySendDateDesc(channelId);
+    }
+
+    public MessageEntity pinMessage(final long messageId)
+    {
+        MessageEntity message = messageRepository.findById(messageId)
+                                                 .orElseThrow(() -> new MessageNotFoundException("No message found with id " + messageId));
+        message.setPinned(true);
+        return message;
     }
 
     /**
