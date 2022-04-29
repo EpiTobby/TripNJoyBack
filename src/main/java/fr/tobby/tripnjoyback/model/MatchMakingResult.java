@@ -19,7 +19,7 @@ public class MatchMakingResult {
 
     public MatchMakingResult(@NotNull final Type type, @Nullable final Long groupId)
     {
-        if (type != Type.WAITING && groupId == null)
+        if ((type != Type.WAITING && type != Type.SEARCHING) && groupId == null)
             throw new IllegalArgumentException("Group cannot be null for type " + type);
         this.type = type;
         this.groupId = groupId;
