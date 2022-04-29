@@ -14,6 +14,7 @@ import fr.tobby.tripnjoyback.utils.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,11 +55,13 @@ public class MatchMaker {
     @Transactional
     public long match(@NotNull UserEntity entity, @NotNull ProfileModel profile) throws IllegalStateException
     {
-        return this.match(MatchMakingUserModel.from(entity, profile));
+        this.match(MatchMakingUserModel.from(entity, profile));
+        return taskIndex++;
     }
 
     @Transactional
-    public long match(@NotNull final MatchMakingUserModel user)
+    @Async
+    public CompletableFuture<Void> match(@NotNull final MatchMakingUserModel user)
     {
         logger.info("Starting matchmaking for user {}", user.getUserId());
         Optional<GroupEntity> matchedGroup = findMatchingGroup(user);
@@ -68,7 +72,7 @@ public class MatchMaker {
             logger.info("User {} joining group {}", user.getUserId(), group.getId());
             profileService.setActiveProfile(user.getProfile().getId(), false);
             groupService.addUserToPublicGroup(group.getId(), user.getUserId(), user.getProfile().getId());
-            return taskIndex++;
+            return CompletableFuture.completedFuture(null);
         }
 
         findMatchingUser(user).ifPresentOrElse(matched -> {
@@ -96,7 +100,7 @@ public class MatchMaker {
             userRepository.getById(user.getUserId()).setWaitingForGroup(true);
         });
 
-        return taskIndex++;
+        return CompletableFuture.completedFuture(null);
     }
 
     /**

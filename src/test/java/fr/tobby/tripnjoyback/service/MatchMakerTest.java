@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import static org.mockito.Mockito.*;
 
@@ -118,7 +119,7 @@ class MatchMakerTest {
     }
 
     @Test
-    void noGroupNoUserTest() throws ParseException
+    void noGroupNoUserTest() throws ParseException, ExecutionException, InterruptedException
     {
         UserEntity user = anyUser();
 
@@ -130,13 +131,13 @@ class MatchMakerTest {
         Assertions.assertEquals(21, model.getAge());
         Assertions.assertFalse(user.isWaitingForGroup());
 
-        matchMaker.match(model);
+        matchMaker.match(model).get();
 
         Assertions.assertTrue(user.isWaitingForGroup());
     }
 
     @Test
-    void noGroupOneMatchingUserTest() throws ParseException
+    void noGroupOneMatchingUserTest() throws ParseException, ExecutionException, InterruptedException
     {
         UserEntity userA = anyUser();
         UserEntity userB = anyUser();
@@ -152,14 +153,14 @@ class MatchMakerTest {
         Instant now = dateFormat.parse("01-01-2021").toInstant();
         MatchMakingUserModel modelA = MatchMakingUserModel.from(userA, profileA, now);
 
-        matchMaker.match(modelA);
+        matchMaker.match(modelA).get();
 
         verify(groupService).createPublicGroup(any(), any(), any(), any(), anyInt(), any());
         Assertions.assertFalse(userB.isWaitingForGroup());
     }
 
     @Test
-    void noGroupOneNonMatchingUserTest() throws ParseException
+    void noGroupOneNonMatchingUserTest() throws ParseException, ExecutionException, InterruptedException
     {
         UserEntity userA = anyUser();
         UserEntity userB = anyUser();
@@ -177,7 +178,7 @@ class MatchMakerTest {
         Instant now = dateFormat.parse("01-01-2021").toInstant();
         MatchMakingUserModel modelA = MatchMakingUserModel.from(userA, profileA, now);
 
-        matchMaker.match(modelA);
+        matchMaker.match(modelA).get();
 
         verify(groupService, times(0)).createPublicGroup(any(), any(), any(), any(), anyInt(), any());
         Assertions.assertTrue(userA.isWaitingForGroup());
@@ -185,7 +186,7 @@ class MatchMakerTest {
     }
 
     @Test
-    void matchingGroupNoUserTest() throws ParseException
+    void matchingGroupNoUserTest() throws ParseException, ExecutionException, InterruptedException
     {
         UserEntity userA = anyUser();
         UserEntity userB = anyUser();
@@ -217,7 +218,7 @@ class MatchMakerTest {
         Instant now = dateFormat.parse("01-01-2021").toInstant();
         MatchMakingUserModel modelA = MatchMakingUserModel.from(userA, profileA, now);
 
-        matchMaker.match(modelA);
+        matchMaker.match(modelA).get();
 
         verify(groupService).addUserToPublicGroup(group.getId(), userA.getId(), 1);
         Assertions.assertFalse(userA.isWaitingForGroup());
