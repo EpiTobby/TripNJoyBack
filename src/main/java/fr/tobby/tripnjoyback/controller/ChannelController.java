@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.controller;
 
 import fr.tobby.tripnjoyback.exception.ChannelNotFoundException;
+import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.GroupNotFoundException;
 import fr.tobby.tripnjoyback.model.ChannelModel;
 import fr.tobby.tripnjoyback.model.request.CreateChannelRequest;
@@ -30,6 +31,7 @@ public class ChannelController {
     @ApiResponse(responseCode = "200", description = "Return the list of channels of a group")
     @ApiResponse(responseCode = "422", description = "The group does not exist")
     public Collection<ChannelModel> getGroupChannels(@PathVariable("group") long groupId){
+        channelService.checkMember(groupId);
         return channelService.getGroupChannels(groupId);
     }
 
@@ -38,14 +40,17 @@ public class ChannelController {
     @ApiResponse(responseCode = "200", description = "Return the created channel")
     @ApiResponse(responseCode = "422", description = "The group id does not correspond to an existing group")
     public ChannelModel createChannel(@PathVariable("group") long groupId, @RequestBody CreateChannelRequest createChannelRequest){
+        channelService.checkMember(groupId);
         return channelService.createChannel(groupId, createChannelRequest);
     }
 
     @PatchMapping("{id}")
     @Operation(summary = "Update a channel")
     @ApiResponse(responseCode = "200", description = "The channel has been updated")
+    @ApiResponse(responseCode = "403", description = "The client  don't have access to this channel")
     @ApiResponse(responseCode = "422", description = "The channel does not exist")
     public void updateChannel(@PathVariable("id") long channelId, @RequestBody  UpdateChannelRequest updateChannelRequest){
+        channelService.checkUserHasAccessToChannel(channelId);
         channelService.updateChannel(channelId, updateChannelRequest);
     }
 
@@ -54,6 +59,7 @@ public class ChannelController {
     @ApiResponse(responseCode = "200", description = "The channel has been deleted")
     @ApiResponse(responseCode = "422", description = "The channel does not exist")
     public void deleteChannel(@PathVariable("id") long channelId){
+        channelService.checkUserIsOwnerOfGroup(channelId);
         channelService.deleteChannel(channelId);
     }
 
@@ -69,6 +75,14 @@ public class ChannelController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(GroupNotFoundException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(ForbiddenOperationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String getError(ForbiddenOperationException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }
