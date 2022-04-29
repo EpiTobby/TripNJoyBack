@@ -1,8 +1,7 @@
 package fr.tobby.tripnjoyback.controller;
 
-import fr.tobby.tripnjoyback.exception.ChannelNotFoundException;
+import fr.tobby.tripnjoyback.exception.EntityNotFoundException;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
-import fr.tobby.tripnjoyback.exception.GroupNotFoundException;
 import fr.tobby.tripnjoyback.model.ChannelModel;
 import fr.tobby.tripnjoyback.model.request.CreateChannelRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateChannelRequest;
@@ -37,8 +36,9 @@ public class ChannelController {
 
     @PostMapping("{group}")
     @Operation(summary = "Create a channel")
-    @ApiResponse(responseCode = "200", description = "Return the created channel")
+    @ApiResponse(responseCode = "201", description = "Return the created channel")
     @ApiResponse(responseCode = "422", description = "The group id does not correspond to an existing group")
+    @ResponseStatus(HttpStatus.CREATED)
     public ChannelModel createChannel(@PathVariable("group") long groupId, @RequestBody CreateChannelRequest createChannelRequest){
         channelService.checkMember(groupId);
         return channelService.createChannel(groupId, createChannelRequest);
@@ -63,18 +63,11 @@ public class ChannelController {
         channelService.deleteChannel(channelId);
     }
 
-    @ExceptionHandler(ChannelNotFoundException.class)
+    @ExceptionHandler(EntityNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(ChannelNotFoundException exception) {
-        logger.debug("Error on request", exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(GroupNotFoundException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(GroupNotFoundException exception) {
+    public String getError(EntityNotFoundException exception)
+    {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }

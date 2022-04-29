@@ -35,7 +35,7 @@ public class MessagingController {
     }
 
     @MessageMapping("/chat/{channelId}")
-    public void test(@DestinationVariable("channelId") int channelId, final PostMessageRequest message)
+    public void sendMessage(@DestinationVariable("channelId") int channelId, final PostMessageRequest message)
     {
         MessageEntity createdMessage = messageService.postMessage(channelId, message);
         simpMessagingTemplate.convertAndSend("/topic/response/" + channelId, createdMessage);

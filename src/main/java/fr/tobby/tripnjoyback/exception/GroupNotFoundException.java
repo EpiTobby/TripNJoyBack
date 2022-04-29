@@ -1,6 +1,6 @@
 package fr.tobby.tripnjoyback.exception;
 
-public class GroupNotFoundException extends RuntimeException {
+public class GroupNotFoundException extends EntityNotFoundException {
     public GroupNotFoundException()
     {
         super();
