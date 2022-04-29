@@ -6,9 +6,21 @@ import org.jetbrains.annotations.Nullable;
 public class MatchMakingResult {
 
     public enum Type {
+        /**
+         * A new group has been created
+         */
         CREATED,
+        /**
+         * The user has joined an existing group
+         */
         JOINED,
+        /**
+         * No group or other user found. The user is waiting for someone else to match
+         */
         WAITING,
+        /**
+         * Match making in progress
+         */
         SEARCHING,
     }
 

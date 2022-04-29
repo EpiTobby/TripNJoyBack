@@ -47,6 +47,9 @@ public class MatchMakingController {
     }
 
     @GetMapping("{taskId}")
+    @Operation(summary = "Get the state of a match making task")
+    @ApiResponse(responseCode = "200", description = "State")
+    @ApiResponse(responseCode = "404", description = "Task not found")
     public MatchMakingResult getResult(@PathVariable("taskId") long taskId) throws ExecutionException, InterruptedException
     {
         return matchMaker.getTask(taskId);
