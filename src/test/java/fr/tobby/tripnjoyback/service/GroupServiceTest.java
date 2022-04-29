@@ -28,7 +28,6 @@ public class GroupServiceTest {
     private static GenderEntity otherGender;
     private static StateEntity closedState;
     private static StateEntity openState;
-    private static RoleEntity defaultRole;
 
     @Autowired
     private CityRepository cityRepository;
@@ -54,8 +53,6 @@ public class GroupServiceTest {
 
         closedState = stateRepository.save(new StateEntity("CLOSED"));
         openState = stateRepository.save(new StateEntity("OPEN"));
-
-        defaultRole = userRoleRepository.save(new RoleEntity("default"));
     }
 
     @BeforeEach
@@ -68,30 +65,30 @@ public class GroupServiceTest {
     private UserEntity anyUser() throws ParseException {
         CityEntity city = cityRepository.save(new CityEntity("Paris"));
         return userRepository.save(UserEntity.builder()
-                .firstname("Test")
-                .lastname("1")
-                .gender(maleGender)
-                .email("test@1.com")
-                .birthDate(dateFormat.parse("01-01-2000").toInstant())
-                .city(city)
-                .confirmed(true)
-                .roles(List.of(defaultRole))
-                .build());
+                                             .firstname("Test")
+                                             .lastname("1")
+                                             .gender(maleGender)
+                                             .email("test@1.com")
+                                             .birthDate(dateFormat.parse("01-01-2000").toInstant())
+                                             .city(city)
+                                             .confirmed(true)
+                                             .roles(List.of())
+                                             .build());
     }
 
     @NotNull
     private UserEntity anyUserWithEmail(String email) throws ParseException {
         CityEntity city = cityRepository.save(new CityEntity("Paris"));
         return userRepository.save(UserEntity.builder()
-                .firstname("Test")
-                .lastname("1")
-                .gender(maleGender)
-                .email(email)
-                .birthDate(dateFormat.parse("01-01-2000").toInstant())
-                .city(city)
-                .confirmed(true)
-                .roles(List.of(defaultRole))
-                .build());
+                                             .firstname("Test")
+                                             .lastname("1")
+                                             .gender(maleGender)
+                                             .email(email)
+                                             .birthDate(dateFormat.parse("01-01-2000").toInstant())
+                                             .city(city)
+                                             .confirmed(true)
+                                             .roles(List.of())
+                                             .build());
     }
 
     @NotNull

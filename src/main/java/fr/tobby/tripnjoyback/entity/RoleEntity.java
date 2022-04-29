@@ -15,7 +15,7 @@ import javax.persistence.Table;
 public class RoleEntity implements GrantedAuthority {
 
     @Id
-    private long id;
+    private Long id;
     private String name;
 
     @Override
@@ -26,7 +26,6 @@ public class RoleEntity implements GrantedAuthority {
 
     public RoleEntity(String name)
     {
-        this.id = 0;
         this.name = name;
     }
 }

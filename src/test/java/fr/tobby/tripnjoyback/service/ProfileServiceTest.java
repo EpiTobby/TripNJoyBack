@@ -1,6 +1,5 @@
 package fr.tobby.tripnjoyback.service;
 
-import fr.tobby.tripnjoyback.SpringContext;
 import fr.tobby.tripnjoyback.entity.*;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
@@ -17,8 +16,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -28,7 +25,6 @@ public class ProfileServiceTest {
     private static GenderEntity maleGender;
     private static GenderEntity femaleGender;
     private static GenderEntity otherGender;
-    private static RoleEntity defaultRole;
     private ProfileService profileService;
 
     @Autowired
@@ -46,7 +42,6 @@ public class ProfileServiceTest {
         femaleGender = genderRepository.save(new GenderEntity("female"));
         otherGender = genderRepository.save(new GenderEntity("other"));
 
-        defaultRole = userRoleRepository.save(new RoleEntity("default"));
     }
 
     @BeforeEach
@@ -66,16 +61,16 @@ public class ProfileServiceTest {
     private UserEntity anyUserWithProfile() throws ParseException {
         CityEntity city = cityRepository.save(new CityEntity("Paris"));
         return userRepository.save(UserEntity.builder()
-                .firstname("Test")
-                .lastname("1")
-                .gender(maleGender)
-                .email("test@1.com")
-                .birthDate(dateFormat.parse("01-01-2000").toInstant())
-                .city(city)
-                .confirmed(true)
-                .roles(List.of(defaultRole))
-                .profiles(new ArrayList(){{ add(anyProfile()); }})
-                .build());
+                                             .firstname("Test")
+                                             .lastname("1")
+                                             .gender(maleGender)
+                                             .email("test@1.com")
+                                             .birthDate(dateFormat.parse("01-01-2000").toInstant())
+                                             .city(city)
+                                             .confirmed(true)
+                                             .roles(List.of())
+                                             .profiles(new ArrayList(){{ add(anyProfile()); }})
+                                             .build());
     }
 
     @Test
