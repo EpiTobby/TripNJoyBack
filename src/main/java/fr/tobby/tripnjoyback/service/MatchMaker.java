@@ -3,6 +3,8 @@ package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.entity.GroupEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
+import fr.tobby.tripnjoyback.model.GroupModel;
+import fr.tobby.tripnjoyback.model.MatchMakingResult;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
@@ -18,11 +20,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +39,7 @@ public class MatchMaker {
     private final ProfileService profileService;
 
     private long taskIndex = 1L;
+    private final Map<Long, CompletableFuture<MatchMakingResult>> tasks = new HashMap<>();
 
     public MatchMaker(final ProfileRepository profileRepository, final UserRepository userRepository, final MatchMakerScoreComputer scoreComputer,
                       final GroupService groupService, final GroupRepository groupRepository,
@@ -55,13 +56,23 @@ public class MatchMaker {
     @Transactional
     public long match(@NotNull UserEntity entity, @NotNull ProfileModel profile) throws IllegalStateException
     {
-        this.match(MatchMakingUserModel.from(entity, profile));
+        final CompletableFuture<MatchMakingResult> task = this.match(MatchMakingUserModel.from(entity, profile));
+        tasks.put(taskIndex, task);
         return taskIndex++;
+    }
+
+    @NotNull
+    public MatchMakingResult getTask(long taskId) throws NoSuchElementException, ExecutionException, InterruptedException
+    {
+        CompletableFuture<MatchMakingResult> task = tasks.get(taskId);
+        if (task == null)
+            throw new NoSuchElementException();
+        return task.isDone() ? task.get() : new MatchMakingResult(MatchMakingResult.Type.SEARCHING, null);
     }
 
     @Transactional
     @Async
-    public CompletableFuture<Void> match(@NotNull final MatchMakingUserModel user)
+    public CompletableFuture<MatchMakingResult> match(@NotNull final MatchMakingUserModel user)
     {
         logger.info("Starting matchmaking for user {}", user.getUserId());
         Optional<GroupEntity> matchedGroup = findMatchingGroup(user);
@@ -72,10 +83,13 @@ public class MatchMaker {
             logger.info("User {} joining group {}", user.getUserId(), group.getId());
             profileService.setActiveProfile(user.getProfile().getId(), false);
             groupService.addUserToPublicGroup(group.getId(), user.getUserId(), user.getProfile().getId());
-            return CompletableFuture.completedFuture(null);
+            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.JOINED, group.getId()));
         }
 
-        findMatchingUser(user).ifPresentOrElse(matched -> {
+        Optional<MatchMakingUserModel> matchingUser = findMatchingUser(user);
+        if (matchingUser.isPresent())
+        {
+            MatchMakingUserModel matched = matchingUser.get();
             logger.info("Creating new group with user {} and user {}", user.getUserId(), matched.getUserId());
             RangeAnswerModel sizeRange = scoreComputer.computeCommonRange(user.getProfile().getGroupSize(), matched.getProfile().getGroupSize()).orElseThrow();
             int maxSize = (sizeRange.getMaxValue() + sizeRange.getMinValue()) / 2;
@@ -85,7 +99,7 @@ public class MatchMaker {
 
 
             ProfileEntity groupProfile = this.computeGroupProfile(user.getProfile(), matched.getProfile());
-            groupService.createPublicGroup(userEntity,
+            GroupModel created = groupService.createPublicGroup(userEntity,
                     profileRepository.getById(user.getProfile().getId()),
                     matchedEntity,
                     profileRepository.getById(matched.getProfile().getId()),
@@ -95,12 +109,14 @@ public class MatchMaker {
             matchedEntity.setWaitingForGroup(false);
             profileService.setActiveProfile(matched.getProfile().getId(), false);
             profileService.setActiveProfile(user.getProfile().getId(), false);
-        }, () -> {
+            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.CREATED, created.getId()));
+        }
+        else
+        {
             logger.info("No match found for user {}. Set as waiting for match", user.getUserId());
             userRepository.getById(user.getUserId()).setWaitingForGroup(true);
-        });
-
-        return CompletableFuture.completedFuture(null);
+            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.WAITING, null));
+        }
     }
 
     /**

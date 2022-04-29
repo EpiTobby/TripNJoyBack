@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.*;
+import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
@@ -149,6 +150,7 @@ class MatchMakerTest {
         when(profileService.getProfile(1)).thenReturn(profileA);
         when(profileService.getProfile(2)).thenReturn(profileB);
         when(profileService.getActiveProfileModel(userB.getId())).thenReturn(Optional.of(profileB));
+        when(groupService.createPublicGroup(any(), any(), any(), any(), anyInt(), any())).thenReturn(mock(GroupModel.class));
 
         Instant now = dateFormat.parse("01-01-2021").toInstant();
         MatchMakingUserModel modelA = MatchMakingUserModel.from(userA, profileA, now);

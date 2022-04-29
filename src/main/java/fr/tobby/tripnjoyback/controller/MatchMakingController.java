@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.controller;
 
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.UserNotConfirmedException;
+import fr.tobby.tripnjoyback.model.MatchMakingResult;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.response.MatchMakingResponse;
@@ -12,6 +13,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping(path = "matchmaking")
@@ -42,10 +46,24 @@ public class MatchMakingController {
         return new MatchMakingResponse(taskId, "");
     }
 
+    @GetMapping("{taskId}")
+    public MatchMakingResult getResult(@PathVariable("taskId") long taskId) throws ExecutionException, InterruptedException
+    {
+        return matchMaker.getTask(taskId);
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     String onIllegalStateException(IllegalStateException e)
+    {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    String onNoSuchElementException(NoSuchElementException e)
     {
         return e.getMessage();
     }
