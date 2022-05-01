@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.GroupEntity;
+import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.entity.messaging.ChannelEntity;
 import fr.tobby.tripnjoyback.exception.ChannelNotFoundException;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
@@ -40,7 +41,8 @@ public class ChannelService extends MemberCheckerService{
     public void checkUserIsOwnerOfGroup(long channelId){
         ChannelEntity channelEntity = channelRepository.findById(channelId).orElseThrow(() -> new ChannelNotFoundException(channelId));
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!channelEntity.getGroup().getOwner().getEmail().equals(email))
+        UserEntity owner = channelEntity.getGroup().getOwner();
+        if (owner != null && !owner.getEmail().equals(email))
             throw new ForbiddenOperationException("You don't have access to this channel");
     }
 
