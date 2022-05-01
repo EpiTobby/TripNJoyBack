@@ -34,21 +34,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(final HttpSecurity http) throws Exception
     {
         http.authorizeHttpRequests()
-                .antMatchers("/auth/**").permitAll()
-                .antMatchers("/auth/{id}/updatepassword").authenticated()
-                .antMatchers("/auth/{id}/updateemail").authenticated()
-                .antMatchers("/swagger-ui.html/**").permitAll()
-                .antMatchers("/swagger-ui/**").permitAll()
-                .antMatchers("/v2/api-docs").permitAll()
-                .antMatchers("/v3/api-docs/**").permitAll()
-                .antMatchers("/swagger-resources/**").permitAll()
-                .antMatchers("/actuator/**").permitAll()
-                .anyRequest().authenticated()
+            .antMatchers("/auth/**").permitAll()
+            .antMatchers("/auth/{id}/updatepassword").authenticated()
+            .antMatchers("/auth/{id}/updateemail").authenticated()
+            .antMatchers("/swagger-ui.html/**").permitAll()
+            .antMatchers("/swagger-ui/**").permitAll()
+            .antMatchers("/v2/api-docs").permitAll()
+            .antMatchers("/v3/api-docs/**").permitAll()
+            .antMatchers("/swagger-resources/**").permitAll()
+            .antMatchers("/actuator/**").permitAll()
+            .antMatchers("/chat/**").permitAll()
+            .antMatchers("/wbsocket/**").permitAll()
+            .antMatchers("/wbsocket").permitAll()
+            .anyRequest().authenticated()
             .and()
             // Do not persist session. Auth is done via jwt and checked at each request
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
-                .csrf().disable();
+            .csrf().disable();
         // jwt filter will authenticate the user at each request if jwt is valid
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     }
