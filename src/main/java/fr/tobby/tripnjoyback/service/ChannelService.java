@@ -35,7 +35,7 @@ public class ChannelService extends MemberCheckerService {
     {
         ChannelEntity channelEntity = channelRepository.findById(channelId).orElseThrow(() -> new ChannelNotFoundException(channelId));
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!channelEntity.getGroup().members.stream().anyMatch(m -> m.getUser().getEmail().equals(email)))
+        if (channelEntity.getGroup().members.stream().noneMatch(m -> m.getUser().getEmail().equals(email)))
             throw new ForbiddenOperationException("You don't have access to this channel");
     }
 
