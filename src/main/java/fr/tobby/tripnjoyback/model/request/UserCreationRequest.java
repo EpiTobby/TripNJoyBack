@@ -27,11 +27,14 @@ public class UserCreationRequest extends ModelWithEmail {
     private Date birthDate;
     @NotNull
     private String phoneNumber;
+    @NotNull
+    private String language;
 
     public UserCreationRequest(final String email, final @NotNull String firstname, final @NotNull String lastname, final @NotNull String password,
                                final @NotNull String gender,
                                final @NotNull Date birthDate,
-                               final @NotNull String phoneNumber)
+                               final @NotNull String phoneNumber,
+                               final @NotNull String language)
     {
         super(email);
         this.firstname = firstname;
@@ -40,5 +43,6 @@ public class UserCreationRequest extends ModelWithEmail {
         this.gender = gender;
         this.birthDate = birthDate;
         this.phoneNumber = phoneNumber;
+        this.language = language;
     }
 }

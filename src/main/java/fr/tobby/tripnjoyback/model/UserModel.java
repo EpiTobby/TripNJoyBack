@@ -24,6 +24,7 @@ public class UserModel {
     private Instant createdDate;
     private String phoneNumber;
     private boolean confirmed;
+    private String language;
     private Collection<UserRole> roles;
 
     public static UserModel of(final UserEntity entity)
@@ -44,6 +45,7 @@ public class UserModel {
                 entity.getCreatedDate(),
                 entity.getPhoneNumber(),
                 entity.isConfirmed(),
+                entity.getLanguage().getValue(),
                 roles
         );
     }
