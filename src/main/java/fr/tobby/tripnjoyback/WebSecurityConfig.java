@@ -43,16 +43,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers("/v3/api-docs/**").permitAll()
             .antMatchers("/swagger-resources/**").permitAll()
             .antMatchers("/actuator/**").permitAll()
-            // FIXME: remove below permissions
-            .antMatchers("/index.html").permitAll()
-            .antMatchers("/app.js").permitAll()
-            .antMatchers("/main.css").permitAll()
-            .antMatchers("/webjars/**").permitAll()
             .antMatchers("/chat/**").permitAll()
             .antMatchers("/wbsocket/**").permitAll()
             .antMatchers("/wbsocket").permitAll()
-            .anyRequest().permitAll()
-            //                .anyRequest().authenticated()
+            .anyRequest().authenticated()
             .and()
             // Do not persist session. Auth is done via jwt and checked at each request
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
