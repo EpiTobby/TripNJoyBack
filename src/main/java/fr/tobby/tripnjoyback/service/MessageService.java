@@ -61,11 +61,11 @@ public class MessageService {
         return messageRepository.findAllByChannelIdAndPinnedIsTrueOrderBySendDateDesc(channelId);
     }
 
-    public MessageEntity pinMessage(final long messageId)
+    public MessageEntity pinMessage(final long messageId, final boolean pin)
     {
         MessageEntity message = messageRepository.findById(messageId)
                                                  .orElseThrow(() -> new MessageNotFoundException("No message found with id " + messageId));
-        message.setPinned(true);
+        message.setPinned(pin);
         return message;
     }
 

@@ -72,9 +72,10 @@ public class MessagingController {
     @PatchMapping("/chat/{message_id}/pinned")
     @Operation(summary = "Pin a message")
     @ResponseBody
-    public MessageResponse pinMessage(@PathVariable("message_id") long messageId)
+    public MessageResponse pinMessage(@PathVariable("message_id") long messageId,
+                                      @RequestParam(value = "pin", required = false, defaultValue = "true") final boolean pin)
     {
-        return MessageResponse.of(messageService.pinMessage(messageId));
+        return MessageResponse.of(messageService.pinMessage(messageId, pin));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
