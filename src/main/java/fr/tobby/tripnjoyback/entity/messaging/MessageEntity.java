@@ -15,6 +15,7 @@ import java.util.Date;
 public class MessageEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
     @JoinColumn(name = "user_id")
