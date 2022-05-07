@@ -12,7 +12,8 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class ProfileEntity {
     @Id
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Setter
     @Column(name = "name")
