@@ -19,15 +19,16 @@ CREATE TABLE "genders" (
                            "value" varchar
 );
 
-CREATE TABLE "groups" (
-                          "id" SERIAL PRIMARY KEY,
-                          "name" varchar,
-                          "state_id" int,
-                          "owner_id" int,
-                          "max_size" int,
-                          "created_date" timestamp,
-                          "start_of_trip" timestamp,
-                          "end_of_trip" timestamp
+CREATE TABLE "groups"(
+                         "id"            SERIAL PRIMARY KEY,
+                         "name"          varchar,
+                         "state_id"      int,
+                         "owner_id"      int,
+                         "max_size"      int,
+                         "created_date"  timestamp,
+                         "start_of_trip" timestamp,
+                         "end_of_trip"   timestamp,
+                         "picture"       text
 );
 
 CREATE TABLE "cities" (
@@ -40,11 +41,13 @@ CREATE TABLE "states" (
                           "value" varchar
 );
 
-CREATE TABLE "users_groups"(
-                               "id"         SERIAL PRIMARY KEY,
-                               "user_id"    int,
-                               "group_id"   int,
-                               "profile_id" int
+CREATE TABLE "users_groups"
+(
+    "id"         SERIAL PRIMARY KEY,
+    "user_id"    int,
+    "group_id"   int,
+    "profile_id" int,
+    "pending"    bool
 );
 
 CREATE TABLE "profiles" (
