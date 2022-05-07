@@ -88,7 +88,7 @@ public class UserMailUtils {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getAccountDeletedByAdminSubject(user))
-                .setContent(messagesProperties.getAccountDeletedBody(user).replace("{userFirstName}", user.getFirstname()).replace("{reason}",reason))
+                .setContent(messagesProperties.getAccountDeletedByAdminBody(user).replace("{userFirstName}", user.getFirstname()).replace("{reason}",reason))
                 .build();
         mailSender.send(mail);
     }
