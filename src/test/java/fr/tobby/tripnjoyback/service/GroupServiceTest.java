@@ -32,6 +32,8 @@ public class GroupServiceTest {
     @Autowired
     private CityRepository cityRepository;
     @Autowired
+    private LanguageRepository languageRepository;
+    @Autowired
     private ProfileRepository profileRepository;
     @Autowired
     private UserRepository userRepository;
@@ -46,7 +48,7 @@ public class GroupServiceTest {
     private ApplicationContext context;
 
     @BeforeAll
-    static void beforeAll(@Autowired GenderRepository genderRepository, @Autowired StateRepository stateRepository, @Autowired UserRoleRepository userRoleRepository) {
+    static void beforeAll(@Autowired GenderRepository genderRepository, @Autowired StateRepository stateRepository) {
         maleGender = genderRepository.save(new GenderEntity("male"));
         femaleGender = genderRepository.save(new GenderEntity("female"));
         otherGender = genderRepository.save(new GenderEntity("other"));
@@ -64,6 +66,7 @@ public class GroupServiceTest {
     @NotNull
     private UserEntity anyUser() throws ParseException {
         CityEntity city = cityRepository.save(new CityEntity("Paris"));
+        LanguageEntity language = languageRepository.save(new LanguageEntity("French"));
         return userRepository.save(UserEntity.builder()
                                              .firstname("Test")
                                              .lastname("1")
@@ -72,6 +75,7 @@ public class GroupServiceTest {
                                              .birthDate(dateFormat.parse("01-01-2000").toInstant())
                                              .city(city)
                                              .confirmed(true)
+                                             .language(language)
                                              .roles(List.of())
                                              .build());
     }
@@ -79,6 +83,7 @@ public class GroupServiceTest {
     @NotNull
     private UserEntity anyUserWithEmail(String email) throws ParseException {
         CityEntity city = cityRepository.save(new CityEntity("Paris"));
+        LanguageEntity language = languageRepository.save(new LanguageEntity("French"));
         return userRepository.save(UserEntity.builder()
                                              .firstname("Test")
                                              .lastname("1")
@@ -87,6 +92,7 @@ public class GroupServiceTest {
                                              .birthDate(dateFormat.parse("01-01-2000").toInstant())
                                              .city(city)
                                              .confirmed(true)
+                                             .language(language)
                                              .roles(List.of())
                                              .build());
     }
