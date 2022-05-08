@@ -13,10 +13,7 @@ import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.request.auth.GoogleRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.model.response.auth.GoogleUserResponse;
-import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
-import fr.tobby.tripnjoyback.repository.GenderRepository;
-import fr.tobby.tripnjoyback.repository.UserRepository;
-import fr.tobby.tripnjoyback.repository.UserRoleRepository;
+import fr.tobby.tripnjoyback.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,6 +51,7 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final UserService userService;
     private final UserRoleRepository userRoleRepository;
+    private final LanguageRepository languageRepository;
 
     @Value("${google.secret}")
     private String googleSecret;
@@ -65,7 +63,7 @@ public class AuthService {
                        final ConfirmationCodeRepository confirmationCodeRepository,
                        final AuthenticationManager authenticationManager, final TokenManager tokenManager,
                        final UserDetailsService userDetailsService, final UserService userService,
-                       final UserRoleRepository userRoleRepository) {
+                       final UserRoleRepository userRoleRepository, LanguageRepository languageRepository) {
         this.userRepository = userRepository;
         this.userMailUtils = userMailUtils;
         this.encoder = encoder;
@@ -76,6 +74,7 @@ public class AuthService {
         this.userDetailsService = userDetailsService;
         this.userService = userService;
         this.userRoleRepository = userRoleRepository;
+        this.languageRepository = languageRepository;
     }
 
     @Transactional
@@ -90,6 +89,7 @@ public class AuthService {
                 .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                 .phoneNumber(model.getPhoneNumber())
                 .confirmed(false)
+                .language(languageRepository.findByValue(model.getLanguage().toUpperCase()).orElseThrow(() -> new UserCreationException("Invalid language " + model.getLanguage())))
                 .roles(List.of(userRoleRepository.getByName("default")))
                 .build();
         UserModel created = UserModel.of(createUser(userEntity));

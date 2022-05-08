@@ -30,6 +30,8 @@ public class ProfileServiceTest {
     @Autowired
     private CityRepository cityRepository;
     @Autowired
+    private LanguageRepository languageRepository;
+    @Autowired
     private ProfileRepository profileRepository;
     private AnswersRepository answersRepository = mock(AnswersRepository.class);
     @Autowired
@@ -60,6 +62,7 @@ public class ProfileServiceTest {
     @NotNull
     private UserEntity anyUserWithProfile() throws ParseException {
         CityEntity city = cityRepository.save(new CityEntity("Paris"));
+        LanguageEntity language = languageRepository.save(new LanguageEntity("French"));
         return userRepository.save(UserEntity.builder()
                                              .firstname("Test")
                                              .lastname("1")
@@ -68,6 +71,7 @@ public class ProfileServiceTest {
                                              .birthDate(dateFormat.parse("01-01-2000").toInstant())
                                              .city(city)
                                              .confirmed(true)
+                                             .language(language)
                                              .roles(List.of())
                                              .profiles(new ArrayList(){{ add(anyProfile()); }})
                                              .build());
