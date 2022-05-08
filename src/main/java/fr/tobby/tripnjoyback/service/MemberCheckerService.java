@@ -14,7 +14,7 @@ public class MemberCheckerService {
 
     public void checkMember(long groupId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!groupMemberRepository.findByGroupId(groupId).stream().anyMatch(m -> m.getUser().getEmail().equals(email)));
+        if (groupMemberRepository.findByGroupId(groupId).stream().noneMatch(m -> m.getUser().getEmail().equals(email)))
             throw new ForbiddenOperationException("You cannot perform this operation");
     }
 }
