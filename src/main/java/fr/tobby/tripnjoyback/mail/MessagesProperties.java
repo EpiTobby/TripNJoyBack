@@ -8,7 +8,7 @@ import org.springframework.context.annotation.PropertySources;
 
 @Configuration
 @PropertySources({@PropertySource("classpath:fr-fr_messages.properties"),
-@PropertySource("classpath:en-us_messages.properties")})
+        @PropertySource("classpath:en-us_messages.properties")})
 public class MessagesProperties {
     @Value("${fr-confirmation-success-mail-subject}")
     private String frConfirmationSuccessMailSubject;
@@ -94,98 +94,98 @@ public class MessagesProperties {
     @Value("${en-email-update-body}")
     private String enEmailUpdateBody;
 
-    public String getConfirmationSuccessMailSubject(UserModel userModel){
+    public String getConfirmationSuccessMailSubject(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frConfirmationSuccessMailSubject;
         else
             return enConfirmationSuccessMailSubject;
     }
 
-    public String getConfirmationSuccessMailBody(UserModel userModel){
+    public String getConfirmationSuccessMailBody(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frConfirmationSuccessMailBody;
         else
             return enConfirmationSuccessMailBody;
     }
 
-    public String getConfirmationCodeSubject(UserModel userModel){
+    public String getConfirmationCodeSubject(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frConfirmationCodeSubject;
         else
             return enConfirmationCodeSubject;
     }
 
-    public String getConfirmationCodeBody(UserModel userModel){
+    public String getConfirmationCodeBody(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frConfirmationCodeBody;
         else
             return enConfirmationCodeBody;
     }
 
-    public String getForgotPasswordSubject(UserModel userModel){
+    public String getForgotPasswordSubject(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frForgotPasswordSubject;
         else
             return enForgotPasswordSubject;
     }
 
-    public String getForgotPasswordBody(UserModel userModel){
+    public String getForgotPasswordBody(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frForgotPasswordBody;
         else
             return enForgotPasswordBody;
     }
 
-    public String getUpdatePasswordSuccessSubject(UserModel userModel){
+    public String getUpdatePasswordSuccessSubject(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frUpdatePasswordSuccessSubject;
         else
             return enUpdatePasswordSuccessSubject;
     }
 
-    public String getUpdatePasswordSuccessBody(UserModel userModel){
+    public String getUpdatePasswordSuccessBody(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frUpdatePasswordSuccessBody;
         else
             return enUpdatePasswordSuccessBody;
     }
 
-    public String getAccountDeletedSubject(UserModel userModel){
+    public String getAccountDeletedSubject(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frAccountDeletedSubject;
         else
             return enAccountDeletedSubject;
     }
 
-    public String getAccountDeletedBody(UserModel userModel){
+    public String getAccountDeletedBody(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frAccountDeletedBody;
         else
             return enAccountDeletedBody;
     }
 
-    public String getAccountDeletedByAdminSubject(UserModel userModel){
+    public String getAccountDeletedByAdminSubject(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frAccountDeletedByAdminSubject;
         else
             return enAccountDeletedByAdminSubject;
     }
 
-    public String getAccountDeletedByAdminBody(UserModel userModel){
+    public String getAccountDeletedByAdminBody(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frAccountDeletedByAdminBody;
         else
             return enAccountDeletedByAdminBody;
     }
 
-    public String getEmailUpdateSubject(UserModel userModel){
+    public String getEmailUpdateSubject(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frEmailUpdateSubject;
         else
-            return frEmailUpdateSubject;
+            return enEmailUpdateSubject;
     }
 
-    public String getEmailUpdateBody(UserModel userModel){
+    public String getEmailUpdateBody(UserModel userModel) {
         if (userModel.getLanguage().equals("FRENCH"))
             return frEmailUpdateBody;
         else

@@ -18,25 +18,23 @@ public class UserMailUtils {
     @Autowired
     private MessagesProperties messagesProperties;
 
-    public UserMailUtils(final MailConfigRecord config, final MailSender mailSender)
-    {
+    public UserMailUtils(final MailConfigRecord config, final MailSender mailSender) {
         this.config = config;
         this.mailSender = mailSender;
 
     }
 
-    public boolean userEmailIsValid(String email){
+    public boolean userEmailIsValid(String email) {
         try {
             InternetAddress internetAddress = new InternetAddress(email);
             internetAddress.validate();
             return true;
-        }
-        catch (AddressException e){
+        } catch (AddressException e) {
             return false;
         }
     }
-    public void sendConfirmationSuccessMail(UserModel user)
-    {
+
+    public void sendConfirmationSuccessMail(UserModel user) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getConfirmationSuccessMailSubject(user))
@@ -45,8 +43,7 @@ public class UserMailUtils {
         mailSender.send(mail);
     }
 
-    public void sendConfirmationCodeMail(UserModel user, String code)
-    {
+    public void sendConfirmationCodeMail(UserModel user, String code) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getConfirmationCodeSubject(user))
@@ -55,8 +52,7 @@ public class UserMailUtils {
         mailSender.send(mail);
     }
 
-    public void sendForgottenPasswordCodeMail(UserModel user, String code)
-    {
+    public void sendForgottenPasswordCodeMail(UserModel user, String code) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getForgotPasswordSubject(user))
@@ -65,8 +61,7 @@ public class UserMailUtils {
         mailSender.send(mail);
     }
 
-    public void sendUpdatePasswordMail(UserModel user)
-    {
+    public void sendUpdatePasswordMail(UserModel user) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getUpdatePasswordSuccessSubject(user))
@@ -75,7 +70,7 @@ public class UserMailUtils {
         mailSender.send(mail);
     }
 
-    public void sendDeleteAccountMail(UserModel user){
+    public void sendDeleteAccountMail(UserModel user) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getAccountDeletedSubject(user))
@@ -84,16 +79,16 @@ public class UserMailUtils {
         mailSender.send(mail);
     }
 
-    public void sendDeleteAccountByAdminMail(UserModel user, String reason){
+    public void sendDeleteAccountByAdminMail(UserModel user, String reason) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getAccountDeletedByAdminSubject(user))
-                .setContent(messagesProperties.getAccountDeletedByAdminBody(user).replace("{userFirstName}", user.getFirstname()).replace("{reason}",reason))
+                .setContent(messagesProperties.getAccountDeletedByAdminBody(user).replace("{userFirstName}", user.getFirstname()).replace("{reason}", reason))
                 .build();
         mailSender.send(mail);
     }
 
-    public void sendUpdateMail(UserModel user){
+    public void sendUpdateMail(UserModel user) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getEmailUpdateSubject(user))
