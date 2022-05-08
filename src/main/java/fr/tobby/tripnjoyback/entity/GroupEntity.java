@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.entity;
 
+import fr.tobby.tripnjoyback.entity.messaging.ChannelEntity;
 import lombok.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,4 +58,8 @@ public class GroupEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinTable(name = "group_profiles", joinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "profile_id", referencedColumnName = "id"))
     private ProfileEntity profile;
+
+    @OneToMany
+    @JoinColumn(name = "group_id")
+    public Collection<ChannelEntity> channels;
 }

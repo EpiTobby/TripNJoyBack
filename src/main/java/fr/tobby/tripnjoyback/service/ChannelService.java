@@ -57,6 +57,18 @@ public class ChannelService extends MemberCheckerService {
     }
 
     @Transactional
+    public ChannelModel createDefaultChannel(GroupEntity groupEntity)
+    {
+        ChannelEntity channelEntity = ChannelEntity.builder()
+                .name("general")
+                .index(0)
+                .group(groupEntity)
+                .build();
+        groupEntity.channels.add(channelRepository.save(channelEntity));
+        return ChannelModel.of(channelEntity);
+    }
+
+    @Transactional
     public ChannelModel createChannel(long groupId, CreateChannelRequest createChannelRequest)
     {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));

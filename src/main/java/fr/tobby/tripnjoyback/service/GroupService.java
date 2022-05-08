@@ -30,14 +30,16 @@ public class GroupService extends IdCheckerService {
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final ProfileRepository profileRepository;
+    private final ChannelService channelService;
 
     public GroupService(GroupRepository groupRepository, UserRepository userRepository, GroupMemberRepository groupMemberRepository,
-                        ProfileRepository profileRepository)
+                        ProfileRepository profileRepository, ChannelService channelService)
     {
         super(userRepository);
         this.groupRepository = groupRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.profileRepository = profileRepository;
+        this.channelService = channelService;
     }
 
     public Collection<GroupModel> getUserGroups(long userId)
@@ -72,10 +74,12 @@ public class GroupService extends IdCheckerService {
                                                           : State.CLOSED.getEntity())
                                              .members(List.of())
                                              .profile(groupProfile)
+                                             .channels(new ArrayList<>())
                                              .build();
         groupRepository.save(groupEntity);
         groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity, false));
         groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity, false));
+        channelService.createDefaultChannel(groupEntity);
         return GroupModel.of(groupEntity);
     }
 
@@ -89,10 +93,12 @@ public class GroupService extends IdCheckerService {
                 .owner(userEntity)
                 .stateEntity(State.CLOSED.getEntity())
                 .members(new ArrayList<>())
+                .channels(new ArrayList<>())
                 .build());
         GroupMemberEntity groupMemberEntity = new GroupMemberEntity(groupEntity, userEntity, null, false);
         groupMemberRepository.save(groupMemberEntity);
         groupEntity.members.add(groupMemberEntity);
+        channelService.createDefaultChannel(groupEntity);
         return GroupModel.of(groupEntity);
     }
 
@@ -177,6 +183,15 @@ public class GroupService extends IdCheckerService {
             groupEntity.members.removeIf(m -> m.isPending());
             groupEntity.setStateEntity(State.CLOSED.getEntity());
         }
+    }
+
+    @Transactional
+    public void declineGroupInvite(long groupId, long userId) {
+        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
+        GroupMemberEntity invitedUser = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not invited or does not exist"));
+        if (!invitedUser.isPending())
+            throw new UserAlreadyInGroupException("User has joined the groupe so there is not invite");
+        groupMemberRepository.delete(invitedUser);
     }
 
     @Transactional
