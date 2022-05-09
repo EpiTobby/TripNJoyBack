@@ -7,6 +7,7 @@ import fr.tobby.tripnjoyback.exception.ChannelNotFoundException;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.MessageNotFoundException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
+import fr.tobby.tripnjoyback.model.MessageType;
 import fr.tobby.tripnjoyback.model.request.messaging.PostMessageRequest;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import fr.tobby.tripnjoyback.repository.messaging.ChannelRepository;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -52,6 +54,15 @@ public class MessageService {
         checkUserIsInChannelGroup(channelId, username);
 
         return messageRepository.findAllByChannelIdOrderBySendDateDesc(channelId, PageRequest.of(page, 50));
+    }
+
+    public List<MessageEntity> getChannelMessages(final long channelId, final String username, final Collection<MessageType> types, final int page)
+    {
+        checkUserIsInChannelGroup(channelId, username);
+
+        return messageRepository.findAllByChannelIdAndTypeInOrderBySendDateDesc(channelId,
+                types.stream().map(MessageType::getEntity).toList(),
+                PageRequest.of(page, 50));
     }
 
     public List<MessageEntity> getChannelPinnedMessages(final long channelId, final String username)
