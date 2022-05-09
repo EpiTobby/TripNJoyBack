@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.auth.TokenManager;
+import fr.tobby.tripnjoyback.entity.CityEntity;
 import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.*;
@@ -45,7 +46,7 @@ public class AuthService {
     private final UserMailUtils userMailUtils;
     private final PasswordEncoder encoder;
     private final GenderRepository genderRepository;
-    private final CityRepository cityRepository;
+    private final CityService cityService;
     private final ConfirmationCodeRepository confirmationCodeRepository;
     private final AuthenticationManager authenticationManager;
     private final TokenManager tokenManager;
@@ -61,7 +62,7 @@ public class AuthService {
 
     public AuthService(final UserRepository userRepository, final UserMailUtils userMailUtils, final PasswordEncoder encoder,
                        final GenderRepository genderRepository,
-                       CityRepository cityRepository, final ConfirmationCodeRepository confirmationCodeRepository,
+                       final CityService cityService, final ConfirmationCodeRepository confirmationCodeRepository,
                        final AuthenticationManager authenticationManager, final TokenManager tokenManager,
                        final UserDetailsService userDetailsService, final UserService userService,
                        final UserRoleRepository userRoleRepository, LanguageRepository languageRepository) {
@@ -69,7 +70,7 @@ public class AuthService {
         this.userMailUtils = userMailUtils;
         this.encoder = encoder;
         this.genderRepository = genderRepository;
-        this.cityRepository = cityRepository;
+        this.cityService = cityService;
         this.confirmationCodeRepository = confirmationCodeRepository;
         this.authenticationManager = authenticationManager;
         this.tokenManager = tokenManager;
@@ -81,6 +82,8 @@ public class AuthService {
 
     @Transactional
     public UserModel createUser(UserCreationRequest model) throws UserCreationException {
+
+        String city = model.getCity().toUpperCase().trim();
         UserEntity userEntity = UserEntity.builder()
                 .firstname(model.getFirstname())
                 .lastname(model.getLastname())
@@ -91,8 +94,7 @@ public class AuthService {
                 .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                 .phoneNumber(model.getPhoneNumber())
                 .confirmed(false)
-                //.city(cityRepository.findByName(model.getCity().toUpperCase().trim()).orElseThrow(() -> new UserCreationException("Invalid city " + model.getCity())))
-                .language(languageRepository.findByValue(model.getLanguage().toUpperCase()).orElseThrow(() -> new UserCreationException("Invalid language " + model.getLanguage())))
+                .city(cityService.getOrAddCity(model.getCity().trim().toUpperCase())).language(languageRepository.findByValue(model.getLanguage().toUpperCase()).orElseThrow(() -> new UserCreationException("Invalid language " + model.getLanguage())))
                 .roles(List.of(userRoleRepository.getByName("default")))
                 .build();
         UserModel created = UserModel.of(createUser(userEntity));

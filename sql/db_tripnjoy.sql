@@ -243,9 +243,9 @@ ALTER TABLE "activities_members" ADD FOREIGN KEY ("participant_id") REFERENCES "
 
 ALTER TABLE "messages" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "messages" ADD FOREIGN KEY ("channel_id") REFERENCES "channels" ("id");
+ALTER TABLE "messages" ADD FOREIGN KEY ("channel_id") REFERENCES "channels" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "channels" ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id");
+ALTER TABLE "channels" ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "survey_answers" ADD FOREIGN KEY ("survey_id") REFERENCES "surveys" ("id");
 
@@ -323,3 +323,24 @@ alter table messages
     add constraint messages_message_type_id_fk
         foreign key (type_id) references message_type
             on update cascade on delete cascade;
+
+alter table channels drop constraint channels_group_id_fkey;
+
+alter table channels
+    add constraint channels_group_id_fkey
+        foreign key (group_id) references groups
+            on delete cascade;
+
+alter table messages drop constraint messages_channel_id_fkey;
+
+alter table messages
+    add constraint messages_channel_id_fkey
+        foreign key (channel_id) references channels
+            on delete cascade;
+
+alter table messages drop constraint messages_user_id_fkey;
+
+alter table messages
+    add constraint messages_user_id_fkey
+        foreign key (user_id) references users
+            on delete set null;

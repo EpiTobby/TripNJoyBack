@@ -29,6 +29,7 @@ public class UserCreationRequest extends ModelWithEmail {
     private String phoneNumber;
     @NotNull
     private String language;
+    @NotNull
     private String city;
 
     public UserCreationRequest(final String email, final @NotNull String firstname, final @NotNull String lastname, final @NotNull String password,
