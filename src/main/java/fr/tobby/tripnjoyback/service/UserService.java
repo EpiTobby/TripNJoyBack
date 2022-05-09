@@ -9,8 +9,8 @@ import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.DeleteUserByAdminRequest;
 import fr.tobby.tripnjoyback.model.request.DeleteUserRequest;
 import fr.tobby.tripnjoyback.model.request.UserUpdateRequest;
-import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
+import fr.tobby.tripnjoyback.repository.LanguageRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,14 +24,16 @@ public class UserService extends IdCheckerService {
 
     private final GenderRepository genderRepository;
     private final ProfileService profileService;
+    private final LanguageRepository languageRepository;
     private final CityService cityService;
     private final PasswordEncoder encoder;
     private final UserMailUtils userMailUtils;
 
-    public UserService(UserRepository userRepository, GenderRepository genderRepository, ProfileService profileService, final CityService cityService, PasswordEncoder encoder, UserMailUtils userMailUtils) {
+    public UserService(UserRepository userRepository, GenderRepository genderRepository, ProfileService profileService, LanguageRepository languageRepository, final CityService cityService, PasswordEncoder encoder, UserMailUtils userMailUtils) {
         super(userRepository);
         this.genderRepository = genderRepository;
         this.profileService = profileService;
+        this.languageRepository = languageRepository;
         this.cityService = cityService;
         this.encoder = encoder;
         this.userMailUtils = userMailUtils;
@@ -65,6 +67,9 @@ public class UserService extends IdCheckerService {
         }
         if (userUpdateRequest.getGender() != null) {
             user.setGender(genderRepository.findByValue(userUpdateRequest.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + userUpdateRequest.getGender())));
+        }
+        if (userUpdateRequest.getLanguage() != null) {
+            user.setLanguage(languageRepository.findByValue(userUpdateRequest.getLanguage().toUpperCase()).orElseThrow(() -> new UserCreationException("Invalid langage " + userUpdateRequest.getLanguage())));
         }
     }
 

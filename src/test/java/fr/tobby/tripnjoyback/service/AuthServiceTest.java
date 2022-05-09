@@ -26,6 +26,7 @@ public class AuthServiceTest {
     UserMailUtils userMailUtils;
     PasswordEncoder encoder;
     GenderRepository genderRepository;
+    CityRepository cityRepository;
     ConfirmationCodeRepository confirmationCodeRepository;
     AuthenticationManager authenticationManager;
     TokenManager tokenManager;
@@ -50,12 +51,13 @@ public class AuthServiceTest {
         userService = mock(UserService.class);
         userRoleRepository = mock(UserRoleRepository.class);
         languageRepository = mock(LanguageRepository.class);
+        cityRepository = mock(CityRepository.class);
 
         service = new AuthService(userRepository,
                 userMailUtils,
                 encoder,
                 genderRepository,
-                confirmationCodeRepository,
+                cityRepository, confirmationCodeRepository,
                 authenticationManager,
                 tokenManager,
                 userDetailsService,

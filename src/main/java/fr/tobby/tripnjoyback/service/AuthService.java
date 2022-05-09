@@ -45,6 +45,7 @@ public class AuthService {
     private final UserMailUtils userMailUtils;
     private final PasswordEncoder encoder;
     private final GenderRepository genderRepository;
+    private final CityRepository cityRepository;
     private final ConfirmationCodeRepository confirmationCodeRepository;
     private final AuthenticationManager authenticationManager;
     private final TokenManager tokenManager;
@@ -60,7 +61,7 @@ public class AuthService {
 
     public AuthService(final UserRepository userRepository, final UserMailUtils userMailUtils, final PasswordEncoder encoder,
                        final GenderRepository genderRepository,
-                       final ConfirmationCodeRepository confirmationCodeRepository,
+                       CityRepository cityRepository, final ConfirmationCodeRepository confirmationCodeRepository,
                        final AuthenticationManager authenticationManager, final TokenManager tokenManager,
                        final UserDetailsService userDetailsService, final UserService userService,
                        final UserRoleRepository userRoleRepository, LanguageRepository languageRepository) {
@@ -68,6 +69,7 @@ public class AuthService {
         this.userMailUtils = userMailUtils;
         this.encoder = encoder;
         this.genderRepository = genderRepository;
+        this.cityRepository = cityRepository;
         this.confirmationCodeRepository = confirmationCodeRepository;
         this.authenticationManager = authenticationManager;
         this.tokenManager = tokenManager;
@@ -89,6 +91,7 @@ public class AuthService {
                 .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                 .phoneNumber(model.getPhoneNumber())
                 .confirmed(false)
+                //.city(cityRepository.findByName(model.getCity().toUpperCase().trim()).orElseThrow(() -> new UserCreationException("Invalid city " + model.getCity())))
                 .language(languageRepository.findByValue(model.getLanguage().toUpperCase()).orElseThrow(() -> new UserCreationException("Invalid language " + model.getLanguage())))
                 .roles(List.of(userRoleRepository.getByName("default")))
                 .build();
