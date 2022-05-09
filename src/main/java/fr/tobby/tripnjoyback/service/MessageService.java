@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -72,6 +73,7 @@ public class MessageService {
         return messageRepository.findAllByChannelIdAndPinnedIsTrueOrderBySendDateDesc(channelId);
     }
 
+    @Transactional
     public MessageEntity pinMessage(final long messageId, final boolean pin)
     {
         MessageEntity message = messageRepository.findById(messageId)
