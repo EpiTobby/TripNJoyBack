@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.model.response.messaging;
 
 import fr.tobby.tripnjoyback.entity.messaging.MessageEntity;
+import fr.tobby.tripnjoyback.model.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,6 +18,7 @@ public class MessageResponse {
     private final Date sentDate;
     private final Date modifiedDate;
     private final boolean pinned;
+    private final MessageType type;
 
     public static MessageResponse of(MessageEntity entity)
     {
@@ -26,6 +28,7 @@ public class MessageResponse {
                 entity.getContent(),
                 entity.getSendDate(),
                 entity.getModifiedDate(),
-                entity.isPinned());
+                entity.isPinned(),
+                MessageType.ofEntity(entity.getType()));
     }
 }
