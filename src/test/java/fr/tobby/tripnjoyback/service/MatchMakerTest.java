@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.*;
+import fr.tobby.tripnjoyback.entity.messaging.ChannelEntity;
 import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
@@ -215,7 +216,8 @@ class MatchMakerTest {
                 null,
                 "",
                 List.of(mock(GroupMemberEntity.class)),
-                groupProfileEntity));
+                groupProfileEntity,
+                List.of(mock(ChannelEntity.class))));
 
         Instant now = dateFormat.parse("01-01-2021").toInstant();
         MatchMakingUserModel modelA = MatchMakingUserModel.from(userA, profileA, now);

@@ -34,6 +34,7 @@ public class GroupModel {
     @Nullable
     private String picture;
     private List<MemberModel> members;
+    private List<ChannelModel> channels;
 
     @JsonProperty("createdDate")
     public String getCreatedDate() {
@@ -52,6 +53,7 @@ public class GroupModel {
                          .createdDate(groupEntity.getCreatedDate())
                          .picture(groupEntity.getPicture())
                          .members(groupEntity.members.stream().filter(m -> !m.isPending()).map(m -> MemberModel.of(m.getUser())).toList())
+                         .channels(groupEntity.channels.stream().map(e -> ChannelModel.of(e)).toList())
                          .build();
     }
 }

@@ -21,6 +21,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.Mockito.mock;
+
 @DataJpaTest
 public class GroupServiceTest {
     private static GenderEntity maleGender;
@@ -41,6 +43,7 @@ public class GroupServiceTest {
     private GroupRepository groupRepository;
     @Autowired
     private GroupMemberRepository groupMemberRepository;
+    private ChannelService channelService;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     private GroupService groupService;
 
@@ -59,7 +62,8 @@ public class GroupServiceTest {
 
     @BeforeEach
     void initGroupService(){
-        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository);
+        channelService = mock(ChannelService.class);
+        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService);
         SpringContext.setContext(context);
     }
 

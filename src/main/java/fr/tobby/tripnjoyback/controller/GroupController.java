@@ -123,6 +123,15 @@ public class GroupController {
         groupService.joinGroup(groupId, userId);
     }
 
+    @PatchMapping("{group}/decline/{id}")
+    @Operation(summary = "Decline the invitation to the group")
+    @ApiResponse(responseCode = "200", description = "The user has declined the invite")
+    @ApiResponse(responseCode = "422", description = "Group or User does not exist")
+    public void declineGroupInvite(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
+        groupService.checkId(userId);
+        groupService.declineGroupInvite(groupId, userId);
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
