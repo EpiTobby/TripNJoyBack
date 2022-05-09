@@ -7,6 +7,7 @@ import fr.tobby.tripnjoyback.exception.ChannelNotFoundException;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.MessageNotFoundException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
+import fr.tobby.tripnjoyback.model.MessageType;
 import fr.tobby.tripnjoyback.model.request.messaging.PostMessageRequest;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import fr.tobby.tripnjoyback.repository.messaging.ChannelRepository;
@@ -42,7 +43,7 @@ public class MessageService {
         UserEntity sender = userRepository.findById(message.getUserId())
                                           .orElseThrow(() -> new UserNotFoundException(message.getUserId()));
 
-        MessageEntity created = messageRepository.save(new MessageEntity(sender, channel, message.getContent(), new Date()));
+        MessageEntity created = messageRepository.save(new MessageEntity(sender, channel, message.getContent(), MessageType.TEXT.getEntity(), new Date()));
         logger.debug("Posted message in channel {} by user {}, content: {}", channel.getName(), sender.getEmail(), message.getContent());
         return created;
     }
