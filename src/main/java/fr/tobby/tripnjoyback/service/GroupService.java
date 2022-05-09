@@ -9,6 +9,7 @@ import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
+import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import fr.tobby.tripnjoyback.repository.GroupMemberRepository;
 import fr.tobby.tripnjoyback.repository.GroupRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
@@ -40,6 +41,21 @@ public class GroupService extends IdCheckerService {
         this.groupMemberRepository = groupMemberRepository;
         this.profileRepository = profileRepository;
         this.channelService = channelService;
+    }
+
+    public boolean isInGroup(final long groupId, final long userId)
+    {
+        GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+        return group.getMembers().stream().anyMatch(member -> member.getId().equals(userId));
+    }
+
+    public GroupMemberModel getMember(long groupId, long userId)
+    {
+        GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+        return group.getMembers().stream().filter(member -> member.getId().equals(userId))
+                    .findAny()
+                    .map(member -> GroupMemberModel.of(member.getUser()))
+                    .orElseThrow(UserNotFoundException::new);
     }
 
     public Collection<GroupModel> getUserGroups(long userId)
