@@ -5,6 +5,7 @@ import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.ModelWithEmail;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
+import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import fr.tobby.tripnjoyback.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -58,6 +59,18 @@ public class GroupController {
     {
         groupService.checkId(userId);
         groupService.removeUserFromGroup(groupId, userId);
+    }
+
+    @GetMapping("{groupId}/users/{userId}")
+    @Operation(summary = "Get the information related to the member")
+    @ApiResponse(responseCode = "200", description = "User information")
+    @ApiResponse(responseCode = "422", description = "User or group not found")
+    @ApiResponse(responseCode = "403", description = "You are not allowed to view members of this group")
+    public GroupMemberModel getMember(@PathVariable("groupId") final long groupId, @PathVariable("userId") final long userId)
+    {
+        if (!groupService.isInGroup(groupId, groupService.getCurrentUserId()))
+            throw new ForbiddenOperationException("You are not a member of this group");
+        return groupService.getMember(groupId, userId);
     }
 
     @PostMapping("private/{id}")
