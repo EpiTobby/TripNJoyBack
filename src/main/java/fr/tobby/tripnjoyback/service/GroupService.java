@@ -46,7 +46,7 @@ public class GroupService extends IdCheckerService {
     public boolean isInGroup(final long groupId, final long userId)
     {
         GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
-        return group.getMembers().stream().noneMatch(member -> member.getId().equals(userId));
+        return group.getMembers().stream().anyMatch(member -> member.getId().equals(userId));
     }
 
     public GroupMemberModel getMember(long groupId, long userId)
