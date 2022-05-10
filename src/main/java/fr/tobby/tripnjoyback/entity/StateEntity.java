@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "states")
+@Table(name = "states", uniqueConstraints = @UniqueConstraint(name = "states_value_uindex", columnNames = "value"))
 @Getter
 @NoArgsConstructor
 public class StateEntity {
