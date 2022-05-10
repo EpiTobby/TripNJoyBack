@@ -58,6 +58,7 @@ public class MatchMaker {
     public long match(@NotNull UserEntity entity, long profileId) throws IllegalStateException
     {
         ProfileEntity profile = profileRepository.findById(profileId).orElseThrow(ProfileNotFoundException::new);
+        profileService.setProfileInactive(entity.getId());
         profileService.setActiveProfile(profileId, true);
         return match(entity, profileService.getProfile(profile));
     }
