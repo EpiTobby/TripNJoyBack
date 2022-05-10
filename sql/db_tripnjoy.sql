@@ -344,3 +344,7 @@ alter table messages
     add constraint messages_user_id_fkey
         foreign key (user_id) references users
             on delete set null;
+
+create unique index states_value_uindex
+    on states (value);
+

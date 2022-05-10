@@ -54,8 +54,10 @@ class MatchMakerTest {
         femaleGender = genderRepository.save(new GenderEntity("female"));
         otherGender = genderRepository.save(new GenderEntity("other"));
 
-        closedState = stateRepository.save(new StateEntity("CLOSED"));
-        openState = stateRepository.save(new StateEntity("OPEN"));
+        if (stateRepository.findByValue("CLOSED").isEmpty())
+            closedState = stateRepository.save(new StateEntity("CLOSED"));
+        if (stateRepository.findByValue("OPEN").isEmpty())
+            openState = stateRepository.save(new StateEntity("OPEN"));
     }
 
     @BeforeEach
