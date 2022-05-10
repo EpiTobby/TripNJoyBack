@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.*;
+import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
@@ -39,11 +40,10 @@ public class ProfileServiceTest {
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
     @BeforeAll
-    static void beforeAll(@Autowired GenderRepository genderRepository, @Autowired UserRoleRepository userRoleRepository) {
+    static void beforeAll(@Autowired GenderRepository genderRepository) {
         maleGender = genderRepository.save(new GenderEntity("male"));
         femaleGender = genderRepository.save(new GenderEntity("female"));
         otherGender = genderRepository.save(new GenderEntity("other"));
-
     }
 
     @BeforeEach
@@ -131,5 +131,36 @@ public class ProfileServiceTest {
         List<ProfileEntity> profileEntities = List.copyOf(user.getProfiles());
         Assertions.assertFalse(profileEntities.get(0).isActive());
         Assertions.assertTrue(profileEntities.get(1).isActive());
+    }
+
+    @Test
+    public void testDeleteProfile() throws ParseException {
+        UserEntity user = anyUserWithProfile();
+        AnswersEntity entity = AnswersEntity.builder()
+                .id("2")
+                .availabilities(List.of(new AvailabiltyEntity("01-07-2023", "16-07-2023")))
+                .durationMin(4)
+                .durationMax(7)
+                .groupSizeMin(2)
+                .groupSizeMax(5)
+                .budgetMin(1000)
+                .budgetMax(2000)
+                .destinationTypes(List.of("CITY","BEACH"))
+                .ageMin(25)
+                .ageMax(40)
+                .travelWithPersonFromSameCity(true)
+                .travelWithPersonFromSameCountry(true)
+                .travelWithPersonSameLanguage(true)
+                .gender("MALE")
+                .aboutFood("RESTAURANT")
+                .goOutAtNight(true)
+                .chillOrVisit("CHILL")
+                .sport(true)
+                .build();
+        when(answersRepository.save(any())).thenReturn(entity);
+        when(answersRepository.findByProfileId(anyLong())).thenReturn(entity);
+        long profileId = user.getProfiles().stream().findFirst().get().getId();
+        profileService.deleteProfile(profileId);
+        Assertions.assertThrows(ProfileNotFoundException.class, () -> profileService.getProfile(profileId));
     }
 }

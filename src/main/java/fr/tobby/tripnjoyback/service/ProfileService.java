@@ -140,7 +140,7 @@ public class ProfileService extends IdCheckerService {
     }
 
     @Transactional
-    public void deleteProfile(long userId, long profileId)
+    public void deleteProfile(long profileId)
     {
         ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
         profileRepository.delete(profileEntity);
