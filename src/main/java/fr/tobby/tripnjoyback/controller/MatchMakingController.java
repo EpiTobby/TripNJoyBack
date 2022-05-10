@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.controller;
 
 import fr.tobby.tripnjoyback.entity.UserEntity;
+import fr.tobby.tripnjoyback.exception.EntityNotFoundException;
 import fr.tobby.tripnjoyback.exception.UserNotConfirmedException;
 import fr.tobby.tripnjoyback.model.MatchMakingResult;
 import fr.tobby.tripnjoyback.model.ProfileModel;
@@ -46,6 +47,19 @@ public class MatchMakingController {
         return new MatchMakingResponse(taskId, "");
     }
 
+    @PatchMapping
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @Operation(summary = "Start the matchmaking with an existing profile")
+    @ApiResponse(responseCode = "202", description = "Matchmaking started")
+    @ApiResponse(responseCode = "404", description = "Profile or user not found")
+    public MatchMakingResponse match(@RequestParam("user_id") long userId, @RequestParam("profile_id") long profileId)
+    {
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(UserNotConfirmedException::new);
+
+        long taskId = matchMaker.match(userEntity, profileId);
+        return new MatchMakingResponse(taskId, "");
+    }
+
     @GetMapping("{taskId}")
     @Operation(summary = "Get the state of a match making task")
     @ApiResponse(responseCode = "200", description = "State")
@@ -67,6 +81,14 @@ public class MatchMakingController {
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)
     String onNoSuchElementException(NoSuchElementException e)
+    {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    String onEntityNotFoundException(EntityNotFoundException e)
     {
         return e.getMessage();
     }
