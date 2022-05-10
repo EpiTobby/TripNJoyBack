@@ -95,7 +95,7 @@ public class MessageService {
         UserEntity user = userRepository.findByEmail(username).orElseThrow(UserNotFoundException::new);
         ChannelEntity channel = channelRepository.findById(channelId).orElseThrow(() -> new ChannelNotFoundException(channelId));
 
-        if (channel.getGroup().getMembers().stream().noneMatch(member -> member.getId().equals(user.getId())))
+        if (channel.getGroup().getMembers().stream().noneMatch(member -> member.getUser().getId().equals(user.getId())))
             throw new ForbiddenOperationException("User " + username + " does not belong to group id " + channel.getGroup().getId());
     }
 }
