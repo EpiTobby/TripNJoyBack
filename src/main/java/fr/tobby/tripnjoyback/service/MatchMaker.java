@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.entity.GroupEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
+import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.MatchMakingResult;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
@@ -51,6 +52,14 @@ public class MatchMaker {
         this.groupService = groupService;
         this.groupRepository = groupRepository;
         this.profileService = profileService;
+    }
+
+    @Transactional
+    public long match(@NotNull UserEntity entity, long profileId) throws IllegalStateException
+    {
+        ProfileEntity profile = profileRepository.findById(profileId).orElseThrow(ProfileNotFoundException::new);
+        profileService.setActiveProfile(profileId, true);
+        return match(entity, profileService.getProfile(profile));
     }
 
     @Transactional
