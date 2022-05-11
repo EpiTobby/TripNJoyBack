@@ -1,6 +1,5 @@
 package fr.tobby.tripnjoyback.repository;
 
-import com.mapbox.services.commons.geojson.Feature;
 import fr.tobby.tripnjoyback.entity.PlaceEntity;
 import fr.tobby.tripnjoyback.entity.api.request.GeocodeAddressRequest;
 import fr.tobby.tripnjoyback.entity.api.response.FeatureResponse;
@@ -16,9 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Component
 public class PlacesRepository {
@@ -44,7 +41,7 @@ public class PlacesRepository {
 
     public Optional<LocationResponse> getCoordinates(GeocodeAddressRequest request){
         //if DAILY API LIMIT EXCEEDED
-        //return Optional.of(LocationResponse.builder().longitude(2.3548f).latitude(48.8279f).build());
+//        return Optional.of(LocationResponse.builder().longitude(2.3548f).latitude(48.8279f).build());
         if (neutrinoApiKey != null && neutrinoUserId != null) {
             request.setUserId(neutrinoUserId);
             request.setApiKey(neutrinoApiKey);
@@ -68,16 +65,11 @@ public class PlacesRepository {
     }
 
     private String buildQuery(List<String> categories, double lat, double lon, int radiusMeter){
-        //TODO faire un builder
-        String url = GEOAPIFY_PLACES_URL + '?';
-        if (!categories.isEmpty()){
-            url += "categories=";
-            StringJoiner stringJoiner = new StringJoiner(",");
-            categories.stream().forEach(c -> stringJoiner.add(c));
-            url+=stringJoiner.toString() + '&';
-        }
-        url += "filter=circle:" + lon + ',' + lat + ',' + radiusMeter + "&bias=proximity:2.25,48.8&limit=20&apiKey=" + placesApiKey;
-        return url;
+        return new GeoapifyQueryBuilder().setCategories(categories)
+                                         .setLimit(10)
+                                         .setApiKey(placesApiKey)
+                                         .setCircle(new SearchCircle(lon, lat, radiusMeter))
+                                         .build();
     }
 
     public List<PlaceEntity> getPlacesfromAddress(GeocodeAddressRequest request, List<String> categories, int radiusMeter){
@@ -97,5 +89,65 @@ public class PlacesRepository {
             e.printStackTrace();
             throw new GeoapifyPlacesException("An error occurred with Geocode Address");
         }
+    }
+}
+
+final class GeoapifyQueryBuilder {
+
+    private Collection<String> categories = new ArrayList<>();
+    private SearchCircle circle;
+    private int limit = 10;
+    private String apiKey;
+
+    public String build()
+    {
+        if (apiKey == null || circle == null)
+            throw new IllegalStateException();
+        StringJoiner joinerCategories = new StringJoiner(",");
+        categories.forEach(joinerCategories::add);
+        return String.format("https://api.geoapify.com/v2/places?categories=%s&filter=%s&bias=proximity:2.25,48.8&limit=%d&apiKey=%s",
+                joinerCategories,
+                circle.toString(),
+                limit,
+                apiKey);
+    }
+
+    public GeoapifyQueryBuilder setCategories(final Collection<String> categories)
+    {
+        this.categories = categories;
+        return this;
+    }
+
+    public GeoapifyQueryBuilder addCategory(String category)
+    {
+        categories.add(category);
+        return this;
+    }
+
+    public GeoapifyQueryBuilder setCircle(final SearchCircle circle)
+    {
+        this.circle = circle;
+        return this;
+    }
+
+    public GeoapifyQueryBuilder setLimit(final int limit)
+    {
+        this.limit = limit;
+        return this;
+    }
+
+    public GeoapifyQueryBuilder setApiKey(final String apiKey)
+    {
+        this.apiKey = apiKey;
+        return this;
+    }
+}
+
+final record SearchCircle(double longitude, double latitude, int radius)
+{
+    @Override
+    public String toString()
+    {
+        return "circle:" + longitude + ","+latitude+"," +radius;
     }
 }
