@@ -1,8 +1,9 @@
-package fr.tobby.tripnjoyback.entity;
+package fr.tobby.tripnjoyback.entity.api.response;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.mapbox.services.commons.geojson.Feature;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import fr.tobby.tripnjoyback.entity.PlaceEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,9 +15,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PlaceEntity{
-    private String name;
-    private String street;
-    private String city;
-    private String country;
+public class FeatureResponse{
+    @JsonProperty("properties")
+    private PlaceEntity place;
 }

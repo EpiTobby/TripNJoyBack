@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.repository;
 import com.mapbox.services.commons.geojson.Feature;
 import fr.tobby.tripnjoyback.entity.PlaceEntity;
 import fr.tobby.tripnjoyback.entity.api.request.GeocodeAddressRequest;
+import fr.tobby.tripnjoyback.entity.api.response.FeatureResponse;
 import fr.tobby.tripnjoyback.entity.api.response.GeoapifyPlacesResponse;
 import fr.tobby.tripnjoyback.entity.api.response.GeocodeAddressResponse;
 import fr.tobby.tripnjoyback.entity.api.response.LocationResponse;
@@ -11,6 +12,7 @@ import fr.tobby.tripnjoyback.exception.GeocodeAddressException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+@Component
 public class PlacesRepository {
     @Value("${neutrino.user.id}")
     private String neutrinoUserId;
@@ -28,7 +31,7 @@ public class PlacesRepository {
     @Value("${places.api.key}")
     private String placesApiKey;
 
-    static final String GEOAPIFY_PLACES_URL = "https://api.geoapify.com/v2/places?";
+    static final String GEOAPIFY_PLACES_URL = "https://api.geoapify.com/v2/places";
     static final String GEOCODE_ADDRESS_URL = "https://neutrinoapi.net/geocode-address";
 
     private LocationResponse filterAdresses(GeocodeAddressRequest request, List<LocationResponse> locations){
@@ -36,10 +39,12 @@ public class PlacesRepository {
         for(LocationResponse location : locations){
             //TODO
         }
-        return locations.get(1);
+        return locations.get(0);
     }
 
     public Optional<LocationResponse> getCoordinates(GeocodeAddressRequest request){
+        //if DAILY API LIMIT EXCEEDED
+        //return Optional.of(LocationResponse.builder().longitude(2.3548f).latitude(48.8279f).build());
         if (neutrinoApiKey != null && neutrinoUserId != null) {
             request.setUserId(neutrinoUserId);
             request.setApiKey(neutrinoApiKey);
@@ -71,11 +76,11 @@ public class PlacesRepository {
             categories.stream().forEach(c -> stringJoiner.add(c));
             url+=stringJoiner.toString() + '&';
         }
-        url += "filter=" + lat + ',' + lon + ',' + radiusMeter + "&limit=20&apiKey=" + placesApiKey;
+        url += "filter=circle:" + lon + ',' + lat + ',' + radiusMeter + "&bias=proximity:2.25,48.8&limit=20&apiKey=" + placesApiKey;
         return url;
     }
 
-    public List<PlaceEntity> getPlaces(GeocodeAddressRequest request, List<String> categories, int radiusMeter){
+    public List<PlaceEntity> getPlacesfromAddress(GeocodeAddressRequest request, List<String> categories, int radiusMeter){
         LocationResponse location = getCoordinates(request).get();
         String url = buildQuery(categories, location.getLatitude(), location.getLongitude(), radiusMeter);
         try {
@@ -85,10 +90,11 @@ public class PlacesRepository {
                 throw new GeoapifyPlacesException("Invalid Status Code");
             }
             GeoapifyPlacesResponse geoapifyPlacesResponse = response.getBody();
-            List<Feature> features = geoapifyPlacesResponse.getFeatures().getFeatures();
-            return features.stream().map(PlaceEntity::of).toList();
+            List<FeatureResponse> features = geoapifyPlacesResponse.getFeatures();
+            return features.stream().map(f -> f.getPlace()).toList();
 
         } catch (RestClientException e) {
+            e.printStackTrace();
             throw new GeoapifyPlacesException("An error occurred with Geocode Address");
         }
     }
