@@ -8,10 +8,7 @@ import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
 import fr.tobby.tripnjoyback.repository.*;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -31,8 +28,10 @@ class MatchMakerTest {
     private static GenderEntity maleGender;
     private static GenderEntity femaleGender;
     private static GenderEntity otherGender;
+    private static GenderRepository genderRepository;
     private static StateEntity closedState;
     private static StateEntity openState;
+    private static StateRepository stateRepository;
     private MatchMaker matchMaker;
 
     @Autowired
@@ -53,11 +52,18 @@ class MatchMakerTest {
         maleGender = genderRepository.save(new GenderEntity("male"));
         femaleGender = genderRepository.save(new GenderEntity("female"));
         otherGender = genderRepository.save(new GenderEntity("other"));
+        MatchMakerTest.genderRepository = genderRepository;
 
-        if (stateRepository.findByValue("CLOSED").isEmpty())
-            closedState = stateRepository.save(new StateEntity("CLOSED"));
-        if (stateRepository.findByValue("OPEN").isEmpty())
-            openState = stateRepository.save(new StateEntity("OPEN"));
+        closedState = stateRepository.save(new StateEntity("CLOSED"));
+        openState = stateRepository.save(new StateEntity("OPEN"));
+        MatchMakerTest.stateRepository = stateRepository;
+    }
+
+    @AfterAll
+    static void afterAll()
+    {
+        stateRepository.deleteAll();
+        genderRepository.deleteAll();
     }
 
     @BeforeEach
