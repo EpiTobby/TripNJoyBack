@@ -1,8 +1,12 @@
 package fr.tobby.tripnjoyback.repository;
 
+import com.mapbox.services.commons.geojson.Feature;
+import fr.tobby.tripnjoyback.entity.PlaceEntity;
 import fr.tobby.tripnjoyback.entity.api.request.GeocodeAddressRequest;
+import fr.tobby.tripnjoyback.entity.api.response.GeoapifyPlacesResponse;
 import fr.tobby.tripnjoyback.entity.api.response.GeocodeAddressResponse;
 import fr.tobby.tripnjoyback.entity.api.response.LocationResponse;
+import fr.tobby.tripnjoyback.exception.GeoapifyPlacesException;
 import fr.tobby.tripnjoyback.exception.GeocodeAddressException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -59,6 +63,7 @@ public class PlacesRepository {
     }
 
     private String buildQuery(List<String> categories, double lat, double lon, int radiusMeter){
+        //TODO faire un builder
         String url = GEOAPIFY_PLACES_URL + '?';
         if (!categories.isEmpty()){
             url += "categories=";
@@ -70,9 +75,21 @@ public class PlacesRepository {
         return url;
     }
 
-    public List<String> getPlaces(GeocodeAddressRequest request, List<String> categories, int radiusMeter){
+    public List<PlaceEntity> getPlaces(GeocodeAddressRequest request, List<String> categories, int radiusMeter){
         LocationResponse location = getCoordinates(request).get();
         String url = buildQuery(categories, location.getLatitude(), location.getLongitude(), radiusMeter);
-        return null;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<GeoapifyPlacesResponse> response = restTemplate.getForEntity(url, GeoapifyPlacesResponse.class);
+            if (response.getStatusCode() != HttpStatus.OK){
+                throw new GeoapifyPlacesException("Invalid Status Code");
+            }
+            GeoapifyPlacesResponse geoapifyPlacesResponse = response.getBody();
+            List<Feature> features = geoapifyPlacesResponse.getFeatures().getFeatures();
+            return features.stream().map(PlaceEntity::of).toList();
+
+        } catch (RestClientException e) {
+            throw new GeoapifyPlacesException("An error occurred with Geocode Address");
+        }
     }
 }
