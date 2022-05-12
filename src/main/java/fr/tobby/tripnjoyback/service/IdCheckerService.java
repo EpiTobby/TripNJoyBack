@@ -46,7 +46,7 @@ public class IdCheckerService {
                              .orElseThrow(UserNotFoundException::new);
     }
 
-    public boolean isUserInGroup(long userId, long groupId)
+    public boolean isUserInGroup(long userId, long groupId) throws GroupNotFoundException
     {
         return groupRepository.findById(groupId)
                               .map(group -> group.getMembers().stream()
