@@ -26,9 +26,10 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class GroupService extends IdCheckerService {
+public class GroupService {
     private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
     private final GroupRepository groupRepository;
+    private final UserRepository userRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final ProfileRepository profileRepository;
     private final ChannelService channelService;
@@ -36,8 +37,8 @@ public class GroupService extends IdCheckerService {
     public GroupService(GroupRepository groupRepository, UserRepository userRepository, GroupMemberRepository groupMemberRepository,
                         ProfileRepository profileRepository, ChannelService channelService)
     {
-        super(userRepository);
         this.groupRepository = groupRepository;
+        this.userRepository = userRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.profileRepository = profileRepository;
         this.channelService = channelService;

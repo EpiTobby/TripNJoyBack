@@ -20,8 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Service
-public class UserService extends IdCheckerService {
+public class UserService {
 
+    private final UserRepository userRepository;
     private final GenderRepository genderRepository;
     private final ProfileService profileService;
     private final LanguageRepository languageRepository;
@@ -29,8 +30,9 @@ public class UserService extends IdCheckerService {
     private final PasswordEncoder encoder;
     private final UserMailUtils userMailUtils;
 
-    public UserService(UserRepository userRepository, GenderRepository genderRepository, ProfileService profileService, LanguageRepository languageRepository, final CityService cityService, PasswordEncoder encoder, UserMailUtils userMailUtils) {
-        super(userRepository);
+    public UserService(UserRepository userRepository, GenderRepository genderRepository, ProfileService profileService,
+                       LanguageRepository languageRepository, final CityService cityService, PasswordEncoder encoder, UserMailUtils userMailUtils) {
+        this.userRepository = userRepository;
         this.genderRepository = genderRepository;
         this.profileService = profileService;
         this.languageRepository = languageRepository;
