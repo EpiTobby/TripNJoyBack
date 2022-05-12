@@ -9,6 +9,8 @@ import fr.tobby.tripnjoyback.service.PlanningService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("groups/{groupId}/planning")
 public class PlanningController {
@@ -28,6 +30,14 @@ public class PlanningController {
         if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException("You are not allowed to view this group");
         return this.service.createActivity(groupId, request);
+    }
+
+    @GetMapping
+    public List<ActivityModel> getActivities(@PathVariable(name = "groupId") final long groupId)
+    {
+        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+            throw new ForbiddenOperationException("You are not allowed to view this group");
+        return this.service.getGroupActivities(groupId);
     }
 
     @ExceptionHandler(ForbiddenOperationException.class)

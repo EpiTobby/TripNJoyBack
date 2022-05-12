@@ -9,6 +9,8 @@ import fr.tobby.tripnjoyback.repository.ActivityRepository;
 import fr.tobby.tripnjoyback.repository.GroupRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class PlanningService {
 
@@ -34,5 +36,15 @@ public class PlanningService {
                 request.getIcon());
 
         return ActivityModel.from(activityRepository.save(activity));
+    }
+
+    public List<ActivityModel> getGroupActivities(final long groupId) throws GroupNotFoundException
+    {
+        GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+
+        return activityRepository.findAllByGroupOrderByStartDate(group)
+                                 .stream()
+                                 .map(ActivityModel::from)
+                                 .toList();
     }
 }
