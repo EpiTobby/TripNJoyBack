@@ -40,6 +40,16 @@ public class PlanningController {
         return this.service.getGroupActivities(groupId);
     }
 
+    @DeleteMapping("{activityId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteActivity(@PathVariable(name = "groupId") final long groupId,
+                               @PathVariable(name = "activityId") final long activityId)
+    {
+        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+            throw new ForbiddenOperationException("You are not allowed to view this group");
+        this.service.deleteActivity(activityId);
+    }
+
     @ExceptionHandler(ForbiddenOperationException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody

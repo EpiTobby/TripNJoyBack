@@ -47,4 +47,9 @@ public class PlanningService {
                                  .map(ActivityModel::from)
                                  .toList();
     }
+
+    public void deleteActivity(final long activityId)
+    {
+        activityRepository.deleteById(activityId);
+    }
 }
