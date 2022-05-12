@@ -371,3 +371,16 @@ alter table activities_members
     add constraint activities_members_participant_id_fkey
         foreign key (participant_id) references users
             on update cascade on delete cascade;
+
+create table activities_info
+(
+    id serial
+        constraint activities_info_pk
+            primary key,
+    activity_id int not null
+        constraint activities_info_activities_id_fk
+            references activities
+            on update cascade on delete cascade,
+    content text not null
+);
+

@@ -2,10 +2,13 @@ package fr.tobby.tripnjoyback.model.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.tobby.tripnjoyback.entity.ActivityEntity;
+import fr.tobby.tripnjoyback.entity.ActivityInfoEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public record ActivityModel(
         @JsonProperty("id") long id,
@@ -16,7 +19,8 @@ public record ActivityModel(
         @JsonProperty("participants") Collection<GroupMemberModel> participants,
         @JsonProperty("color") String color,
         @JsonProperty("location") String location,
-        @JsonProperty("icon") String icon
+        @JsonProperty("icon") String icon,
+        @JsonProperty("infos") Map<Long, String> infos
 ) {
 
     @NotNull
@@ -30,6 +34,7 @@ public record ActivityModel(
                 entity.getParticipants().stream().map(member -> GroupMemberModel.of(member.getUser())).toList(),
                 entity.getColor(),
                 entity.getLocation(),
-                entity.getIcon());
+                entity.getIcon(),
+                entity.getInfos().stream().collect(Collectors.toMap(ActivityInfoEntity::getId, ActivityInfoEntity::getContent)));
     }
 }
