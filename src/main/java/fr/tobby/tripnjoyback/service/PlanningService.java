@@ -2,6 +2,8 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.ActivityEntity;
 import fr.tobby.tripnjoyback.entity.GroupEntity;
+import fr.tobby.tripnjoyback.entity.GroupMemberEntity;
+import fr.tobby.tripnjoyback.exception.ActivityNotFoundException;
 import fr.tobby.tripnjoyback.exception.GroupNotFoundException;
 import fr.tobby.tripnjoyback.model.request.CreateActivityRequest;
 import fr.tobby.tripnjoyback.model.response.ActivityModel;
@@ -51,5 +53,12 @@ public class PlanningService {
     public void deleteActivity(final long activityId)
     {
         activityRepository.deleteById(activityId);
+    }
+
+    public void joinActivity(final long activityId, final long userId)
+    {
+        ActivityEntity activity = activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+        GroupMemberEntity member = activity.getGroup().findMember(userId).orElseThrow(IllegalArgumentException::new);
+        activity.getParticipants().add(member);
     }
 }
