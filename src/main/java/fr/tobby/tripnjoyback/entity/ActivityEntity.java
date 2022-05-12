@@ -25,6 +25,9 @@ public class ActivityEntity {
     private String description;
     private Date startDate;
     private Date endDate;
+    private String color;
+    private String location;
+    private String icon;
 
     @ManyToMany
     @JoinTable(name = "activities_members",
@@ -32,13 +35,17 @@ public class ActivityEntity {
             inverseJoinColumns = @JoinColumn(name = "participant_id"))
     private Collection<GroupMemberEntity> participants;
 
-    public ActivityEntity(final GroupEntity group, final String name, final String description, final Date startDate, final Date endDate)
+    public ActivityEntity(final GroupEntity group, final String name, final String description, final Date startDate, final Date endDate,
+                          final String color, final String location, final String icon)
     {
         this.group = group;
         this.name = name;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.color = color;
+        this.location = location;
+        this.icon = icon;
         participants = new ArrayList<>();
     }
 }

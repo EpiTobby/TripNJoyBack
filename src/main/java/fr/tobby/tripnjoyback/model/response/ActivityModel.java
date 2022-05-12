@@ -13,7 +13,10 @@ public record ActivityModel(
         @JsonProperty("description") String description,
         @JsonProperty("startDate") Date startDate,
         @JsonProperty("endDate") Date endDate,
-        @JsonProperty("participants") Collection<GroupMemberModel> participants
+        @JsonProperty("participants") Collection<GroupMemberModel> participants,
+        @JsonProperty("color") String color,
+        @JsonProperty("location") String location,
+        @JsonProperty("icon") String icon
 ) {
 
     @NotNull
@@ -24,6 +27,9 @@ public record ActivityModel(
                 entity.getDescription(),
                 entity.getStartDate(),
                 entity.getEndDate(),
-                entity.getParticipants().stream().map(member -> GroupMemberModel.of(member.getUser())).toList());
+                entity.getParticipants().stream().map(member -> GroupMemberModel.of(member.getUser())).toList(),
+                entity.getColor(),
+                entity.getLocation(),
+                entity.getIcon());
     }
 }

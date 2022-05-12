@@ -24,7 +24,14 @@ public class PlanningService {
     public ActivityModel createActivity(final long groupId, final CreateActivityRequest request)
     {
         GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
-        ActivityEntity activity = new ActivityEntity(group, request.name(), request.description(), request.startDate(), request.endDate());
+        ActivityEntity activity = new ActivityEntity(group,
+                request.getName(),
+                request.getDescription(),
+                request.getStartDate(),
+                request.getEndDate(),
+                String.format("#%02x%02x%02x", request.getColor().getRed(), request.getColor().getGreen(), request.getColor().getBlue()),
+                request.getLocation(),
+                request.getIcon());
 
         return ActivityModel.from(activityRepository.save(activity));
     }

@@ -77,7 +77,10 @@ CREATE TABLE "activities" (
                               "name" varchar,
                               "start_date" timestamp,
                               "end_date" timestamp,
-                              "description" text
+                              "description" text,
+                              "color" varchar,
+                              "location" text,
+                              "icon" text
 );
 
 CREATE TABLE "activities_members" (
