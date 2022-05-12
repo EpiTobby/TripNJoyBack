@@ -64,6 +64,20 @@ public class PlanningController {
         this.service.joinActivity(activityId, idCheckerService.getCurrentUserId());
     }
 
+    @PatchMapping("{activityId}")
+    @Operation(summary = "Remove the current user from the given activity")
+    @ApiResponse(responseCode = "204", description = "User removed")
+    @ApiResponse(responseCode = "403", description = "User does not belong to the group")
+    @ApiResponse(responseCode = "404", description = "The activity or group does not exist")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void leaveActivity(@PathVariable(name = "groupId") final long groupId,
+                              @PathVariable(name = "activityId") final long activityId)
+    {
+        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+            throw new ForbiddenOperationException();
+        this.service.leaveActivity(activityId, idCheckerService.getCurrentUserId());
+    }
+
     @DeleteMapping("{activityId}")
     @Operation(summary = "Delete the activity")
     @ApiResponse(responseCode = "204", description = "Activity deleted")

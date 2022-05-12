@@ -168,4 +168,34 @@ class PlanningServiceTest {
 
         assertEquals(0, activity.getParticipants().size());
     }
+
+    @Test
+    void leaveActivity() throws ParseException
+    {
+        GroupEntity group = anyGroup();
+        UserEntity user = anyUser();
+        GroupMemberEntity member = new GroupMemberEntity(group, user, null, false);
+        group.getMembers().add(member);
+        ActivityEntity activity = anyActivity(group);
+        activity.getParticipants().add(member);
+
+        planningService.leaveActivity(activity.getId(), user.getId());
+
+        assertEquals(0, activity.getParticipants().size());
+    }
+
+    @Test
+    void leaveActivityInvalidActivity() throws ParseException
+    {
+        GroupEntity group = anyGroup();
+        UserEntity user = anyUser();
+        GroupMemberEntity member = new GroupMemberEntity(group, user, null, false);
+        group.getMembers().add(member);
+        ActivityEntity activity = anyActivity(group);
+        activity.getParticipants().add(member);
+
+        assertThrows(ActivityNotFoundException.class, () -> planningService.leaveActivity(activity.getId() + 1, user.getId()));
+
+        assertEquals(1, activity.getParticipants().size());
+    }
 }

@@ -61,4 +61,10 @@ public class PlanningService {
         GroupMemberEntity member = activity.getGroup().findMember(userId).orElseThrow(IllegalArgumentException::new);
         activity.getParticipants().add(member);
     }
+
+    public void leaveActivity(final long activityId, final long userId)
+    {
+        ActivityEntity activity = activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+        activity.getParticipants().removeIf(member -> member.getUser().getId().equals(userId));
+    }
 }
