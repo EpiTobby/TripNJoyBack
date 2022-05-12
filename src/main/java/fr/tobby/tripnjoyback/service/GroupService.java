@@ -10,10 +10,7 @@ import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
-import fr.tobby.tripnjoyback.repository.GroupMemberRepository;
-import fr.tobby.tripnjoyback.repository.GroupRepository;
-import fr.tobby.tripnjoyback.repository.ProfileRepository;
-import fr.tobby.tripnjoyback.repository.UserRepository;
+import fr.tobby.tripnjoyback.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,15 +30,18 @@ public class GroupService {
     private final GroupMemberRepository groupMemberRepository;
     private final ProfileRepository profileRepository;
     private final ChannelService channelService;
+    private final ActivityRepository activityRepository;
 
     public GroupService(GroupRepository groupRepository, UserRepository userRepository, GroupMemberRepository groupMemberRepository,
-                        ProfileRepository profileRepository, ChannelService channelService)
+                        ProfileRepository profileRepository, ChannelService channelService,
+                        final ActivityRepository activityRepository)
     {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.profileRepository = profileRepository;
         this.channelService = channelService;
+        this.activityRepository = activityRepository;
     }
 
     public boolean isInGroup(final long groupId, final long userId)
@@ -214,6 +214,8 @@ public class GroupService {
     @Transactional
     public void removeUserFromGroup(long groupId, long userId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
+        activityRepository.findAllByGroupOrderByStartDate(groupEntity)
+                          .forEach(activity -> activity.getParticipants().removeIf(member -> member.getUser().getId().equals(userId)));
         GroupMemberEntity groupMemberEntity = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not found in this group or does not exist"));
         groupEntity.members.removeIf(m -> m.getUser().getId() == userId);
         groupMemberRepository.delete(groupMemberEntity);
