@@ -32,14 +32,18 @@ public class PlacesRepository {
     static final String GEOCODE_ADDRESS_URL = "https://neutrinoapi.net/geocode-address";
 
     private LocationResponse filterAdresses(GeocodeAddressRequest request, List<LocationResponse> locations){
-        LocationResponse result = null;
+        String requestedCity = request.getCity();
+        String countryCode = request.getCountryCode();
         for(LocationResponse location : locations){
-            //TODO
+            if (countryCode != null && !countryCode.equals(location.getCountryCode3()))
+                continue;
+            if (requestedCity != null && requestedCity.equals(location.getCity()))
+                return location;
         }
         return locations.get(0);
     }
 
-    public Optional<LocationResponse> getCoordinates(GeocodeAddressRequest request){
+    public LocationResponse getCoordinates(GeocodeAddressRequest request){
         //if DAILY API LIMIT EXCEEDED
 //        return Optional.of(LocationResponse.builder().longitude(2.3548f).latitude(48.8279f).build());
         if (neutrinoApiKey != null && neutrinoUserId != null) {
@@ -56,9 +60,9 @@ public class PlacesRepository {
             if (geocodeAddressResponse.getFound() == 0)
                 throw new GeocodeAddressException("Address Not Found");
             if (geocodeAddressResponse.getFound() == 1)
-                return Optional.of(geocodeAddressResponse.getLocations().get(0));
+                return geocodeAddressResponse.getLocations().get(0);
             else
-                return Optional.of(filterAdresses(request, geocodeAddressResponse.getLocations()));
+                return filterAdresses(request, geocodeAddressResponse.getLocations());
         } catch (RestClientException e) {
             throw new GeocodeAddressException("An error occurred with Geocode Address");
         }
@@ -73,7 +77,7 @@ public class PlacesRepository {
     }
 
     public List<PlaceEntity> getPlacesfromAddress(GeocodeAddressRequest request, List<String> categories, int radiusMeter){
-        LocationResponse location = getCoordinates(request).get();
+        LocationResponse location = getCoordinates(request);
         String url = buildQuery(categories, location.getLatitude(), location.getLongitude(), radiusMeter);
         try {
             RestTemplate restTemplate = new RestTemplate();

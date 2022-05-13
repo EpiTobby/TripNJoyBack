@@ -21,7 +21,7 @@ public class PlacesRepositoryTest {
                 .userId("tripNjoy")
                 .address("10 rue Vandrezanne")
                 .countryCode("FRA").build();
-        LocationResponse location = placesRepository.getCoordinates(request).get();
+        LocationResponse location = placesRepository.getCoordinates(request);
         System.out.println(location.getCity() + ", " + location.getAddress());
     }
 }

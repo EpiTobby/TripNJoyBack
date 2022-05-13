@@ -21,7 +21,7 @@ public class ActivityService {
     public Collection<PlaceResponse> getPlacesfromAddress(PlaceRequest placeRequest){
         GeocodeAddressRequest request = GeocodeAddressRequest.builder()
                 .address(placeRequest.getAddress())
-                .city(placeRequest.getCity())
+                .city(placeRequest.getCity().trim())
                 .countryCode(placeRequest.getCountryCode()).build();
         List<PlaceEntity> placeEntities = placesRepository.getPlacesfromAddress(request, placeRequest.getCategories(),placeRequest.getRadiusMeter());
         return placeEntities.stream().map(PlaceResponse::of).toList();
