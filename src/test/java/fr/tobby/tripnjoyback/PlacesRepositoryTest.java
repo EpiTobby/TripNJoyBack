@@ -4,6 +4,7 @@ import fr.tobby.tripnjoyback.entity.api.request.GeocodeAddressRequest;
 import fr.tobby.tripnjoyback.entity.api.response.LocationResponse;
 import fr.tobby.tripnjoyback.repository.PlacesRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class PlacesRepositoryTest {
@@ -14,6 +15,7 @@ public class PlacesRepositoryTest {
         placesRepository = new PlacesRepository();
     }
 
+    @Disabled
     @Test
     void sendRequest(){
         GeocodeAddressRequest request = GeocodeAddressRequest.builder()
