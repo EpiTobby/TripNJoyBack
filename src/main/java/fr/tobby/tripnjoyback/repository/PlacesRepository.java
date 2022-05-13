@@ -16,7 +16,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.StringJoiner;
 
 @Component
 public class PlacesRepository {
@@ -65,7 +68,7 @@ public class PlacesRepository {
             else
                 return filterAdresses(request, geocodeAddressResponse.getLocations());
         } catch (RestClientException e) {
-            throw new GeocodeAddressException("An error occurred with Geocode Address");
+            throw new GeocodeAddressException("An error occurred with Geocode Address", e);
         }
     }
 
@@ -88,7 +91,7 @@ public class PlacesRepository {
             }
             GeoapifyPlacesResponse geoapifyPlacesResponse = response.getBody();
             List<FeatureResponse> features = geoapifyPlacesResponse.getFeatures();
-            return features.stream().map(f -> f.getPlace()).toList();
+            return features.stream().map(FeatureResponse::getPlace).toList();
 
         } catch (RestClientException e) {
             e.printStackTrace();
