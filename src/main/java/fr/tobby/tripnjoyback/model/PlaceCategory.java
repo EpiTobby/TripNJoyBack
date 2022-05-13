@@ -3,11 +3,14 @@ package fr.tobby.tripnjoyback.model;
 import lombok.Getter;
 
 @Getter
-public enum PlaceType {
+public enum PlaceCategory {
     ANTIQUES_SHOP("commercial.antiques"),
     ARTS_CENTER("entertainment.culture.arts_centre"),
     ART_SHOP("commercial.art"),
     BAR_AND_PUB("catering.pub,catering.bar"),
+    BEACH("beach"),
+    BUS("public_transport.bus"),
+    CHANGE("service.financial.bureau_de_change"),
     CHINESE_RESTAURANT("catering.restaurant.chinese"),
     COFFEE_SHOP("catering.cafe.coffee_shop"),
     ENTERTAINEMENT("entertainment"),
@@ -19,12 +22,15 @@ public enum PlaceType {
     RESTAURANT("catering.restaurant"),
     SEAFOOD_RESTARANT("catering.restaurant.seafood"),
     SUPERMARKET("commercial.supermarket"),
+    SWIMMING_POOL("sport.swimming_pool"),
+    SUBWAY("public_transport.subway"),
     THEATRE("entertainment.culture.theatre"),
-    TOURISM("tourism");
+    TOURISM("tourism"),
+    TRANSPORT("public_transport");
 
     protected final String categoryValue;
 
-    PlaceType(String categoryValue) {
+    PlaceCategory(String categoryValue) {
         this.categoryValue = categoryValue;
     }
 }
