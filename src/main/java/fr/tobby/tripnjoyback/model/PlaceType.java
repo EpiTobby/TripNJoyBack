@@ -1,12 +1,15 @@
 package fr.tobby.tripnjoyback.model;
 
+import lombok.Getter;
+
+@Getter
 public enum PlaceType {
     ANTIQUES_SHOP("commercial.antiques"),
     ARTS_CENTER("entertainment.culture.arts_centre"),
     ART_SHOP("commercial.art"),
     BAR_AND_PUB("catering.pub,catering.bar"),
     CHINESE_RESTAURANT("catering.restaurant.chinese"),
-    COFEE_SHOP("catering.cafe.coffee_shop"),
+    COFFEE_SHOP("catering.cafe.coffee_shop"),
     ENTERTAINEMENT("entertainment"),
     FAST_FOOD("catering.fast_food"),
     FISH_AND_CHIPS_RESTAURANT("catering.restaurant.fish_and_chips"),
