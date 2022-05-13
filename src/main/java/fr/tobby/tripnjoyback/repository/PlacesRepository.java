@@ -32,7 +32,6 @@ public class PlacesRepository {
     @Value("${places.api.key}")
     private String placesApiKey;
 
-    static final String GEOAPIFY_PLACES_URL = "https://api.geoapify.com/v2/places";
     static final String GEOCODE_ADDRESS_URL = "https://neutrinoapi.net/geocode-address";
 
     private LocationResponse filterAdresses(GeocodeAddressRequest request, List<LocationResponse> locations){
@@ -61,6 +60,9 @@ public class PlacesRepository {
                 throw new GeocodeAddressException("Invalid Status Code");
             }
             GeocodeAddressResponse geocodeAddressResponse = response.getBody();
+            if (geocodeAddressResponse == null){
+                throw new GeocodeAddressException("Could not retrieve data from address");
+            }
             if (geocodeAddressResponse.getFound() == 0)
                 throw new AddressNotFoundException("Address Not Found");
             if (geocodeAddressResponse.getFound() == 1)
@@ -90,6 +92,9 @@ public class PlacesRepository {
                 throw new GeoapifyPlacesException("Invalid Status Code");
             }
             GeoapifyPlacesResponse geoapifyPlacesResponse = response.getBody();
+            if (geoapifyPlacesResponse == null){
+                throw new GeoapifyPlacesException("Could not retrieve places");
+            }
             List<FeatureResponse> features = geoapifyPlacesResponse.getFeatures();
             return features.stream().map(FeatureResponse::getPlace).toList();
 
@@ -107,13 +112,15 @@ final class GeoapifyQueryBuilder {
     private int limit = 10;
     private String apiKey;
 
+    static final String GEOAPIFY_PLACES_URL = "https://api.geoapify.com/v2/places";
+
     public String build()
     {
         if (apiKey == null || circle == null)
             throw new IllegalStateException();
         StringJoiner joinerCategories = new StringJoiner(",");
         categories.forEach(joinerCategories::add);
-        return String.format("https://api.geoapify.com/v2/places?categories=%s&filter=%s&bias=proximity:2.25,48.8&limit=%d&apiKey=%s",
+        return String.format(GEOAPIFY_PLACES_URL + "?categories=%s&filter=%s&bias=proximity:2.25,48.8&limit=%d&apiKey=%s",
                 joinerCategories,
                 circle.toString(),
                 limit,

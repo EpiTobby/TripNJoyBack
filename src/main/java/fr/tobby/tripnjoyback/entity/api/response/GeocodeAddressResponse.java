@@ -14,6 +14,6 @@ import java.util.List;
 @Getter
 @Builder
 public class GeocodeAddressResponse {
-    int found;
+    private int found;
     private List<LocationResponse> locations;
 }
