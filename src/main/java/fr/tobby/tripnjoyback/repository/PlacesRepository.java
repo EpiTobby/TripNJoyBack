@@ -6,6 +6,7 @@ import fr.tobby.tripnjoyback.entity.api.response.FeatureResponse;
 import fr.tobby.tripnjoyback.entity.api.response.GeoapifyPlacesResponse;
 import fr.tobby.tripnjoyback.entity.api.response.GeocodeAddressResponse;
 import fr.tobby.tripnjoyback.entity.api.response.LocationResponse;
+import fr.tobby.tripnjoyback.exception.AddressNotFoundException;
 import fr.tobby.tripnjoyback.exception.GeoapifyPlacesException;
 import fr.tobby.tripnjoyback.exception.GeocodeAddressException;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,7 +59,7 @@ public class PlacesRepository {
             }
             GeocodeAddressResponse geocodeAddressResponse = response.getBody();
             if (geocodeAddressResponse.getFound() == 0)
-                throw new GeocodeAddressException("Address Not Found");
+                throw new AddressNotFoundException("Address Not Found");
             if (geocodeAddressResponse.getFound() == 1)
                 return geocodeAddressResponse.getLocations().get(0);
             else

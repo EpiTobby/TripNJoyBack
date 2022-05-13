@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.controller;
 
 import fr.tobby.tripnjoyback.entity.api.request.GeocodeAddressRequest;
 import fr.tobby.tripnjoyback.entity.api.response.GeoapifyPlacesResponse;
+import fr.tobby.tripnjoyback.exception.AddressNotFoundException;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.GeoapifyPlacesException;
 import fr.tobby.tripnjoyback.exception.GeocodeAddressException;
@@ -36,9 +37,17 @@ public class ActivityController {
         return activityService.getPlacesfromAddress(placeRequest);
     }
 
+    @ExceptionHandler(AddressNotFoundException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String getError(AddressNotFoundException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
     @ExceptionHandler(GeocodeAddressException.class)
     @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public String getError(GeocodeAddressException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
@@ -46,7 +55,7 @@ public class ActivityController {
 
     @ExceptionHandler(GeoapifyPlacesException.class)
     @ResponseBody
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public String getError(GeoapifyPlacesException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
