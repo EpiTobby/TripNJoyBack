@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -22,12 +23,19 @@ public class ActivityEntity {
     @JoinColumn(name = "group_id")
     private GroupEntity group;
 
+    @Setter
     private String name;
+    @Setter
     private String description;
+    @Setter
     private Date startDate;
+    @Setter
     private Date endDate;
+    @Setter
     private String color;
+    @Setter
     private String location;
+    @Setter
     private String icon;
 
     @ManyToMany

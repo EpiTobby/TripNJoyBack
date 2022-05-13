@@ -3,11 +3,13 @@ package fr.tobby.tripnjoyback.controller;
 import fr.tobby.tripnjoyback.exception.EntityNotFoundException;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.model.request.CreateActivityRequest;
+import fr.tobby.tripnjoyback.model.request.UpdateActivityRequest;
 import fr.tobby.tripnjoyback.model.response.ActivityModel;
 import fr.tobby.tripnjoyback.service.IdCheckerService;
 import fr.tobby.tripnjoyback.service.PlanningService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -90,6 +92,20 @@ public class PlanningController {
         if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
         this.service.deleteActivity(activityId);
+    }
+
+    @PatchMapping("{activityId}")
+    @Operation(summary = "Update the activity")
+    @ApiResponse(responseCode = "200", description = "Activity updated. New activity is returned")
+    @ApiResponse(responseCode = "403", description = "User does not belong to the group")
+    @ApiResponse(responseCode = "404", description = "The activity or group does not exist")
+    public ActivityModel updateActivity(@PathVariable(name = "groupId") final long groupId,
+                                        @PathVariable(name = "activityId") final long activityId,
+                                        @NotNull final UpdateActivityRequest updateActivityRequest)
+    {
+        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+            throw new ForbiddenOperationException();
+        return this.service.updateActivity(activityId, updateActivityRequest);
     }
 
     @ExceptionHandler(ForbiddenOperationException.class)

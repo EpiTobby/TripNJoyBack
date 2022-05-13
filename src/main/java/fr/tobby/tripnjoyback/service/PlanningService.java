@@ -1,14 +1,18 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.ActivityEntity;
+import fr.tobby.tripnjoyback.entity.ActivityInfoEntity;
 import fr.tobby.tripnjoyback.entity.GroupEntity;
 import fr.tobby.tripnjoyback.entity.GroupMemberEntity;
 import fr.tobby.tripnjoyback.exception.ActivityNotFoundException;
 import fr.tobby.tripnjoyback.exception.GroupNotFoundException;
 import fr.tobby.tripnjoyback.model.request.CreateActivityRequest;
+import fr.tobby.tripnjoyback.model.request.UpdateActivityRequest;
 import fr.tobby.tripnjoyback.model.response.ActivityModel;
 import fr.tobby.tripnjoyback.repository.ActivityRepository;
 import fr.tobby.tripnjoyback.repository.GroupRepository;
+import fr.tobby.tripnjoyback.utils.ColorUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,7 +37,7 @@ public class PlanningService {
                 request.getDescription(),
                 request.getStartDate(),
                 request.getEndDate(),
-                String.format("#%02x%02x%02x", request.getColor().getRed(), request.getColor().getGreen(), request.getColor().getBlue()),
+                ColorUtils.colorToString(request.getColor()),
                 request.getLocation(),
                 request.getIcon());
 
@@ -66,5 +70,39 @@ public class PlanningService {
     {
         ActivityEntity activity = activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
         activity.getParticipants().removeIf(member -> member.getUser().getId().equals(userId));
+    }
+
+    @NotNull
+    public ActivityModel updateActivity(final long activityId, @NotNull final UpdateActivityRequest updateRequest)
+    {
+        ActivityEntity activity = activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+        if (updateRequest.getName() != null)
+            activity.setName(updateRequest.getName());
+        if (updateRequest.getDescription() != null)
+            activity.setDescription(updateRequest.getDescription());
+        if (updateRequest.getStartDate() != null)
+            activity.setStartDate(updateRequest.getStartDate());
+        if (updateRequest.getEndDate() != null)
+            activity.setEndDate(updateRequest.getEndDate());
+        if (updateRequest.getColor() != null)
+            activity.setColor(ColorUtils.colorToString(updateRequest.getColor()));
+        if (updateRequest.getLocation() != null)
+            activity.setLocation(updateRequest.getLocation());
+        if (updateRequest.getIcon() != null)
+            activity.setIcon(updateRequest.getIcon());
+
+        if (updateRequest.getInfos() != null)
+        {
+            activity.getInfos().removeIf(info -> !updateRequest.getInfos().contains(info.getContent()));
+
+            for (final String info : updateRequest.getInfos())
+            {
+                if (activity.getInfos().stream().anyMatch(entity -> entity.getContent().equals(info)))
+                    continue;
+                activity.getInfos().add(new ActivityInfoEntity(info));
+            }
+        }
+
+        return ActivityModel.from(activity);
     }
 }

@@ -7,8 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.List;
 
 public record ActivityModel(
         @JsonProperty("id") long id,
@@ -20,7 +19,7 @@ public record ActivityModel(
         @JsonProperty("color") String color,
         @JsonProperty("location") String location,
         @JsonProperty("icon") String icon,
-        @JsonProperty("infos") Map<Long, String> infos
+        @JsonProperty("infos") List<String> infos
 ) {
 
     @NotNull
@@ -35,6 +34,6 @@ public record ActivityModel(
                 entity.getColor(),
                 entity.getLocation(),
                 entity.getIcon(),
-                entity.getInfos().stream().collect(Collectors.toMap(ActivityInfoEntity::getId, ActivityInfoEntity::getContent)));
+                entity.getInfos().stream().map(ActivityInfoEntity::getContent).toList());
     }
 }

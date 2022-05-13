@@ -6,6 +6,7 @@ import fr.tobby.tripnjoyback.exception.ActivityNotFoundException;
 import fr.tobby.tripnjoyback.exception.GroupNotFoundException;
 import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreateActivityRequest;
+import fr.tobby.tripnjoyback.model.request.UpdateActivityRequest;
 import fr.tobby.tripnjoyback.model.response.ActivityModel;
 import fr.tobby.tripnjoyback.repository.*;
 import org.jetbrains.annotations.NotNull;
@@ -42,8 +43,10 @@ class PlanningServiceTest {
     private PlanningService planningService;
 
     @BeforeAll
-    static void beforeAll(@Autowired GenderRepository genderRepository, @Autowired StateRepository stateRepository, @Autowired ApplicationContext context,
-                          @Autowired CityRepository cityRepository, @Autowired LanguageRepository languageRepository) {
+    static void beforeAll(@Autowired GenderRepository genderRepository, @Autowired StateRepository stateRepository,
+                          @Autowired ApplicationContext context,
+                          @Autowired CityRepository cityRepository, @Autowired LanguageRepository languageRepository)
+    {
         maleGender = genderRepository.save(new GenderEntity("male"));
         PlanningServiceTest.genderRepository = genderRepository;
         PlanningServiceTest.cityRepository = cityRepository;
@@ -66,8 +69,8 @@ class PlanningServiceTest {
     @AfterEach
     void tearDown()
     {
-        groupRepository.deleteAll();
         activityRepository.deleteAll();
+        groupRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -197,5 +200,79 @@ class PlanningServiceTest {
         assertThrows(ActivityNotFoundException.class, () -> planningService.leaveActivity(activity.getId() + 1, user.getId()));
 
         assertEquals(1, activity.getParticipants().size());
+    }
+
+    @Test
+    void updateActivityNameTest()
+    {
+        GroupEntity group = anyGroup();
+        ActivityEntity activity = anyActivity(group);
+
+        UpdateActivityRequest request = UpdateActivityRequest.builder()
+                                                             .setName("Hello world!")
+                                                             .build();
+        ActivityModel result = planningService.updateActivity(activity.getId(), request);
+
+        assertEquals("Hello world!", result.name());
+        assertEquals("Hello world!", activity.getName());
+    }
+
+    @Test
+    void updateOtherFieldsTest()
+    {
+        GroupEntity group = anyGroup();
+        ActivityEntity activity = anyActivity(group);
+
+        UpdateActivityRequest request = UpdateActivityRequest.builder()
+                                                             .setDescription("Hello world!")
+                                                             .build();
+        ActivityModel result = planningService.updateActivity(activity.getId(), request);
+
+        assertEquals("foo", result.name());
+        assertEquals("foo", activity.getName());
+    }
+
+    @Test
+    void updateActivityAddInfoTest()
+    {
+        GroupEntity group = anyGroup();
+        ActivityEntity activity = anyActivity(group);
+
+        UpdateActivityRequest request = UpdateActivityRequest.builder()
+                                                             .setInfos(List.of("test"))
+                                                             .build();
+        ActivityModel result = planningService.updateActivity(activity.getId(), request);
+
+        assertEquals(1, result.infos().size());
+        assertEquals("test", result.infos().get(0));
+    }
+
+    @Test
+    void updateActivityRemoveInfoTest()
+    {
+        GroupEntity group = anyGroup();
+        ActivityEntity activity = anyActivity(group);
+        activity.getInfos().add(new ActivityInfoEntity("test"));
+
+        UpdateActivityRequest request = UpdateActivityRequest.builder()
+                                                             .setInfos(List.of())
+                                                             .build();
+        ActivityModel result = planningService.updateActivity(activity.getId(), request);
+
+        assertEquals(0, result.infos().size());
+    }
+
+    @Test
+    void updateActivityDoNotUpdateInfoTest()
+    {
+        GroupEntity group = anyGroup();
+        ActivityEntity activity = anyActivity(group);
+        activity.getInfos().add(new ActivityInfoEntity("test"));
+
+        UpdateActivityRequest request = UpdateActivityRequest.builder()
+                                                             .build();
+        ActivityModel result = planningService.updateActivity(activity.getId(), request);
+
+        assertEquals(1, result.infos().size());
     }
 }
