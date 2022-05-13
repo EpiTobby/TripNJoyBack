@@ -162,8 +162,7 @@ public class ProfileService extends IdCheckerService {
         {
             if (Boolean.TRUE.equals(profileUpdateRequest.getActive()))
                 setProfileInactive(userId);
-            else
-                profileEntity.setActive(profileUpdateRequest.getActive());
+            profileEntity.setActive(profileUpdateRequest.getActive());
         }
         if (profileUpdateRequest.getName() != null)
         {

@@ -28,8 +28,10 @@ public class GroupServiceTest {
     private static GenderEntity maleGender;
     private static GenderEntity femaleGender;
     private static GenderEntity otherGender;
+    private static GenderRepository genderRepository;
     private static StateEntity closedState;
     private static StateEntity openState;
+    private static StateRepository stateRepository;
 
     @Autowired
     private CityRepository cityRepository;
@@ -55,11 +57,24 @@ public class GroupServiceTest {
         maleGender = genderRepository.save(new GenderEntity("male"));
         femaleGender = genderRepository.save(new GenderEntity("female"));
         otherGender = genderRepository.save(new GenderEntity("other"));
+        GroupServiceTest.genderRepository = genderRepository;
 
-        if (stateRepository.findByValue("CLOSED").isEmpty())
-            closedState = stateRepository.save(new StateEntity("CLOSED"));
-        if (stateRepository.findByValue("OPEN").isEmpty())
-            openState = stateRepository.save(new StateEntity("OPEN"));
+        closedState = stateRepository.save(new StateEntity("CLOSED"));
+        openState = stateRepository.save(new StateEntity("OPEN"));
+        GroupServiceTest.stateRepository = stateRepository;
+    }
+
+    @AfterEach
+    void deleteData(){
+        groupRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
+    @AfterAll
+    static void afterAll()
+    {
+        stateRepository.deleteAll();
+        genderRepository.deleteAll();
     }
 
     @BeforeEach
@@ -193,12 +208,6 @@ public class GroupServiceTest {
         groupService.removeUserFromGroup(model.getId(), owner.getId());
         Optional<GroupEntity> entity = groupRepository.findById(model.getId());
         Assertions.assertTrue(entity.isEmpty());
-    }
-
-    @AfterEach
-    void deleteData(){
-        groupRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
 }
