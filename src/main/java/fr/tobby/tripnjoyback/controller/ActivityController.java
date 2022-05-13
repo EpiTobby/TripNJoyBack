@@ -1,12 +1,8 @@
 package fr.tobby.tripnjoyback.controller;
 
-import fr.tobby.tripnjoyback.entity.api.request.GeocodeAddressRequest;
-import fr.tobby.tripnjoyback.entity.api.response.GeoapifyPlacesResponse;
 import fr.tobby.tripnjoyback.exception.AddressNotFoundException;
-import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.GeoapifyPlacesException;
 import fr.tobby.tripnjoyback.exception.GeocodeAddressException;
-import fr.tobby.tripnjoyback.model.ChannelModel;
 import fr.tobby.tripnjoyback.model.request.PlaceRequest;
 import fr.tobby.tripnjoyback.model.response.PlaceResponse;
 import fr.tobby.tripnjoyback.service.ActivityService;
