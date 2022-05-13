@@ -18,12 +18,12 @@ public class ActivityService {
         this.placesRepository = placesRepository;
     }
 
-    public Collection<PlaceResponse> getPlacesfromAddress(PlaceRequest placeRequest){
+    public Collection<PlaceResponse> getPlacesFromAddress(PlaceRequest placeRequest){
         GeocodeAddressRequest request = GeocodeAddressRequest.builder()
                 .address(placeRequest.getAddress())
                 .city(placeRequest.getCity())
                 .countryCode(placeRequest.getCountryCode()).build();
-        List<PlaceEntity> placeEntities = placesRepository.getPlacesfromAddress(request, placeRequest.getCategories().stream().map(p -> p.getCategoryValue()).toList(),placeRequest.getRadiusMeter());
+        List<PlaceEntity> placeEntities = placesRepository.getPlacesFromAddress(request, placeRequest.getCategories().stream().map(p -> p.getCategoryValue()).toList(),placeRequest.getRadiusMeter());
         return placeEntities.stream().map(PlaceResponse::of).toList();
     }
 }

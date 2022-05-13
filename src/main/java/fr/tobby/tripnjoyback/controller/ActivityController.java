@@ -30,7 +30,7 @@ public class ActivityController {
     @ApiResponse(responseCode = "200", description = "Return a list of places")
     @ApiResponse(responseCode = "422", description = "Address not found")
     public Collection<PlaceResponse> getPlacesByAddress(@RequestBody PlaceRequest placeRequest){
-        return activityService.getPlacesfromAddress(placeRequest);
+        return activityService.getPlacesFromAddress(placeRequest);
     }
 
     @ExceptionHandler(AddressNotFoundException.class)

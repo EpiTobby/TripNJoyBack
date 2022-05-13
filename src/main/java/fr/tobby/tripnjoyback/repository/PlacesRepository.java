@@ -77,7 +77,7 @@ public class PlacesRepository {
                                          .build();
     }
 
-    public List<PlaceEntity> getPlacesfromAddress(GeocodeAddressRequest request, List<String> categories, int radiusMeter){
+    public List<PlaceEntity> getPlacesFromAddress(GeocodeAddressRequest request, List<String> categories, int radiusMeter){
         LocationResponse location = getCoordinates(request);
         String url = buildQuery(categories, location.getLatitude(), location.getLongitude(), radiusMeter);
         try {
