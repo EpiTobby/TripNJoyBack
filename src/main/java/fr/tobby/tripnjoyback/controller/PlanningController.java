@@ -33,7 +33,7 @@ public class PlanningController {
     @ApiResponse(responseCode = "200", description = "Activity created")
     @ApiResponse(responseCode = "403", description = "User does not belong to the group")
     @ApiResponse(responseCode = "404", description = "The group does not exist")
-    public ActivityModel createActivity(@PathVariable(name = "groupId") final long groupId, final CreateActivityRequest request)
+    public ActivityModel createActivity(@PathVariable(name = "groupId") final long groupId, @RequestBody final CreateActivityRequest request)
     {
         if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
@@ -101,7 +101,7 @@ public class PlanningController {
     @ApiResponse(responseCode = "404", description = "The activity or group does not exist")
     public ActivityModel updateActivity(@PathVariable(name = "groupId") final long groupId,
                                         @PathVariable(name = "activityId") final long activityId,
-                                        @NotNull final UpdateActivityRequest updateActivityRequest)
+                                        @NotNull @RequestBody final UpdateActivityRequest updateActivityRequest)
     {
         if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
