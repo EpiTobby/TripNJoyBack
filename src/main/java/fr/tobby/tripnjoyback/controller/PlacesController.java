@@ -3,9 +3,10 @@ package fr.tobby.tripnjoyback.controller;
 import fr.tobby.tripnjoyback.exception.AddressNotFoundException;
 import fr.tobby.tripnjoyback.exception.GeoapifyPlacesException;
 import fr.tobby.tripnjoyback.exception.GeocodeAddressException;
-import fr.tobby.tripnjoyback.model.request.PlaceRequest;
+import fr.tobby.tripnjoyback.model.request.PlacesFromCoordinatesRequest;
+import fr.tobby.tripnjoyback.model.request.PlacesFromAddressRequest;
 import fr.tobby.tripnjoyback.model.response.PlaceResponse;
-import fr.tobby.tripnjoyback.service.ActivityService;
+import fr.tobby.tripnjoyback.service.PlacesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
@@ -16,22 +17,31 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collection;
 
 @RestController
-@RequestMapping(path = "activities")
-public class ActivityController {
-    private static final Logger logger = LoggerFactory.getLogger(ActivityController.class);
-    private final ActivityService activityService;
+@RequestMapping(path = "places")
+public class PlacesController {
+    private static final Logger logger = LoggerFactory.getLogger(PlacesController.class);
+    private final PlacesService placesService;
 
-    public ActivityController(ActivityService activityService) {
-        this.activityService = activityService;
+    public PlacesController(PlacesService placesService) {
+        this.placesService = placesService;
     }
 
-    @PostMapping("suggest")
-    @Operation(summary = "Retrieve 20 places around an address")
+    @PostMapping("address")
+    @Operation(summary = "Retrieve 10 places around an address")
     @ApiResponse(responseCode = "200", description = "Return a list of places")
     @ApiResponse(responseCode = "422", description = "Address not found")
-    public Collection<PlaceResponse> getPlacesByAddress(@RequestBody PlaceRequest placeRequest){
-        return activityService.getPlacesFromAddress(placeRequest);
+    public Collection<PlaceResponse> getPlacesFromAddress(@RequestBody PlacesFromAddressRequest placesFromAddressRequest){
+        return placesService.getPlacesFromAddress(placesFromAddressRequest);
     }
+
+    @PostMapping("coordinates")
+    @Operation(summary = "Retrieve 10 places around geographic coordinates")
+    @ApiResponse(responseCode = "200", description = "Return a list of places")
+    @ApiResponse(responseCode = "422", description = "Address not found")
+    public Collection<PlaceResponse> getPlacesFromCoordinates(@RequestBody PlacesFromCoordinatesRequest placesFromCoordinatesRequest){
+        return placesService.getPlacesFromCoordinates(placesFromCoordinatesRequest);
+    }
+
 
     @ExceptionHandler(AddressNotFoundException.class)
     @ResponseBody

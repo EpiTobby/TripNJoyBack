@@ -16,13 +16,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PlaceRequest {
+public class PlacesFromAddressRequest {
     private List<PlaceCategory> categories;
     @NotNull
     private int radiusMeter;
     @NotNull
     private String address;
-    @JsonProperty("country-code")
+    @JsonProperty("countryCode")
     private String countryCode;
     private String city;
 }

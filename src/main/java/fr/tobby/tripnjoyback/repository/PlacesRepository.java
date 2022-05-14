@@ -9,6 +9,7 @@ import fr.tobby.tripnjoyback.entity.api.response.LocationResponse;
 import fr.tobby.tripnjoyback.exception.AddressNotFoundException;
 import fr.tobby.tripnjoyback.exception.GeoapifyPlacesException;
 import fr.tobby.tripnjoyback.exception.GeocodeAddressException;
+import fr.tobby.tripnjoyback.model.request.PlacesFromCoordinatesRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -85,6 +86,27 @@ public class PlacesRepository {
     public List<PlaceEntity> getPlacesFromAddress(GeocodeAddressRequest request, List<String> categories, int radiusMeter){
         LocationResponse location = getCoordinates(request);
         String url = buildQuery(categories, location.getLatitude(), location.getLongitude(), radiusMeter);
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<GeoapifyPlacesResponse> response = restTemplate.getForEntity(url, GeoapifyPlacesResponse.class);
+            if (response.getStatusCode() != HttpStatus.OK){
+                throw new GeoapifyPlacesException("Invalid Status Code");
+            }
+            GeoapifyPlacesResponse geoapifyPlacesResponse = response.getBody();
+            if (geoapifyPlacesResponse == null){
+                throw new GeoapifyPlacesException("Could not retrieve places");
+            }
+            List<FeatureResponse> features = geoapifyPlacesResponse.getFeatures();
+            return features.stream().map(FeatureResponse::getPlace).toList();
+
+        } catch (RestClientException e) {
+            e.printStackTrace();
+            throw new GeoapifyPlacesException("An error occurred with Geocode Address");
+        }
+    }
+
+    public List<PlaceEntity> getPlacesFromCoordinates(PlacesFromCoordinatesRequest placesFromCoordinatesRequest, List<String> categories){
+        String url = buildQuery(categories, placesFromCoordinatesRequest.getLatitude(), placesFromCoordinatesRequest.getLongitude(), placesFromCoordinatesRequest.getRadiusMeter());
         try {
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<GeoapifyPlacesResponse> response = restTemplate.getForEntity(url, GeoapifyPlacesResponse.class);

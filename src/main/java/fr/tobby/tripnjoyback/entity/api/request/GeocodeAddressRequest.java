@@ -14,7 +14,7 @@ public class GeocodeAddressRequest {
     @JsonProperty("user-id")
     private String userId;
     private String address;
-    @JsonProperty("countryCode")
+    @JsonProperty("country-code")
     private String countryCode;
     private String city;
     @JsonProperty("language-code")

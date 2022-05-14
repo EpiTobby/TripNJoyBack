@@ -1,6 +1,5 @@
 package fr.tobby.tripnjoyback.model.response;
 
-import com.mapbox.services.commons.geojson.Feature;
 import fr.tobby.tripnjoyback.entity.PlaceEntity;
 import lombok.Builder;
 import lombok.Getter;
