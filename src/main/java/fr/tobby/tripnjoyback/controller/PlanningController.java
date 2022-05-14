@@ -52,7 +52,7 @@ public class PlanningController {
         return this.service.getGroupActivities(groupId);
     }
 
-    @PatchMapping("{activityId}")
+    @PatchMapping("{activityId}/join")
     @Operation(summary = "Add the current user to the given activity")
     @ApiResponse(responseCode = "204", description = "User added")
     @ApiResponse(responseCode = "403", description = "User does not belong to the group")
@@ -66,7 +66,7 @@ public class PlanningController {
         this.service.joinActivity(activityId, idCheckerService.getCurrentUserId());
     }
 
-    @PatchMapping("{activityId}")
+    @PatchMapping("{activityId}/leave")
     @Operation(summary = "Remove the current user from the given activity")
     @ApiResponse(responseCode = "204", description = "User removed")
     @ApiResponse(responseCode = "403", description = "User does not belong to the group")
