@@ -94,7 +94,8 @@ public class AuthService {
                 .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                 .phoneNumber(model.getPhoneNumber())
                 .confirmed(false)
-                .city(cityService.getOrAddCity(model.getCity().trim().toUpperCase())).language(languageRepository.findByValue(model.getLanguage().toUpperCase()).orElseThrow(() -> new UserCreationException("Invalid language " + model.getLanguage())))
+                .city(cityService.getOrAddCity(city))
+                .language(languageRepository.findByValue(model.getLanguage().toUpperCase()).orElseThrow(() -> new UserCreationException("Invalid language " + model.getLanguage())))
                 .roles(List.of(userRoleRepository.getByName("default")))
                 .build();
         UserModel created = UserModel.of(createUser(userEntity));
@@ -127,7 +128,6 @@ public class AuthService {
                 throw new UserCreationException(errorMessage);
 
         } catch (RestClientException e) {
-            e.printStackTrace();
             throw new UserCreationException("An error occurred while login with google");
         }
 
