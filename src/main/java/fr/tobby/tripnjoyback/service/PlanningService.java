@@ -11,7 +11,6 @@ import fr.tobby.tripnjoyback.model.request.UpdateActivityRequest;
 import fr.tobby.tripnjoyback.model.response.ActivityModel;
 import fr.tobby.tripnjoyback.repository.ActivityRepository;
 import fr.tobby.tripnjoyback.repository.GroupRepository;
-import fr.tobby.tripnjoyback.utils.ColorUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +37,7 @@ public class PlanningService {
                 request.getDescription(),
                 request.getStartDate(),
                 request.getEndDate(),
-                ColorUtils.colorToString(request.getColor()),
+                request.getColor(),
                 request.getLocation(),
                 request.getIcon());
 
@@ -88,7 +87,7 @@ public class PlanningService {
         if (updateRequest.getEndDate() != null)
             activity.setEndDate(updateRequest.getEndDate());
         if (updateRequest.getColor() != null)
-            activity.setColor(ColorUtils.colorToString(updateRequest.getColor()));
+            activity.setColor(updateRequest.getColor());
         if (updateRequest.getLocation() != null)
             activity.setLocation(updateRequest.getLocation());
         if (updateRequest.getIcon() != null)

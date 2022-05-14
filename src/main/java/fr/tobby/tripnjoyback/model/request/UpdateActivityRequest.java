@@ -20,7 +20,7 @@ public final class UpdateActivityRequest {
     @Nullable
     private final Date endDate;
     @Nullable
-    private final Color color;
+    private final String color;
     @Nullable
     private final String location;
     @Nullable
@@ -41,7 +41,9 @@ public final class UpdateActivityRequest {
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.color = color == null ? null : Color.decode(color);
+        if (color != null && !CreateActivityRequest.COLOR_PATTERN.matcher(color).matches())
+            throw new IllegalArgumentException("Invalid color " + color);
+        this.color = color;
         this.location = location;
         this.icon = icon;
         this.infos = infos;
