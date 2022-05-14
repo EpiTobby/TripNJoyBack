@@ -15,6 +15,7 @@ import fr.tobby.tripnjoyback.utils.ColorUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -59,6 +60,7 @@ public class PlanningService {
         activityRepository.deleteById(activityId);
     }
 
+    @Transactional
     public void joinActivity(final long activityId, final long userId)
     {
         ActivityEntity activity = activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
@@ -66,6 +68,7 @@ public class PlanningService {
         activity.getParticipants().add(member);
     }
 
+    @Transactional
     public void leaveActivity(final long activityId, final long userId)
     {
         ActivityEntity activity = activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
