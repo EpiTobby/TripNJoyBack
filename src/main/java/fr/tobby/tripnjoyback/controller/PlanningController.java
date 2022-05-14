@@ -41,7 +41,7 @@ public class PlanningController {
     }
 
     @GetMapping
-    @Operation(summary = "Add the current user to the given activity")
+    @Operation(summary = "Get the group's activities")
     @ApiResponse(responseCode = "200")
     @ApiResponse(responseCode = "403", description = "User does not belong to the group")
     @ApiResponse(responseCode = "404", description = "The group does not exist")
