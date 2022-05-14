@@ -18,11 +18,33 @@ import java.util.List;
 @Builder
 public class PlacesFromAddressRequest {
     private List<PlaceCategory> categories;
-    @NotNull
     private int radiusMeter;
     @NotNull
     private String address;
-    @JsonProperty("countryCode")
     private String countryCode;
     private String city;
+
+    @JsonProperty("radiusMeter")
+    public void setRadiusMeter(int radiusMeter){
+        if (radiusMeter < 500)
+            radiusMeter = 500;
+        else if (radiusMeter > 5000)
+            radiusMeter = 5000;
+        this.radiusMeter = radiusMeter;
+    }
+
+    @JsonProperty("address")
+    public void setAddress(String address){
+        this.address = address.trim();
+    }
+
+    @JsonProperty("city")
+    public void setCity(String city){
+        this.city = city.trim();
+    }
+
+    @JsonProperty("countryCode")
+    public void setCountryCode(String countryCode){
+        this.countryCode = countryCode.toUpperCase().trim();
+    }
 }
