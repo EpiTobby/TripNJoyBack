@@ -93,7 +93,7 @@ public class MatchMaker {
             logger.info("User {} joining group {}", user.getUserId(), group.getId());
             profileService.setActiveProfile(user.getProfile().getId(), false);
             groupService.addUserToPublicGroup(group.getId(), user.getUserId(), user.getProfile().getId());
-            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.JOINED, group.getId()));
+            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.JOINED, GroupModel.of(group)));
         }
 
         Optional<MatchMakingUserModel> matchingUser = findMatchingUser(user);
@@ -119,7 +119,7 @@ public class MatchMaker {
             matchedEntity.setWaitingForGroup(false);
             profileService.setActiveProfile(matched.getProfile().getId(), false);
             profileService.setActiveProfile(user.getProfile().getId(), false);
-            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.CREATED, created.getId()));
+            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.CREATED, created));
         }
         else
         {

@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -218,15 +219,17 @@ class MatchMakerTest {
                 "test",
                 "description",
                 openState,
-                userB,
+                null,
                 3,
                 new Date(),
                 null,
                 null,
                 "",
-                List.of(mock(GroupMemberEntity.class)),
+                new ArrayList<>(),
                 groupProfileEntity,
                 List.of(mock(ChannelEntity.class))));
+
+        group.getMembers().add(new GroupMemberEntity(group, userB, mock(ProfileEntity.class), false));
 
         Instant now = dateFormat.parse("01-01-2021").toInstant();
         MatchMakingUserModel modelA = MatchMakingUserModel.from(userA, profileA, now);

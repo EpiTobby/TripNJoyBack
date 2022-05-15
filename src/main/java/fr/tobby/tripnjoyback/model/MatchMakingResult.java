@@ -27,14 +27,14 @@ public class MatchMakingResult {
     @NotNull
     private final Type type;
     @Nullable
-    private final Long groupId;
+    private final GroupModel group;
 
-    public MatchMakingResult(@NotNull final Type type, @Nullable final Long groupId)
+    public MatchMakingResult(@NotNull final Type type, @Nullable final GroupModel group)
     {
-        if ((type != Type.WAITING && type != Type.SEARCHING) && groupId == null)
+        if ((type != Type.WAITING && type != Type.SEARCHING) && group == null)
             throw new IllegalArgumentException("Group cannot be null for type " + type);
         this.type = type;
-        this.groupId = groupId;
+        this.group = group;
     }
 
     @NotNull
@@ -44,8 +44,8 @@ public class MatchMakingResult {
     }
 
     @Nullable
-    public Long getGroupId()
+    public GroupModel getGroup()
     {
-        return groupId;
+        return group;
     }
 }
