@@ -9,6 +9,7 @@ import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.DeleteUserByAdminRequest;
 import fr.tobby.tripnjoyback.model.request.DeleteUserRequest;
 import fr.tobby.tripnjoyback.model.request.UserUpdateRequest;
+import fr.tobby.tripnjoyback.service.IdCheckerService;
 import fr.tobby.tripnjoyback.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,9 +31,11 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
+    private final IdCheckerService idCheckerService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, final IdCheckerService idCheckerService) {
         this.userService = userService;
+        this.idCheckerService = idCheckerService;
     }
 
     @GetMapping("")
@@ -60,13 +63,13 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "User information have been updated")
     @ApiResponse(responseCode = "422", description = "If the user does not exist")
     public void updateUserInfo(@PathVariable("id") final long userId, @RequestBody UserUpdateRequest userUpdateRequest) {
-        userService.checkId(userId);
+        idCheckerService.checkId(userId);
         userService.updateUserInfo(userId, userUpdateRequest);
     }
 
     @DeleteMapping("{id}")
     public void deleteUserAccount(@PathVariable("id") final long userId, @RequestBody DeleteUserRequest deleteUserRequest) {
-        userService.checkId(userId);
+        idCheckerService.checkId(userId);
         userService.deleteUserAccount(userId, deleteUserRequest);
     }
 

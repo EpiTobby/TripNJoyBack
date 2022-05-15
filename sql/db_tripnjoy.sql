@@ -76,9 +76,12 @@ CREATE TABLE "activities" (
                               "id" SERIAL PRIMARY KEY,
                               "group_id" int,
                               "name" varchar,
-                              "begining" timestamp,
-                              "end" timestamp,
-                              "description" text
+                              "start_date" timestamp,
+                              "end_date" timestamp,
+                              "description" text,
+                              "color" varchar,
+                              "location" text,
+                              "icon" text
 );
 
 CREATE TABLE "activities_members" (
@@ -240,7 +243,7 @@ ALTER TABLE "activities"
 
 ALTER TABLE "activities_members" ADD FOREIGN KEY ("activity_id") REFERENCES "activities" ("id");
 
-ALTER TABLE "activities_members" ADD FOREIGN KEY ("participant_id") REFERENCES "users" ("id");
+ALTER TABLE "activities_members" ADD FOREIGN KEY ("participant_id") REFERENCES "users_groups" ("id");
 
 ALTER TABLE "messages" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
@@ -348,4 +351,37 @@ alter table messages
 
 create unique index states_value_uindex
     on states (value);
+
+alter table activities drop constraint activities_group_id_fkey;
+
+alter table activities
+    add constraint activities_group_id_fkey
+        foreign key (group_id) references groups
+            on update cascade on delete cascade;
+
+alter table activities_members drop constraint activities_members_activity_id_fkey;
+
+alter table activities_members
+    add constraint activities_members_activity_id_fkey
+        foreign key (activity_id) references activities
+            on update cascade on delete cascade;
+
+alter table activities_members drop constraint activities_members_participant_id_fkey;
+
+alter table activities_members
+    add constraint activities_members_participant_id_fkey
+        foreign key (participant_id) references users
+            on update cascade on delete cascade;
+
+create table activities_info
+(
+    id serial
+        constraint activities_info_pk
+            primary key,
+    activity_id int not null
+        constraint activities_info_activities_id_fk
+            references activities
+            on update cascade on delete cascade,
+    content text not null
+);
 
