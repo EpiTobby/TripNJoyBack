@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.controller;
 import fr.tobby.tripnjoyback.exception.AddressNotFoundException;
 import fr.tobby.tripnjoyback.exception.GeoapifyPlacesException;
 import fr.tobby.tripnjoyback.exception.GeocodeAddressException;
+import fr.tobby.tripnjoyback.model.PlaceCategory;
 import fr.tobby.tripnjoyback.model.request.PlacesFromCoordinatesRequest;
 import fr.tobby.tripnjoyback.model.request.PlacesFromAddressRequest;
 import fr.tobby.tripnjoyback.model.response.PlaceResponse;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "places")
@@ -24,6 +26,33 @@ public class PlacesController {
 
     public PlacesController(PlacesService placesService) {
         this.placesService = placesService;
+    }
+
+    @GetMapping("categories")
+    public Collection<PlaceCategory> getCategory(){
+        return List.of(PlaceCategory.ANTIQUES_SHOP,
+                PlaceCategory.ARTS_CENTER,
+                PlaceCategory.ART_SHOP,
+                PlaceCategory.BAR_AND_PUB,
+                PlaceCategory.BEACH,
+                PlaceCategory.BUS,
+                PlaceCategory.CHANGE,
+                PlaceCategory.CHINESE_RESTAURANT,
+                PlaceCategory.COFFEE_SHOP,
+                PlaceCategory.ENTERTAINEMENT,
+                PlaceCategory.FAST_FOOD,
+                PlaceCategory.FISH_AND_CHIPS_RESTAURANT,
+                PlaceCategory.ITALIAN_RESTAURANT,
+                PlaceCategory.MUSEUM,
+                PlaceCategory.PARKING,
+                PlaceCategory.RESTAURANT,
+                PlaceCategory.SEAFOOD_RESTARANT,
+                PlaceCategory.SUPERMARKET,
+                PlaceCategory.SWIMMING_POOL,
+                PlaceCategory.SUBWAY,
+                PlaceCategory.THEATRE,
+                PlaceCategory.TOURISM,
+                PlaceCategory.TRANSPORT);
     }
 
     @PostMapping("address")
