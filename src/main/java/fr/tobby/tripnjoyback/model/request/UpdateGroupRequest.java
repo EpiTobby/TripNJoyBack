@@ -19,6 +19,8 @@ public class UpdateGroupRequest {
     @Nullable
     private String name;
     @Nullable
+    private String description;
+    @Nullable
     private State state;
     @Nullable
     private Long ownerId;

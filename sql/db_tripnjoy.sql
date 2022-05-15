@@ -22,6 +22,7 @@ CREATE TABLE "genders" (
 CREATE TABLE "groups"(
                          "id"            SERIAL PRIMARY KEY,
                          "name"          varchar,
+                         "description"   varchar,
                          "state_id"      int,
                          "owner_id"      int,
                          "max_size"      int,

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @JsonAutoDetect
@@ -15,6 +16,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreatePrivateGroupRequest {
     private String name;
+    @Nullable
+    private String description;
     private int maxSize;
 
     @JsonProperty("maxSize")

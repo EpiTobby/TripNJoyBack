@@ -22,6 +22,7 @@ public class GroupModel {
 
     private long id;
     private String name;
+    private String description;
     private State state;
     @Nullable
     private UserModel owner;
@@ -45,6 +46,7 @@ public class GroupModel {
         return GroupModel.builder()
                          .id(groupEntity.getId())
                          .name(groupEntity.getName())
+                         .description(groupEntity.getDescription())
                          .state(State.valueOf(groupEntity.getStateEntity().getValue()))
                          .owner(groupEntity.getOwner() == null ? null : UserModel.of(groupEntity.getOwner()))
                          .maxSize(groupEntity.getMaxSize())

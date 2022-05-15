@@ -22,6 +22,8 @@ public class GroupEntity {
 
     private String name;
 
+    private String description;
+
     @Setter
     @ManyToOne()
     @JoinColumn(name = "state_id")

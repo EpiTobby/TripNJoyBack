@@ -216,6 +216,7 @@ class MatchMakerTest {
 
         GroupEntity group = groupRepository.save(new GroupEntity(null,
                 "test",
+                "description",
                 openState,
                 userB,
                 3,

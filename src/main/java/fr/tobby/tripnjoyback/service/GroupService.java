@@ -104,6 +104,7 @@ public class GroupService extends IdCheckerService {
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         GroupEntity groupEntity = groupRepository.save(GroupEntity.builder()
                 .name(createPrivateGroupRequest.getName())
+                .description(createPrivateGroupRequest.getDescription())
                 .maxSize(createPrivateGroupRequest.getMaxSize())
                 .createdDate(Date.from(Instant.now()))
                 .owner(userEntity)
@@ -146,6 +147,10 @@ public class GroupService extends IdCheckerService {
         if (updateGroupRequest.getName() != null)
         {
             groupEntity.setName(updateGroupRequest.getName());
+        }
+        if (updateGroupRequest.getDescription() != null)
+        {
+            groupEntity.setDescription(updateGroupRequest.getDescription());
         }
         if (updateGroupRequest.getMaxSize() != null && updateGroupRequest.getMaxSize() != 0)
         {
