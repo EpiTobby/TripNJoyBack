@@ -45,6 +45,8 @@ public class GroupServiceTest {
     private GroupRepository groupRepository;
     @Autowired
     private GroupMemberRepository groupMemberRepository;
+    @Autowired
+    private ActivityRepository activityRepository;
     private ChannelService channelService;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     private GroupService groupService;
@@ -80,7 +82,7 @@ public class GroupServiceTest {
     @BeforeEach
     void initGroupService(){
         channelService = mock(ChannelService.class);
-        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService);
+        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository);
         SpringContext.setContext(context);
     }
 

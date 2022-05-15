@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 
 @Entity
 @Table(name = "groups")
@@ -62,4 +63,17 @@ public class GroupEntity {
     @OneToMany
     @JoinColumn(name = "group_id")
     public Collection<ChannelEntity> channels;
+
+    public boolean isMember(long userId)
+    {
+        return getMembers().stream()
+                           .anyMatch(groupMember -> groupMember.getUser().getId().equals(userId));
+    }
+
+    public Optional<GroupMemberEntity> findMember(long userId)
+    {
+        return getMembers().stream()
+                           .filter(groupMember -> groupMember.getUser().getId().equals(userId))
+                           .findAny();
+    }
 }

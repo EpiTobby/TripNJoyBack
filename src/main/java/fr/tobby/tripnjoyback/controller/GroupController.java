@@ -7,6 +7,7 @@ import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import fr.tobby.tripnjoyback.service.GroupService;
+import fr.tobby.tripnjoyback.service.IdCheckerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
@@ -23,10 +24,12 @@ import java.util.Collection;
 public class GroupController {
     private static final Logger logger = LoggerFactory.getLogger(GroupController.class);
     private final GroupService groupService;
+    private final IdCheckerService idCheckerService;
 
-    public GroupController(GroupService groupService)
+    public GroupController(GroupService groupService, final IdCheckerService idCheckerService)
     {
         this.groupService = groupService;
+        this.idCheckerService = idCheckerService;
     }
 
     @GetMapping("{id}")
@@ -57,7 +60,7 @@ public class GroupController {
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
     public void leaveGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId)
     {
-        groupService.checkId(userId);
+        idCheckerService.checkId(userId);
         groupService.removeUserFromGroup(groupId, userId);
     }
 
@@ -68,7 +71,7 @@ public class GroupController {
     @ApiResponse(responseCode = "403", description = "You are not allowed to view members of this group")
     public GroupMemberModel getMember(@PathVariable("groupId") final long groupId, @PathVariable("userId") final long userId)
     {
-        if (!groupService.isInGroup(groupId, groupService.getCurrentUserId()))
+        if (!groupService.isInGroup(groupId, idCheckerService.getCurrentUserId()))
             throw new ForbiddenOperationException("You are not a member of this group");
         return groupService.getMember(groupId, userId);
     }
@@ -78,7 +81,7 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "Returns the created group")
     @ApiResponse(responseCode = "422", description = "User or Group does not exist")
     public GroupModel createPrivateGroup(@PathVariable("id") final long userId, @RequestBody CreatePrivateGroupRequest createPrivateGroupRequest) {
-        groupService.checkId(userId);
+        idCheckerService.checkId(userId);
         return groupService.createPrivateGroup(userId, createPrivateGroupRequest);
     }
 
@@ -132,7 +135,7 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "The user has joined the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
     public void joinGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
-        groupService.checkId(userId);
+        idCheckerService.checkId(userId);
         groupService.joinGroup(groupId, userId);
     }
 
@@ -141,7 +144,7 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "The user has declined the invite")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
     public void declineGroupInvite(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
-        groupService.checkId(userId);
+        idCheckerService.checkId(userId);
         groupService.declineGroupInvite(groupId, userId);
     }
 
