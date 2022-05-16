@@ -144,6 +144,8 @@ public class ProfileService {
     public void deleteProfile(long profileId)
     {
         ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
+        if (profileEntity.isActive())
+            throw new IllegalArgumentException("Cannot delete an active profile");
         profileRepository.delete(profileEntity);
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
         answersRepository.deleteByProfileId(answersEntity.getProfileId());
