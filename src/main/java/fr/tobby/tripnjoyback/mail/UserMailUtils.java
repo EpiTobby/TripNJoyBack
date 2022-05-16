@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.mail;
 
 import fr.tobby.tripnjoyback.model.UserModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
@@ -14,87 +15,84 @@ public class UserMailUtils {
     private final MailConfigRecord config;
     private final MailSender mailSender;
 
-    public UserMailUtils(final MailConfigRecord config, final MailSender mailSender)
-    {
+    @Autowired
+    private MessagesProperties messagesProperties;
+
+    public UserMailUtils(final MailConfigRecord config, final MailSender mailSender) {
         this.config = config;
         this.mailSender = mailSender;
+
     }
 
-    public boolean userEmailIsValid(String email){
+    public boolean userEmailIsValid(String email) {
         try {
             InternetAddress internetAddress = new InternetAddress(email);
             internetAddress.validate();
             return true;
-        }
-        catch (AddressException e){
+        } catch (AddressException e) {
             return false;
         }
     }
-    public void sendConfirmationSuccessMail(UserModel user)
-    {
+
+    public void sendConfirmationSuccessMail(UserModel user) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
-                .setSubject("Confirmation de la création de votre compte TripNJoy")
-                .setContent("Bonjour " + user.getFirstname() + ",\n\nBienvenue dans notre application.\nCordialement,\nl'équipe TripNJoy")
+                .setSubject(messagesProperties.getConfirmationSuccessMailSubject(user))
+                .setContent(messagesProperties.getConfirmationSuccessMailBody(user).replace("{userFirstName}", user.getFirstname()))
                 .build();
         mailSender.send(mail);
     }
 
-    public void sendConfirmationCodeMail(UserModel user, String code)
-    {
+    public void sendConfirmationCodeMail(UserModel user, String code) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
-                .setSubject("Code de confirmation de votre compte TripNJoy")
-                .setContent("Bonjour " + user.getFirstname() + ",\n\nVoici votre code de confirmation: "
-                        + code + "\nCe dernier expirera dans 24 heures.\nCordialement,\nl'équipe TripNJoy")
+                .setSubject(messagesProperties.getConfirmationCodeSubject(user))
+                .setContent(messagesProperties.getConfirmationCodeBody(user).replace("{userFirstName}", user.getFirstname()).replace("{code}", code))
                 .build();
         mailSender.send(mail);
     }
 
-    public void sendForgottenPasswordCodeMail(UserModel user, String code)
-    {
+    public void sendForgottenPasswordCodeMail(UserModel user, String code) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
-                .setSubject("Code de changement de mot de passe TripNJoy")
-                .setContent("Bonjour " + user.getFirstname() + ",\n\nVoici votre code de changement de mot de passe: "
-                        + code + "\nCe dernier expirera dans 24 heures.\nCordialement,\nl'équipe TripNJoy")
+                .setSubject(messagesProperties.getForgotPasswordSubject(user))
+                .setContent(messagesProperties.getForgotPasswordBody(user).replace("{userFirstName}", user.getFirstname()).replace("{code}", code))
                 .build();
         mailSender.send(mail);
     }
 
-    public void sendUpdatePasswordMail(UserModel user)
-    {
+    public void sendUpdatePasswordMail(UserModel user) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
-                .setSubject("Confirmation du changement de mot de passe TripNJoy")
-                .setContent("Bonjour " + user.getFirstname() + ",\n\nVotre mot de passe a bien été mis à jour.\nCordialement,\nl'équipe TripNJoy")
+                .setSubject(messagesProperties.getUpdatePasswordSuccessSubject(user))
+                .setContent(messagesProperties.getUpdatePasswordSuccessBody(user).replace("{userFirstName}", user.getFirstname()))
                 .build();
         mailSender.send(mail);
     }
 
-    public void sendDeleteAccountMail(UserModel user){
+    public void sendDeleteAccountMail(UserModel user) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
-                .setSubject("Suppression de votre compte TripNJoy")
-                .setContent("Bonjour " + user.getFirstname() + ",\n\nVotre compte TripNJoy a bien été supprimé.\nCordialement,\nl'équipe TripNJoy")
+                .setSubject(messagesProperties.getAccountDeletedSubject(user))
+                .setContent(messagesProperties.getAccountDeletedBody(user).replace("{userFirstName}", user.getFirstname()))
                 .build();
         mailSender.send(mail);
     }
 
-    public void sendDeleteAccountByAdminMail(UserModel user, String reason){
+    public void sendDeleteAccountByAdminMail(UserModel user, String reason) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
-                .setSubject("Suppression de votre compte TripNJoy")
-                .setContent("Bonjour " + user.getFirstname() + ",\n\nVotre compte TripNJoy a été supprimé pour la raison suivante:\n" + reason + ".\nCordialement,\nl'équipe TripNJoy")
+                .setSubject(messagesProperties.getAccountDeletedByAdminSubject(user))
+                .setContent(messagesProperties.getAccountDeletedByAdminBody(user).replace("{userFirstName}", user.getFirstname()).replace("{reason}", reason))
                 .build();
         mailSender.send(mail);
     }
 
-    public void sendUpdateMail(UserModel user){
+    public void sendUpdateMail(UserModel user) {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
-                .setSubject("Confirmation du changement d'adresse email TripNJoy")
-                .setContent("Bonjour " + user.getFirstname() + ",\n\nVotre compte TripNJoy est à présent lié à cette adresse email.\nCordialement,\nl'équipe TripNJoy")
+                .setSubject(messagesProperties.getEmailUpdateSubject(user))
+                .setContent(messagesProperties.getEmailUpdateBody(user).replace("{userFirstName}", user.getFirstname()))
                 .build();
         mailSender.send(mail);
     }

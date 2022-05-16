@@ -1,11 +1,13 @@
 package fr.tobby.tripnjoyback.entity;
 
+import fr.tobby.tripnjoyback.entity.messaging.ChannelEntity;
 import lombok.*;
 import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 
 @Entity
 @Table(name = "groups")
@@ -20,6 +22,8 @@ public class GroupEntity {
     private Long id;
 
     private String name;
+
+    private String description;
 
     @Setter
     @ManyToOne()
@@ -57,4 +61,21 @@ public class GroupEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinTable(name = "group_profiles", joinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "profile_id", referencedColumnName = "id"))
     private ProfileEntity profile;
+
+    @OneToMany
+    @JoinColumn(name = "group_id")
+    public Collection<ChannelEntity> channels;
+
+    public boolean isMember(long userId)
+    {
+        return getMembers().stream()
+                           .anyMatch(groupMember -> groupMember.getUser().getId().equals(userId));
+    }
+
+    public Optional<GroupMemberEntity> findMember(long userId)
+    {
+        return getMembers().stream()
+                           .filter(groupMember -> groupMember.getUser().getId().equals(userId))
+                           .findAny();
+    }
 }

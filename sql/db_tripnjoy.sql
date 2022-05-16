@@ -19,15 +19,17 @@ CREATE TABLE "genders" (
                            "value" varchar
 );
 
-CREATE TABLE "groups" (
-                          "id" SERIAL PRIMARY KEY,
-                          "name" varchar,
-                          "state_id" int,
-                          "owner_id" int,
-                          "max_size" int,
-                          "created_date" timestamp,
-                          "start_of_trip" timestamp,
-                          "end_of_trip" timestamp
+CREATE TABLE "groups"(
+                         "id"            SERIAL PRIMARY KEY,
+                         "name"          varchar,
+                         "description"   varchar,
+                         "state_id"      int,
+                         "owner_id"      int,
+                         "max_size"      int,
+                         "created_date"  timestamp,
+                         "start_of_trip" timestamp,
+                         "end_of_trip"   timestamp,
+                         "picture"       text
 );
 
 CREATE TABLE "cities" (
@@ -40,10 +42,13 @@ CREATE TABLE "states" (
                           "value" varchar
 );
 
-CREATE TABLE "users_groups" (
-                                "user_id" int,
-                                "group_id" int,
-                                "profile_id" int
+CREATE TABLE "users_groups"
+(
+    "id"         SERIAL PRIMARY KEY,
+    "user_id"    int,
+    "group_id"   int,
+    "profile_id" int,
+    "pending"    bool
 );
 
 CREATE TABLE "profiles" (
@@ -71,9 +76,12 @@ CREATE TABLE "activities" (
                               "id" SERIAL PRIMARY KEY,
                               "group_id" int,
                               "name" varchar,
-                              "begining" timestamp,
-                              "end" timestamp,
-                              "description" text
+                              "start_date" timestamp,
+                              "end_date" timestamp,
+                              "description" text,
+                              "color" varchar,
+                              "location" text,
+                              "icon" text
 );
 
 CREATE TABLE "activities_members" (
@@ -235,13 +243,13 @@ ALTER TABLE "activities"
 
 ALTER TABLE "activities_members" ADD FOREIGN KEY ("activity_id") REFERENCES "activities" ("id");
 
-ALTER TABLE "activities_members" ADD FOREIGN KEY ("participant_id") REFERENCES "users" ("id");
+ALTER TABLE "activities_members" ADD FOREIGN KEY ("participant_id") REFERENCES "users_groups" ("id");
 
 ALTER TABLE "messages" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "messages" ADD FOREIGN KEY ("channel_id") REFERENCES "channels" ("id");
+ALTER TABLE "messages" ADD FOREIGN KEY ("channel_id") REFERENCES "channels" ("id") ON DELETE CASCADE;
 
-ALTER TABLE "channels" ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id");
+ALTER TABLE "channels" ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "survey_answers" ADD FOREIGN KEY ("survey_id") REFERENCES "surveys" ("id");
 
@@ -283,3 +291,97 @@ INSERT INTO roles (name)
 VALUES ('default');
 INSERT INTO roles (name)
 VALUES ('admin');
+
+create table languages(
+                          id SERIAL PRIMARY KEY,
+                          value varchar
+);
+
+INSERT INTO languages VALUES (0,'ENGLISH');
+INSERT INTO languages VALUES (1,'FRENCH');
+
+alter table users add column language_id int;
+
+alter table users add constraint users_language_id_fk
+    foreign key (language_id) references languages(id);
+
+create table message_type
+(
+    id   serial
+        constraint message_type_pk
+            primary key,
+    name varchar not null
+);
+
+INSERT INTO public.message_type (id, name)
+VALUES (1, 'TEXT');
+INSERT INTO public.message_type (id, name)
+VALUES (2, 'IMAGE');
+INSERT INTO public.message_type (id, name)
+VALUES (3, 'FILE');
+
+alter table messages
+    add type_id int default 1 not null;
+
+alter table messages
+    add constraint messages_message_type_id_fk
+        foreign key (type_id) references message_type
+            on update cascade on delete cascade;
+
+alter table channels drop constraint channels_group_id_fkey;
+
+alter table channels
+    add constraint channels_group_id_fkey
+        foreign key (group_id) references groups
+            on delete cascade;
+
+alter table messages drop constraint messages_channel_id_fkey;
+
+alter table messages
+    add constraint messages_channel_id_fkey
+        foreign key (channel_id) references channels
+            on delete cascade;
+
+alter table messages drop constraint messages_user_id_fkey;
+
+alter table messages
+    add constraint messages_user_id_fkey
+        foreign key (user_id) references users
+            on delete set null;
+
+create unique index states_value_uindex
+    on states (value);
+
+alter table activities drop constraint activities_group_id_fkey;
+
+alter table activities
+    add constraint activities_group_id_fkey
+        foreign key (group_id) references groups
+            on update cascade on delete cascade;
+
+alter table activities_members drop constraint activities_members_activity_id_fkey;
+
+alter table activities_members
+    add constraint activities_members_activity_id_fkey
+        foreign key (activity_id) references activities
+            on update cascade on delete cascade;
+
+alter table activities_members drop constraint activities_members_participant_id_fkey;
+
+alter table activities_members
+    add constraint activities_members_participant_id_fkey
+        foreign key (participant_id) references users
+            on update cascade on delete cascade;
+
+create table activities_info
+(
+    id serial
+        constraint activities_info_pk
+            primary key,
+    activity_id int not null
+        constraint activities_info_activities_id_fk
+            references activities
+            on update cascade on delete cascade,
+    content text not null
+);
+

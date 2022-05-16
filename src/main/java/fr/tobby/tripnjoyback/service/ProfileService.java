@@ -22,14 +22,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ProfileService extends IdCheckerService {
+public class ProfileService {
     private final ProfileRepository profileRepository;
     private final AnswersRepository answersRepository;
     private final UserRepository userRepository;
     private final DateFormat dateFormat;
 
-    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository, UserRepository userRepository) {
-        super(userRepository);
+    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository, final UserRepository userRepository) {
         this.profileRepository = profileRepository;
         this.answersRepository = answersRepository;
         this.userRepository = userRepository;
@@ -37,7 +36,7 @@ public class ProfileService extends IdCheckerService {
     }
 
     @Transactional
-    public ProfileModel createProfile(long userId, ProfileCreationRequest profileCreationRequest)
+    public ProfileModel createUserProfile(long userId, ProfileCreationRequest profileCreationRequest)
     {
         setProfileInactive(userId);
         ProfileEntity profileEntity = ProfileEntity.builder()
@@ -142,7 +141,7 @@ public class ProfileService extends IdCheckerService {
     }
 
     @Transactional
-    public void deleteProfile(long userId, long profileId)
+    public void deleteProfile(long profileId)
     {
         ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
         profileRepository.delete(profileEntity);
@@ -164,8 +163,7 @@ public class ProfileService extends IdCheckerService {
         {
             if (Boolean.TRUE.equals(profileUpdateRequest.getActive()))
                 setProfileInactive(userId);
-            else
-                profileEntity.setActive(profileUpdateRequest.getActive());
+            profileEntity.setActive(profileUpdateRequest.getActive());
         }
         if (profileUpdateRequest.getName() != null)
         {

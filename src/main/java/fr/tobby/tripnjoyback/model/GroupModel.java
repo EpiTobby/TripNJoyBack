@@ -22,6 +22,7 @@ public class GroupModel {
 
     private long id;
     private String name;
+    private String description;
     private State state;
     @Nullable
     private UserModel owner;
@@ -34,6 +35,7 @@ public class GroupModel {
     @Nullable
     private String picture;
     private List<MemberModel> members;
+    private List<ChannelModel> channels;
 
     @JsonProperty("createdDate")
     public String getCreatedDate() {
@@ -44,13 +46,16 @@ public class GroupModel {
         return GroupModel.builder()
                          .id(groupEntity.getId())
                          .name(groupEntity.getName())
+                         .description(groupEntity.getDescription())
                          .state(State.valueOf(groupEntity.getStateEntity().getValue()))
                          .owner(groupEntity.getOwner() == null ? null : UserModel.of(groupEntity.getOwner()))
                          .maxSize(groupEntity.getMaxSize())
                          .startOfTrip(groupEntity.getStartOfTrip())
                          .endOfTrip(groupEntity.getEndOfTrip())
                          .createdDate(groupEntity.getCreatedDate())
+                         .picture(groupEntity.getPicture())
                          .members(groupEntity.members.stream().filter(m -> !m.isPending()).map(m -> MemberModel.of(m.getUser())).toList())
+                         .channels(groupEntity.channels.stream().map(e -> ChannelModel.of(e)).toList())
                          .build();
     }
 }

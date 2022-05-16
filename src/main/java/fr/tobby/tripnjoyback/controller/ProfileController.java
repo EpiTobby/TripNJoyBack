@@ -6,6 +6,7 @@ import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
+import fr.tobby.tripnjoyback.service.IdCheckerService;
 import fr.tobby.tripnjoyback.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,10 +22,12 @@ import java.util.List;
 @RequestMapping(path = "{id}/profiles")
 public class ProfileController {
     private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
-    private ProfileService profileService;
+    private final ProfileService profileService;
+    private final IdCheckerService idCheckerService;
 
-    public ProfileController(ProfileService profileService) {
+    public ProfileController(ProfileService profileService, final IdCheckerService idCheckerService) {
         this.profileService = profileService;
+        this.idCheckerService = idCheckerService;
     }
 
     @GetMapping("")
@@ -33,7 +35,7 @@ public class ProfileController {
     @ApiResponse(responseCode = "200", description = "Returns list of profiles")
     @ApiResponse(responseCode = "422", description = "If the answers are not valid")
     public List<ProfileModel> getUserProfiles(@PathVariable("id") final long userId) {
-        profileService.checkId(userId);
+        idCheckerService.checkId(userId);
         return profileService.getUserProfiles(userId);
     }
 
@@ -48,8 +50,8 @@ public class ProfileController {
     @ApiResponse(responseCode = "200", description = "Returns the profile")
     @ApiResponse(responseCode = "422", description = "")
     public ProfileModel createProfile(@PathVariable("id") final long userId, @RequestBody ProfileCreationRequest profileCreationRequest) {
-        profileService.checkId(userId);
-        return profileService.createProfile(userId, profileCreationRequest);
+        idCheckerService.checkId(userId);
+        return profileService.createUserProfile(userId, profileCreationRequest);
     }
 
     @PatchMapping("{profile}/update")
@@ -57,7 +59,7 @@ public class ProfileController {
     @ApiResponse(responseCode = "200", description = "The profile is updated")
     @ApiResponse(responseCode = "422", description = "The answers are not valid")
     public void updateProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId, @RequestBody ProfileUpdateRequest profileUpdateRequest) {
-        profileService.checkId(userId);
+        idCheckerService.checkId(userId);
         profileService.updateProfile(userId, profileId, profileUpdateRequest);
     }
 
@@ -66,8 +68,8 @@ public class ProfileController {
     @ApiResponse(responseCode = "200", description = "The profile is deleted")
     @ApiResponse(responseCode = "422", description = "No profile has been found")
     public void deleteProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId) {
-        profileService.checkId(userId);
-        profileService.deleteProfile(userId, profileId);
+        idCheckerService.checkId(userId);
+        profileService.deleteProfile(profileId);
     }
 
     @ExceptionHandler(ProfileNotFoundException.class)

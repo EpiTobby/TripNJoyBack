@@ -1,24 +1,25 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.*;
+import fr.tobby.tripnjoyback.entity.messaging.ChannelEntity;
+import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
 import fr.tobby.tripnjoyback.repository.*;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import static org.mockito.Mockito.*;
 
@@ -28,8 +29,10 @@ class MatchMakerTest {
     private static GenderEntity maleGender;
     private static GenderEntity femaleGender;
     private static GenderEntity otherGender;
+    private static GenderRepository genderRepository;
     private static StateEntity closedState;
     private static StateEntity openState;
+    private static StateRepository stateRepository;
     private MatchMaker matchMaker;
 
     @Autowired
@@ -50,9 +53,18 @@ class MatchMakerTest {
         maleGender = genderRepository.save(new GenderEntity("male"));
         femaleGender = genderRepository.save(new GenderEntity("female"));
         otherGender = genderRepository.save(new GenderEntity("other"));
+        MatchMakerTest.genderRepository = genderRepository;
 
         closedState = stateRepository.save(new StateEntity("CLOSED"));
         openState = stateRepository.save(new StateEntity("OPEN"));
+        MatchMakerTest.stateRepository = stateRepository;
+    }
+
+    @AfterAll
+    static void afterAll()
+    {
+        stateRepository.deleteAll();
+        genderRepository.deleteAll();
     }
 
     @BeforeEach
@@ -118,7 +130,7 @@ class MatchMakerTest {
     }
 
     @Test
-    void noGroupNoUserTest() throws ParseException
+    void noGroupNoUserTest() throws ParseException, ExecutionException, InterruptedException
     {
         UserEntity user = anyUser();
 
@@ -130,13 +142,13 @@ class MatchMakerTest {
         Assertions.assertEquals(21, model.getAge());
         Assertions.assertFalse(user.isWaitingForGroup());
 
-        matchMaker.match(model);
+        matchMaker.match(model).get();
 
         Assertions.assertTrue(user.isWaitingForGroup());
     }
 
     @Test
-    void noGroupOneMatchingUserTest() throws ParseException
+    void noGroupOneMatchingUserTest() throws ParseException, ExecutionException, InterruptedException
     {
         UserEntity userA = anyUser();
         UserEntity userB = anyUser();
@@ -148,18 +160,19 @@ class MatchMakerTest {
         when(profileService.getProfile(1)).thenReturn(profileA);
         when(profileService.getProfile(2)).thenReturn(profileB);
         when(profileService.getActiveProfileModel(userB.getId())).thenReturn(Optional.of(profileB));
+        when(groupService.createPublicGroup(any(), any(), any(), any(), anyInt(), any())).thenReturn(mock(GroupModel.class));
 
         Instant now = dateFormat.parse("01-01-2021").toInstant();
         MatchMakingUserModel modelA = MatchMakingUserModel.from(userA, profileA, now);
 
-        matchMaker.match(modelA);
+        matchMaker.match(modelA).get();
 
         verify(groupService).createPublicGroup(any(), any(), any(), any(), anyInt(), any());
         Assertions.assertFalse(userB.isWaitingForGroup());
     }
 
     @Test
-    void noGroupOneNonMatchingUserTest() throws ParseException
+    void noGroupOneNonMatchingUserTest() throws ParseException, ExecutionException, InterruptedException
     {
         UserEntity userA = anyUser();
         UserEntity userB = anyUser();
@@ -177,7 +190,7 @@ class MatchMakerTest {
         Instant now = dateFormat.parse("01-01-2021").toInstant();
         MatchMakingUserModel modelA = MatchMakingUserModel.from(userA, profileA, now);
 
-        matchMaker.match(modelA);
+        matchMaker.match(modelA).get();
 
         verify(groupService, times(0)).createPublicGroup(any(), any(), any(), any(), anyInt(), any());
         Assertions.assertTrue(userA.isWaitingForGroup());
@@ -185,7 +198,7 @@ class MatchMakerTest {
     }
 
     @Test
-    void matchingGroupNoUserTest() throws ParseException
+    void matchingGroupNoUserTest() throws ParseException, ExecutionException, InterruptedException
     {
         UserEntity userA = anyUser();
         UserEntity userB = anyUser();
@@ -196,7 +209,7 @@ class MatchMakerTest {
         when(profileService.getProfile(1)).thenReturn(profileA);
         when(profileService.getProfile(2)).thenReturn(profileGroup);
 
-        ProfileEntity groupProfileEntity = profileRepository.save(new ProfileEntity(1, "test", true));
+        ProfileEntity groupProfileEntity = profileRepository.save(new ProfileEntity(1L, "test", true));
         when(profileService.getProfile(groupProfileEntity)).thenReturn(profileGroup);
 
         ProfileEntity profileEntity = mock(ProfileEntity.class);
@@ -204,20 +217,24 @@ class MatchMakerTest {
 
         GroupEntity group = groupRepository.save(new GroupEntity(null,
                 "test",
+                "description",
                 openState,
-                userB,
+                null,
                 3,
                 new Date(),
                 null,
                 null,
                 "",
-                List.of(mock(GroupMemberEntity.class)),
-                groupProfileEntity));
+                new ArrayList<>(),
+                groupProfileEntity,
+                List.of(mock(ChannelEntity.class))));
+
+        group.getMembers().add(new GroupMemberEntity(group, userB, mock(ProfileEntity.class), false));
 
         Instant now = dateFormat.parse("01-01-2021").toInstant();
         MatchMakingUserModel modelA = MatchMakingUserModel.from(userA, profileA, now);
 
-        matchMaker.match(modelA);
+        matchMaker.match(modelA).get();
 
         verify(groupService).addUserToPublicGroup(group.getId(), userA.getId(), 1);
         Assertions.assertFalse(userA.isWaitingForGroup());

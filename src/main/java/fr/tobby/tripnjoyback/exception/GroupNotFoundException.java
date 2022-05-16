@@ -1,23 +1,33 @@
 package fr.tobby.tripnjoyback.exception;
 
-public class GroupNotFoundException extends RuntimeException{
-    public GroupNotFoundException() {
+public class GroupNotFoundException extends EntityNotFoundException {
+    public GroupNotFoundException()
+    {
         super();
     }
 
-    public GroupNotFoundException(String message) {
+    public GroupNotFoundException(String message)
+    {
         super(message);
     }
 
-    public GroupNotFoundException(String message, Throwable cause) {
+    public GroupNotFoundException(long groupId)
+    {
+        this("No group found with id " + groupId);
+    }
+
+    public GroupNotFoundException(String message, Throwable cause)
+    {
         super(message, cause);
     }
 
-    public GroupNotFoundException(Throwable cause) {
+    public GroupNotFoundException(Throwable cause)
+    {
         super(cause);
     }
 
-    protected GroupNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected GroupNotFoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace)
+    {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

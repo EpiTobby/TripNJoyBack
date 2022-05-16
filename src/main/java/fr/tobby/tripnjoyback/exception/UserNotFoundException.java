@@ -1,9 +1,14 @@
 package fr.tobby.tripnjoyback.exception;
 
-public class UserNotFoundException extends RuntimeException {
+public class UserNotFoundException extends EntityNotFoundException {
 
     public UserNotFoundException()
     {
+    }
+
+    public UserNotFoundException(long userId)
+    {
+        this("No user found with id " + userId);
     }
 
     public UserNotFoundException(final String message)

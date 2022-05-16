@@ -44,6 +44,10 @@ public class UserEntity {
     private String phoneNumber;
     @Setter
     private boolean confirmed;
+    @ManyToOne
+    @Setter
+    @JoinColumn(name = "language_id")
+    private LanguageEntity language;
     @Setter
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
@@ -57,7 +61,7 @@ public class UserEntity {
     private boolean waitingForGroup;
 
     public UserEntity(String firstname, String lastname, String password, String email, Instant birthDate, GenderEntity gender, String profilePicture,
-                      CityEntity city, Instant createdDate, String phoneNumber)
+                      CityEntity city, Instant createdDate, String phoneNumber, LanguageEntity language)
     {
         this.id = null;
         this.firstname = firstname;
@@ -70,6 +74,7 @@ public class UserEntity {
         this.city = city;
         this.createdDate = createdDate;
         this.phoneNumber = phoneNumber;
+        this.language = language;
         this.confirmed = false;
     }
 }

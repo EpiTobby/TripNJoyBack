@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.auth.TokenManager;
+import fr.tobby.tripnjoyback.entity.CityEntity;
 import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.*;
@@ -13,10 +14,7 @@ import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.request.auth.GoogleRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
 import fr.tobby.tripnjoyback.model.response.auth.GoogleUserResponse;
-import fr.tobby.tripnjoyback.repository.ConfirmationCodeRepository;
-import fr.tobby.tripnjoyback.repository.GenderRepository;
-import fr.tobby.tripnjoyback.repository.UserRepository;
-import fr.tobby.tripnjoyback.repository.UserRoleRepository;
+import fr.tobby.tripnjoyback.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,12 +46,14 @@ public class AuthService {
     private final UserMailUtils userMailUtils;
     private final PasswordEncoder encoder;
     private final GenderRepository genderRepository;
+    private final CityService cityService;
     private final ConfirmationCodeRepository confirmationCodeRepository;
     private final AuthenticationManager authenticationManager;
     private final TokenManager tokenManager;
     private final UserDetailsService userDetailsService;
     private final UserService userService;
     private final UserRoleRepository userRoleRepository;
+    private final LanguageRepository languageRepository;
 
     @Value("${google.secret}")
     private String googleSecret;
@@ -62,24 +62,28 @@ public class AuthService {
 
     public AuthService(final UserRepository userRepository, final UserMailUtils userMailUtils, final PasswordEncoder encoder,
                        final GenderRepository genderRepository,
-                       final ConfirmationCodeRepository confirmationCodeRepository,
+                       final CityService cityService, final ConfirmationCodeRepository confirmationCodeRepository,
                        final AuthenticationManager authenticationManager, final TokenManager tokenManager,
                        final UserDetailsService userDetailsService, final UserService userService,
-                       final UserRoleRepository userRoleRepository) {
+                       final UserRoleRepository userRoleRepository, LanguageRepository languageRepository) {
         this.userRepository = userRepository;
         this.userMailUtils = userMailUtils;
         this.encoder = encoder;
         this.genderRepository = genderRepository;
+        this.cityService = cityService;
         this.confirmationCodeRepository = confirmationCodeRepository;
         this.authenticationManager = authenticationManager;
         this.tokenManager = tokenManager;
         this.userDetailsService = userDetailsService;
         this.userService = userService;
         this.userRoleRepository = userRoleRepository;
+        this.languageRepository = languageRepository;
     }
 
     @Transactional
     public UserModel createUser(UserCreationRequest model) throws UserCreationException {
+
+        String city = model.getCity().toUpperCase().trim();
         UserEntity userEntity = UserEntity.builder()
                 .firstname(model.getFirstname())
                 .lastname(model.getLastname())
@@ -90,6 +94,8 @@ public class AuthService {
                 .gender(genderRepository.findByValue(model.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + model.getGender())))
                 .phoneNumber(model.getPhoneNumber())
                 .confirmed(false)
+                .city(cityService.getOrAddCity(city))
+                .language(languageRepository.findByValue(model.getLanguage().toUpperCase()).orElseThrow(() -> new UserCreationException("Invalid language " + model.getLanguage())))
                 .roles(List.of(userRoleRepository.getByName("default")))
                 .build();
         UserModel created = UserModel.of(createUser(userEntity));
@@ -122,7 +128,6 @@ public class AuthService {
                 throw new UserCreationException(errorMessage);
 
         } catch (RestClientException e) {
-            e.printStackTrace();
             throw new UserCreationException("An error occurred while login with google");
         }
 
