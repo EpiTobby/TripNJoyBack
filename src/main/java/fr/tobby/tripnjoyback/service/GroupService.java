@@ -47,13 +47,13 @@ public class GroupService {
     public boolean isInGroup(final long groupId, final long userId)
     {
         GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
-        return group.getMembers().stream().anyMatch(member -> member.getId().equals(userId));
+        return group.getMembers().stream().anyMatch(member -> member.getUser().getId().equals(userId));
     }
 
     public GroupMemberModel getMember(long groupId, long userId)
     {
         GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
-        return group.getMembers().stream().filter(member -> member.getId().equals(userId))
+        return group.getMembers().stream().filter(member -> member.getUser().getId().equals(userId))
                     .findAny()
                     .map(member -> GroupMemberModel.of(member.getUser()))
                     .orElseThrow(UserNotFoundException::new);
