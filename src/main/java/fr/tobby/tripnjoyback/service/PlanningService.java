@@ -75,6 +75,7 @@ public class PlanningService {
     }
 
     @NotNull
+    @Transactional
     public ActivityModel updateActivity(final long activityId, @NotNull final UpdateActivityRequest updateRequest)
     {
         ActivityEntity activity = activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
