@@ -234,10 +234,12 @@ public class GroupService {
     }
 
     @Transactional
-    public void setGroupPublic(long groupId, ProfileCreationRequest profileRequest) throws GroupNotFoundException
+    public void setGroupPublic(long groupId, ProfileCreationRequest profileRequest) throws GroupNotFoundException, IllegalArgumentException
     {
-        ProfileModel profile = profileService.createProfile(profileRequest);
         GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+        if (group.getOwner() == null)
+            throw new IllegalArgumentException("This group is already public");
+        ProfileModel profile = profileService.createProfile(profileRequest);
         group.setProfile(profileRepository.getById(profile.getId()));
         group.setOwner(null);
     }

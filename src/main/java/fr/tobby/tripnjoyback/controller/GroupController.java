@@ -149,12 +149,23 @@ public class GroupController {
         groupService.declineGroupInvite(groupId, userId);
     }
 
+    @Operation(summary = "Make a private group public")
+    @ApiResponse(responseCode = "200", description = "The group is now public")
+    @ApiResponse(responseCode = "422", description = "Group does not exist")
+    @ApiResponse(responseCode = "403", description = "User is not in the group, or the group is already public")
     @PatchMapping("private/{groupId}/public")
     public void setGroupPublic(@PathVariable("groupId") final long groupId, @RequestBody ProfileCreationRequest profile)
     {
         if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
-        groupService.setGroupPublic(groupId, profile);
+        try
+        {
+            groupService.setGroupPublic(groupId, profile);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new ForbiddenOperationException("This group is already public");
+        }
     }
 
     @ExceptionHandler(UserNotFoundException.class)
