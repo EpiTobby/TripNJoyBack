@@ -82,7 +82,7 @@ public class GroupServiceTest {
     @BeforeEach
     void initGroupService(){
         channelService = mock(ChannelService.class);
-        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository);
+        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository, mock(ProfileService.class));
         SpringContext.setContext(context);
     }
 

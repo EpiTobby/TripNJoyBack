@@ -4,6 +4,7 @@ import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.ModelWithEmail;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
+import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import fr.tobby.tripnjoyback.service.GroupService;
@@ -148,6 +149,14 @@ public class GroupController {
         groupService.declineGroupInvite(groupId, userId);
     }
 
+    @PatchMapping("private/{groupId}/public")
+    public void setGroupPublic(@PathVariable("groupId") final long groupId, @RequestBody ProfileCreationRequest profile)
+    {
+        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+            throw new ForbiddenOperationException();
+        groupService.setGroupPublic(groupId, profile);
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -169,7 +178,7 @@ public class GroupController {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String getError(ForbiddenOperationException exception) {
         logger.debug("Error on request", exception);
-        return exception.getMessage();
+        return exception.getMessage() != null ? exception.getMessage() : "You are not authorized to perform this operation";
     }
 
     @ExceptionHandler(UpdateGroupException.class)

@@ -6,8 +6,10 @@ import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
+import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
+import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import fr.tobby.tripnjoyback.repository.*;
@@ -31,10 +33,11 @@ public class GroupService {
     private final ProfileRepository profileRepository;
     private final ChannelService channelService;
     private final ActivityRepository activityRepository;
+    private final ProfileService profileService;
 
     public GroupService(GroupRepository groupRepository, UserRepository userRepository, GroupMemberRepository groupMemberRepository,
                         ProfileRepository profileRepository, ChannelService channelService,
-                        final ActivityRepository activityRepository)
+                        final ActivityRepository activityRepository, final ProfileService profileService)
     {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
@@ -42,6 +45,7 @@ public class GroupService {
         this.profileRepository = profileRepository;
         this.channelService = channelService;
         this.activityRepository = activityRepository;
+        this.profileService = profileService;
     }
 
     public boolean isInGroup(final long groupId, final long userId)
@@ -227,5 +231,14 @@ public class GroupService {
         if (groupEntity.getNumberOfNonPendingUsers() == 0) {
             groupRepository.delete(groupEntity);
         }
+    }
+
+    @Transactional
+    public void setGroupPublic(long groupId, ProfileCreationRequest profileRequest) throws GroupNotFoundException
+    {
+        ProfileModel profile = profileService.createProfile(profileRequest);
+        GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+        group.setProfile(profileRepository.getById(profile.getId()));
+        group.setOwner(null);
     }
 }
