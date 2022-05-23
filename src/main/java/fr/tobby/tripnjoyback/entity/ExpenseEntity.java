@@ -29,7 +29,7 @@ public class ExpenseEntity {
 
     @ManyToOne
     @JoinColumn(name = "group_id")
-    private GroupEntity groupEntity;
+    private GroupEntity group;
 
     @Column(name = "expense_date")
     private Date date;

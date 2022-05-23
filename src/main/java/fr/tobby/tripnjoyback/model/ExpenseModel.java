@@ -32,7 +32,7 @@ public class ExpenseModel {
                 .description(expenseEntity.getDescription())
                 .date(expenseEntity.getDate())
                 .userModel(UserModel.of(expenseEntity.getPurchaser()))
-                .groupModel(GroupModel.of(expenseEntity.getGroupEntity()))
+                .groupModel(GroupModel.of(expenseEntity.getGroup()))
                 .indebtedMembers(expenseMemberEntities.stream().map(ExpenseMemberModel::of).toList())
                 .build();
     }
