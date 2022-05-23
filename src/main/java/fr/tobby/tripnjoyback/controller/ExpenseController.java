@@ -24,7 +24,7 @@ public class ExpenseController {
         this.expenseService = expenseService;
     }
 
-    @PostMapping("{group}/purcharser/{user}")
+    @PostMapping("{group}/purchaser/{user}")
     public ExpenseModel createExpense(@PathVariable("group") long groupId, @PathVariable("user") long userId, @RequestBody CreateExpenseRequest createExpenseRequest){
         return expenseService.createExpense(groupId, userId, createExpenseRequest);
     }

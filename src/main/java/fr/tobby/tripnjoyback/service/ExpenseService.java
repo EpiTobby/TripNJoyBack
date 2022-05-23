@@ -53,7 +53,7 @@ public class ExpenseService {
                         .build()
         );
         double amountToPay = createExpenseRequest.getTotal() / createExpenseRequest.getUserIds().size();
-        List<ExpenseMemberEntity> expenseMemberEntities = List.of();
+        List<ExpenseMemberEntity> expenseMemberEntities = new ArrayList<ExpenseMemberEntity>();
         createExpenseRequest.getUserIds().stream().forEach(userId -> {
             UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(purchaserId));
             expenseMemberEntities.add(expenseMemberRepository.save(ExpenseMemberEntity.builder()

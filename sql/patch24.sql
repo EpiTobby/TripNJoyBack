@@ -4,7 +4,7 @@ alter table expenses
 ALTER TABLE "expenses" ADD FOREIGN KEY ("purchaser_id") REFERENCES "users" ("id");
 
 alter table expenses_members
-    add id int;
+    add id serial;
 
 alter table expenses_members
     add constraint expenses_members_pk
