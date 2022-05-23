@@ -29,7 +29,8 @@ public class PlacesController {
     }
 
     @GetMapping("categories")
-    public Collection<PlaceCategory> getCategory(){
+    @Operation(summary = "Returns all the categories of locations")
+    public Collection<PlaceCategory> getCategories(){
         return List.of(PlaceCategory.ANTIQUES_SHOP,
                 PlaceCategory.ARTS_CENTER,
                 PlaceCategory.ART_SHOP,
