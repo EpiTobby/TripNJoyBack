@@ -10,7 +10,8 @@ import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
-import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
+import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
+import fr.tobby.tripnjoyback.model.request.UpdatePublicGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import fr.tobby.tripnjoyback.repository.*;
 import org.slf4j.Logger;
@@ -147,49 +148,70 @@ public class GroupService {
     }
 
     @Transactional
-    public void updatePrivateGroup(long groupId, UpdateGroupRequest updateGroupRequest) {
+    public void updatePrivateGroup(long groupId, UpdatePrivateGroupRequest updatePrivateGroupRequest) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-        if (updateGroupRequest.getName() != null)
+        if (updatePrivateGroupRequest.getName() != null)
         {
-            groupEntity.setName(updateGroupRequest.getName());
+            groupEntity.setName(updatePrivateGroupRequest.getName());
         }
-        if (updateGroupRequest.getDescription() != null)
+        if (updatePrivateGroupRequest.getDescription() != null)
         {
-            groupEntity.setDescription(updateGroupRequest.getDescription());
+            groupEntity.setDescription(updatePrivateGroupRequest.getDescription());
         }
-        if (updateGroupRequest.getMaxSize() != null && updateGroupRequest.getMaxSize() != 0)
+        if (updatePrivateGroupRequest.getMaxSize() != null && updatePrivateGroupRequest.getMaxSize() != 0)
         {
-            int newMaxSize = updateGroupRequest.getMaxSize();
+            int newMaxSize = updatePrivateGroupRequest.getMaxSize();
             if (newMaxSize < groupEntity.getNumberOfNonPendingUsers())
                 throw new UpdateGroupException("The maximum size of the group must be greater or equal than the current number of members in the private group");
             groupEntity.setMaxSize(newMaxSize);
         }
-        if (updateGroupRequest.getState() != null)
+        if (updatePrivateGroupRequest.getState() != null)
         {
-            if (updateGroupRequest.getState() == State.CLOSED)
+            if (updatePrivateGroupRequest.getState() == State.CLOSED)
                 groupEntity.members.stream().filter(GroupMemberEntity::isPending).forEach(groupMemberRepository::delete);
-            groupEntity.setStateEntity(updateGroupRequest.getState().getEntity());
+            groupEntity.setStateEntity(updatePrivateGroupRequest.getState().getEntity());
         }
-        if (updateGroupRequest.getPicture() != null){
-            groupEntity.setPicture(updateGroupRequest.getPicture());
+        if (updatePrivateGroupRequest.getPicture() != null){
+            groupEntity.setPicture(updatePrivateGroupRequest.getPicture());
         }
         if (groupEntity.getStateEntity().getValue().equals("CLOSED")) {
-            if (updateGroupRequest.getStartOfTrip() != null)
-                groupEntity.setStartOfTrip(updateGroupRequest.getStartOfTrip());
-            if (updateGroupRequest.getEndOfTrip() != null)
-                groupEntity.setEndOfTrip(updateGroupRequest.getEndOfTrip());
+            if (updatePrivateGroupRequest.getStartOfTrip() != null)
+                groupEntity.setStartOfTrip(updatePrivateGroupRequest.getStartOfTrip());
+            if (updatePrivateGroupRequest.getEndOfTrip() != null)
+                groupEntity.setEndOfTrip(updatePrivateGroupRequest.getEndOfTrip());
         }
-        if (updateGroupRequest.getOwnerId() != null)
+        if (updatePrivateGroupRequest.getOwnerId() != null)
         {
-            long newOwnerId = updateGroupRequest.getOwnerId();
+            long newOwnerId = updatePrivateGroupRequest.getOwnerId();
             if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == newOwnerId))
             {
-                UserEntity newOwner = userRepository.findById(updateGroupRequest.getOwnerId())
-                                                    .orElseThrow(() -> new UserNotFoundException(updateGroupRequest.getOwnerId()));
+                UserEntity newOwner = userRepository.findById(updatePrivateGroupRequest.getOwnerId())
+                                                    .orElseThrow(() -> new UserNotFoundException(updatePrivateGroupRequest.getOwnerId()));
                 groupEntity.setOwner(newOwner);
             }
             else
                 throw new UpdateGroupException("The new owner does not exist or is not in this private group");
+        }
+    }
+
+    @Transactional
+    public void updatePublicGroup(long groupId, UpdatePublicGroupRequest request) throws GroupNotFoundException
+    {
+        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
+        if (request.getName() != null)
+            groupEntity.setName(request.getName());
+        if (request.getDescription() != null)
+            groupEntity.setDescription(request.getDescription());
+
+        if (request.getPicture() != null)
+            groupEntity.setPicture(request.getPicture());
+
+        if (groupEntity.getStateEntity().equals(State.CLOSED.getEntity()))
+        {
+            if (request.getStartOfTrip() != null)
+                groupEntity.setStartOfTrip(request.getStartOfTrip());
+            if (request.getEndOfTrip() != null)
+                groupEntity.setEndOfTrip(request.getEndOfTrip());
         }
     }
 
