@@ -4,6 +4,7 @@ import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.ModelWithEmail;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
+import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import fr.tobby.tripnjoyback.service.GroupService;
@@ -148,6 +149,25 @@ public class GroupController {
         groupService.declineGroupInvite(groupId, userId);
     }
 
+    @Operation(summary = "Make a private group public")
+    @ApiResponse(responseCode = "200", description = "The group is now public")
+    @ApiResponse(responseCode = "422", description = "Group does not exist")
+    @ApiResponse(responseCode = "403", description = "User is not in the group, or the group is already public")
+    @PatchMapping("private/{groupId}/public")
+    public void setGroupPublic(@PathVariable("groupId") final long groupId, @RequestBody ProfileCreationRequest profile)
+    {
+        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+            throw new ForbiddenOperationException();
+        try
+        {
+            groupService.setGroupPublic(groupId, profile);
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new ForbiddenOperationException("This group is already public");
+        }
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -169,7 +189,7 @@ public class GroupController {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String getError(ForbiddenOperationException exception) {
         logger.debug("Error on request", exception);
-        return exception.getMessage();
+        return exception.getMessage() != null ? exception.getMessage() : "You are not authorized to perform this operation";
     }
 
     @ExceptionHandler(UpdateGroupException.class)

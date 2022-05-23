@@ -39,12 +39,19 @@ public class ProfileService {
     public ProfileModel createUserProfile(long userId, ProfileCreationRequest profileCreationRequest)
     {
         setProfileInactive(userId);
+        ProfileModel createdProfileModel = createProfile(profileCreationRequest);
+        userRepository.findById(userId).orElseThrow(UserNotConfirmedException::new)
+                      .getProfiles().add(profileRepository.getById(createdProfileModel.getId()));
+        return createdProfileModel;
+    }
+
+    @Transactional
+    public ProfileModel createProfile(ProfileCreationRequest profileCreationRequest)
+    {
         ProfileEntity profileEntity = ProfileEntity.builder()
                                                    .name(profileCreationRequest.getName())
                                                    .active(true).build();
-        userRepository.findById(userId).orElseThrow(UserNotConfirmedException::new)
-                      .getProfiles().add(profileEntity);
-        profileRepository.save(profileEntity);
+        profileEntity = profileRepository.save(profileEntity);
         AnswersEntity answersEntity = createAnswersEntity(profileCreationRequest, profileEntity.getId());
         return ProfileModel.of(profileEntity, answersEntity);
     }
