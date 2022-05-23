@@ -1,8 +1,12 @@
 package fr.tobby.tripnjoyback.repository;
 
-import fr.tobby.tripnjoyback.entity.ExpenseEntity;
+import fr.tobby.tripnjoyback.entity.ExpenseMemberEntity;
 import org.springframework.data.repository.CrudRepository;
 
-public interface ExpenseRepository extends CrudRepository<ExpenseEntity, Long> {
-    void findByPurchaserId(long userId);
+import java.util.List;
+
+public interface ExpenseMemberRepository extends CrudRepository<ExpenseMemberEntity, Long> {
+    List<ExpenseMemberEntity> findByExpenseId(long expenseId);
+
+    List<ExpenseMemberEntity> findByUserId(long userId);
 }
