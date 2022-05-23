@@ -5,7 +5,8 @@ import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.ModelWithEmail;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
-import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
+import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
+import fr.tobby.tripnjoyback.model.request.UpdatePublicGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import fr.tobby.tripnjoyback.service.GroupService;
 import fr.tobby.tripnjoyback.service.IdCheckerService;
@@ -114,10 +115,18 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "The group is updated")
     @ApiResponse(responseCode = "403", description = "The client is not the owner of the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
-    public void updatePrivateGroup(@PathVariable("group") final long groupId, @RequestBody UpdateGroupRequest updateGroupRequest) {
+    public void updatePrivateGroup(@PathVariable("group") final long groupId, @RequestBody UpdatePrivateGroupRequest updatePrivateGroupRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         checkOwnership(groupId, authentication);
-        groupService.updatePrivateGroup(groupId, updateGroupRequest);
+        groupService.updatePrivateGroup(groupId, updatePrivateGroupRequest);
+    }
+
+    @PatchMapping("{group}")
+    @Operation(summary = "Update the public group")
+    @ApiResponse(responseCode = "200", description = "The group is updated")
+    @ApiResponse(responseCode = "422", description = "Group does not exist")
+    public void updatePublicGroup(@PathVariable("group") final long groupId, @RequestBody UpdatePublicGroupRequest request) {
+        groupService.updatePublicGroup(groupId, request);
     }
 
     @DeleteMapping("private/{group}")
