@@ -51,14 +51,14 @@ public class ExpenseService {
                         .date(Date.from(Instant.now()))
                         .build()
         );
-        double amountToPay = createExpenseRequest.getTotal() / createExpenseRequest.getUserIds().size();
+        double amountToPay = createExpenseRequest.getTotal() / createExpenseRequest.getMoneyDueByEachUser().size();
         List<ExpenseMemberEntity> expenseMemberEntities = new ArrayList<ExpenseMemberEntity>();
-        createExpenseRequest.getUserIds().stream().forEach(userId -> {
-            UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(purchaserId));
+        createExpenseRequest.getMoneyDueByEachUser().stream().forEach(moneyDueRequest -> {
+            UserEntity user = userRepository.findById(moneyDueRequest.getUserId()).orElseThrow(() -> new UserNotFoundException(purchaserId));
             expenseMemberEntities.add(expenseMemberRepository.save(ExpenseMemberEntity.builder()
                     .expense(expenseEntity)
                     .user(user)
-                    .amountToPay(amountToPay)
+                    .amountToPay(createExpenseRequest.isEvenlyDivided() ? amountToPay : moneyDueRequest.getMoney())
                     .build()));
         });
         return ExpenseModel.of(expenseEntity, expenseMemberEntities);

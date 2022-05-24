@@ -2,11 +2,11 @@ package fr.tobby.tripnjoyback.model.response;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import fr.tobby.tripnjoyback.model.UserModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
 @Builder
@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @JsonAutoDetect
 @NoArgsConstructor
 public class MoneyDueResponse {
+    @NotNull
     private GroupMemberModel user;
     private double total;
 }

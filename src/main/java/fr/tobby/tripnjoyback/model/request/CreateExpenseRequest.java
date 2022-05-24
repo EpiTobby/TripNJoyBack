@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -16,10 +16,11 @@ import java.util.List;
 @Getter
 @Builder
 public class CreateExpenseRequest {
-    @Nullable
+    @NotNull
     private String description;
     private double total;
-    private List<Long> userIds;
+    private List<MoneyDueRequest> moneyDueByEachUser;
+    private boolean isEvenlyDivided;
 
     @JsonProperty("total")
     public void setTotal(double total){
