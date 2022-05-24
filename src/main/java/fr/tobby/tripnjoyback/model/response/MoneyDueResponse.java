@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @JsonSerialize
 @JsonAutoDetect
 @NoArgsConstructor
-public class BalanceResponse {
+public class MoneyDueResponse {
     private GroupMemberModel user;
-    private double money;
+    private double total;
 }

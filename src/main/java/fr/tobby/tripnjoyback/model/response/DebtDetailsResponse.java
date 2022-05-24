@@ -17,17 +17,17 @@ import java.util.Date;
 @JsonSerialize
 @JsonAutoDetect
 @NoArgsConstructor
-public class DebtResponse {
-    private UserModel indebtedUser;
-    private UserModel purchaser;
+public class DebtDetailsResponse {
+    private GroupMemberModel indebtedUser;
+    private GroupMemberModel purchaser;
     private String description;
     private double amountToPay;
     private Date date;
 
-    public static DebtResponse of(ExpenseMemberEntity expenseMemberEntity){
-        return DebtResponse.builder()
-                .indebtedUser(UserModel.of(expenseMemberEntity.getUser()))
-                .purchaser(UserModel.of(expenseMemberEntity.getExpense().getPurchaser()))
+    public static DebtDetailsResponse of(ExpenseMemberEntity expenseMemberEntity){
+        return DebtDetailsResponse.builder()
+                .indebtedUser(GroupMemberModel.of(expenseMemberEntity.getUser()))
+                .purchaser(GroupMemberModel.of(expenseMemberEntity.getExpense().getPurchaser()))
                 .description(expenseMemberEntity.getExpense().getDescription())
                 .amountToPay(expenseMemberEntity.getAmountToPay())
                 .date(expenseMemberEntity.getExpense().getDate())

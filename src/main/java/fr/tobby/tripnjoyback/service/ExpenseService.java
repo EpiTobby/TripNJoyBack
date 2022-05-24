@@ -1,16 +1,15 @@
 package fr.tobby.tripnjoyback.service;
 
-import fr.tobby.tripnjoyback.entity.ExpenseEntity;
-import fr.tobby.tripnjoyback.entity.ExpenseMemberEntity;
-import fr.tobby.tripnjoyback.entity.GroupEntity;
-import fr.tobby.tripnjoyback.entity.UserEntity;
+import fr.tobby.tripnjoyback.entity.*;
 import fr.tobby.tripnjoyback.exception.GroupNotFoundException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.ExpenseModel;
 import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.CreateExpenseRequest;
 import fr.tobby.tripnjoyback.model.response.BalanceResponse;
-import fr.tobby.tripnjoyback.model.response.DebtResponse;
+import fr.tobby.tripnjoyback.model.response.DebtDetailsResponse;
+import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
+import fr.tobby.tripnjoyback.model.response.MoneyDueResponse;
 import fr.tobby.tripnjoyback.repository.ExpenseMemberRepository;
 import fr.tobby.tripnjoyback.repository.ExpenseRepository;
 import fr.tobby.tripnjoyback.repository.GroupRepository;
@@ -23,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ExpenseService {
@@ -65,9 +64,33 @@ public class ExpenseService {
         return ExpenseModel.of(expenseEntity, expenseMemberEntities);
     }
 
-    public List<DebtResponse> getUserDebtsInGroup(long groupId, long userId){
-        List<ExpenseMemberEntity> expenseMemberEntities = expenseMemberRepository.findByUserId(userId);
-        return expenseMemberEntities.stream().filter(e -> e.getExpense().getGroup().getId() == groupId && e.getExpense().getPurchaser().getId() != userId).map(DebtResponse::of).toList();
+    public List<MoneyDueResponse> getMoneyUserOwesToEachMemberInGroup(long groupId, long userId){
+        List<ExpenseMemberEntity> expenseMemberEntities = expenseMemberRepository.findByGroupId(groupId);
+        Stream<UserEntity> userEntities = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId)).members.stream().map(GroupMemberEntity::getUser).filter(u -> u.getId() != userId);
+        List<MoneyDueResponse> response = new ArrayList<MoneyDueResponse>() {};
+        userEntities.forEach(u -> {
+            double sum = expenseMemberEntities.stream().filter(e -> e.getExpense().getPurchaser().getId().equals(u.getId()) && e.getUser().getId() == userId).mapToDouble(ExpenseMemberEntity::getAmountToPay).sum();
+            if (sum != 0)
+                response.add(new MoneyDueResponse(GroupMemberModel.of(u), sum));
+        });
+        return response;
+    }
+
+    public List<MoneyDueResponse> getMoneyEachMemberOwesToUserInGroup(long groupId, long userId){
+        List<ExpenseMemberEntity> expenseMemberEntities = expenseMemberRepository.findByGroupId(groupId);
+        List<MoneyDueResponse> response = new ArrayList<MoneyDueResponse>() {};
+        Stream<UserEntity> userEntities = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId)).members.stream().map(GroupMemberEntity::getUser).filter(u -> u.getId() != userId);
+        userEntities.forEach(u -> {
+            double sum = expenseMemberEntities.stream().filter(e -> e.getExpense().getPurchaser().getId() == userId && e.getUser().getId().equals(u.getId())).mapToDouble(ExpenseMemberEntity::getAmountToPay).sum();
+            if (sum != 0)
+                response.add(new MoneyDueResponse(GroupMemberModel.of(u), sum));
+        });
+        return response;
+    }
+
+    public List<DebtDetailsResponse> getUserDebtsDetailsInGroup(long groupId, long userId){
+        List<ExpenseMemberEntity> expenseMemberEntities = expenseMemberRepository.findByGroupIdAndUserId(groupId, userId);
+        return expenseMemberEntities.stream().filter(e -> e.getExpense().getPurchaser().getId() != userId).map(DebtDetailsResponse::of).toList();
     }
 
     public Collection<BalanceResponse> computeBalances(long groupId) {
@@ -75,10 +98,10 @@ public class ExpenseService {
         List<BalanceResponse> response = new ArrayList<BalanceResponse>() {};
         List<ExpenseEntity> expenses =  expenseRepository.findByGroupId(groupId);
         groupEntity.members.forEach(m -> {
-            List<ExpenseMemberEntity> debts = expenseMemberRepository.findByUserId(m.getUser().getId());
-            double balance = expenses.stream().filter(e -> e.getPurchaser().getId() == m.getUser().getId()).mapToDouble(ExpenseEntity::getTotal).sum()
+            List<ExpenseMemberEntity> debts = expenseMemberRepository.findByGroupIdAndUserId(groupId, m.getUser().getId());
+            double balance = expenses.stream().filter(e -> e.getPurchaser().getId().equals(m.getUser().getId())).mapToDouble(ExpenseEntity::getTotal).sum()
                     - debts.stream().mapToDouble(ExpenseMemberEntity::getAmountToPay).sum();
-            response.add(new BalanceResponse(UserModel.of(m.getUser()), balance));
+            response.add(new BalanceResponse(GroupMemberModel.of(m.getUser()), balance));
         });
         return response;
     }

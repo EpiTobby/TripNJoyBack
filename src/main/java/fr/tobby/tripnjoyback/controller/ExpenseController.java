@@ -5,7 +5,8 @@ import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.ExpenseModel;
 import fr.tobby.tripnjoyback.model.request.CreateExpenseRequest;
 import fr.tobby.tripnjoyback.model.response.BalanceResponse;
-import fr.tobby.tripnjoyback.model.response.DebtResponse;
+import fr.tobby.tripnjoyback.model.response.DebtDetailsResponse;
+import fr.tobby.tripnjoyback.model.response.MoneyDueResponse;
 import fr.tobby.tripnjoyback.service.ExpenseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +31,18 @@ public class ExpenseController {
     }
 
     @GetMapping("{group}/user/{user}/debts")
-    public Collection<DebtResponse> getUserDebts(@PathVariable("group") long groupId, @PathVariable("user") long userId){
-        return expenseService.getUserDebtsInGroup(groupId, userId);
+    public Collection<MoneyDueResponse> getMoneyUserOwesToEachMemberInGroup(@PathVariable("group") long groupId, @PathVariable("user") long userId){
+        return expenseService.getMoneyUserOwesToEachMemberInGroup(groupId, userId);
+    }
+
+    @GetMapping("{group}/user/{user}/debts/due")
+    public Collection<MoneyDueResponse> getMoneyEachMemberOwesToUserInGroup(@PathVariable("group") long groupId, @PathVariable("user") long userId){
+        return expenseService.getMoneyEachMemberOwesToUserInGroup(groupId, userId);
+    }
+
+    @GetMapping("{group}/user/{user}/debts/details")
+    public Collection<DebtDetailsResponse> getUserDebtsDetails(@PathVariable("group") long groupId, @PathVariable("user") long userId){
+        return expenseService.getUserDebtsDetailsInGroup(groupId, userId);
     }
 
     @GetMapping("{group}/balances")
