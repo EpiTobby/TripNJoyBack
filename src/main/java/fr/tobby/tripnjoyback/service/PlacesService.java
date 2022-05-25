@@ -2,8 +2,8 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.PlaceEntity;
 import fr.tobby.tripnjoyback.entity.api.request.GeocodeAddressRequest;
-import fr.tobby.tripnjoyback.model.request.PlacesFromCoordinatesRequest;
 import fr.tobby.tripnjoyback.model.request.PlacesFromAddressRequest;
+import fr.tobby.tripnjoyback.model.request.PlacesFromCoordinatesRequest;
 import fr.tobby.tripnjoyback.model.response.PlaceResponse;
 import fr.tobby.tripnjoyback.repository.PlacesRepository;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class PlacesService {
         this.placesRepository = placesRepository;
     }
 
-    public Collection<PlaceResponse> getPlacesFromAddress(PlacesFromAddressRequest placesFromAddressRequest){
+    public Collection<PlaceResponse> getPlacesFromAddress(PlacesFromAddressRequest placesFromAddressRequest) {
         GeocodeAddressRequest request = GeocodeAddressRequest.builder()
                 .address(placesFromAddressRequest.getAddress())
                 .city(placesFromAddressRequest.getCity())
