@@ -1,11 +1,13 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.*;
+import fr.tobby.tripnjoyback.exception.ExpenseNotFoundException;
+import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.GroupNotFoundException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.ExpenseModel;
-import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.CreateExpenseRequest;
+import fr.tobby.tripnjoyback.model.request.MoneyDueRequest;
 import fr.tobby.tripnjoyback.model.response.BalanceResponse;
 import fr.tobby.tripnjoyback.model.response.DebtDetailsResponse;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
@@ -19,7 +21,6 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
@@ -40,6 +41,11 @@ public class ExpenseService {
 
     @Transactional
     public ExpenseModel createExpense(long groupId, long purchaserId, CreateExpenseRequest createExpenseRequest){
+        if (!createExpenseRequest.isEvenlyDivided()){
+            if (createExpenseRequest.getMoneyDueByEachUser().stream().anyMatch(r -> r.getMoney() == null) ||
+                    createExpenseRequest.getMoneyDueByEachUser().stream().mapToDouble(MoneyDueRequest::getMoney).sum() != createExpenseRequest.getTotal())
+                throw new IllegalArgumentException();
+        }
         UserEntity purchaser = userRepository.findById(purchaserId).orElseThrow(() -> new UserNotFoundException(purchaserId));
         GroupEntity groupEntity  = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         ExpenseEntity expenseEntity = expenseRepository.save(
@@ -53,7 +59,7 @@ public class ExpenseService {
         );
         double amountToPay = createExpenseRequest.getTotal() / createExpenseRequest.getMoneyDueByEachUser().size();
         List<ExpenseMemberEntity> expenseMemberEntities = new ArrayList<ExpenseMemberEntity>();
-        createExpenseRequest.getMoneyDueByEachUser().stream().forEach(moneyDueRequest -> {
+        createExpenseRequest.getMoneyDueByEachUser().forEach(moneyDueRequest -> {
             UserEntity user = userRepository.findById(moneyDueRequest.getUserId()).orElseThrow(() -> new UserNotFoundException(purchaserId));
             expenseMemberEntities.add(expenseMemberRepository.save(ExpenseMemberEntity.builder()
                     .expense(expenseEntity)
@@ -93,7 +99,7 @@ public class ExpenseService {
         return expenseMemberEntities.stream().filter(e -> e.getExpense().getPurchaser().getId() != userId).map(DebtDetailsResponse::of).toList();
     }
 
-    public Collection<BalanceResponse> computeBalances(long groupId) {
+    public List<BalanceResponse> computeBalances(long groupId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         List<BalanceResponse> response = new ArrayList<BalanceResponse>() {};
         List<ExpenseEntity> expenses =  expenseRepository.findByGroupId(groupId);
@@ -104,5 +110,13 @@ public class ExpenseService {
             response.add(new BalanceResponse(GroupMemberModel.of(m.getUser()), balance));
         });
         return response;
+    }
+
+    @Transactional
+    public void deleteExpense(long groupId, long expenseId) {
+        ExpenseEntity expenseEntity = expenseRepository.findById(expenseId).orElseThrow(() -> new ExpenseNotFoundException("Expense not found"));
+        if (expenseEntity.getGroup().getId() != groupId)
+            throw new ForbiddenOperationException("You cannot perform this operation");
+        expenseRepository.delete(expenseEntity);
     }
 }

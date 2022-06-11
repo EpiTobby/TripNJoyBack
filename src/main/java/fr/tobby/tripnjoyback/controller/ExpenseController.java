@@ -1,5 +1,7 @@
 package fr.tobby.tripnjoyback.controller;
 
+import fr.tobby.tripnjoyback.exception.ExpenseNotFoundException;
+import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.GroupNotFoundException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.ExpenseModel;
@@ -50,6 +52,11 @@ public class ExpenseController {
         return expenseService.computeBalances(groupId);
     }
 
+    @DeleteMapping("{group}/expense/{expense}")
+    public void deleteExpense(@PathVariable("group") long groupId, @PathVariable("expense") long expenseId){
+        expenseService.deleteExpense(groupId, expenseId);
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -62,6 +69,30 @@ public class ExpenseController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(GroupNotFoundException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(IllegalArgumentException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(ExpenseNotFoundException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String getError(ExpenseNotFoundException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(ForbiddenOperationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String getError(ForbiddenOperationException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }
