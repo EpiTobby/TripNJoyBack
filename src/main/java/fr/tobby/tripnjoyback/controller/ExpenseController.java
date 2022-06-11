@@ -52,8 +52,8 @@ public class ExpenseController {
         return expenseService.computeBalances(groupId);
     }
 
-    @DeleteMapping("{group}/expense/{expense}")
-    public void deleteExpense(@PathVariable("group") long groupId, @PathVariable("expense") long expenseId){
+    @DeleteMapping("{groupId}/{expenseId}")
+    public void deleteExpense(@PathVariable("groupId") long groupId, @PathVariable("expenseId") long expenseId){
         expenseService.deleteExpense(groupId, expenseId);
     }
 
