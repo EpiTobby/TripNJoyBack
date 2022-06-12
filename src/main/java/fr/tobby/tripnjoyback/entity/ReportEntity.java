@@ -24,15 +24,15 @@ public class ReportEntity {
 
     @ManyToOne
     @JoinColumn(name = "reported_id")
-    private UserEntity reported;
+    private UserEntity reportedUser;
 
     private String reason;
 
     private String details;
 
-    public ReportEntity(UserEntity submitter, UserEntity reported, String reason, String details) {
+    public ReportEntity(UserEntity submitter, UserEntity reportedUser, String reason, String details) {
         this.submitter = submitter;
-        this.reported = reported;
+        this.reportedUser = reportedUser;
         this.reason = reason;
         this.details = details;
     }

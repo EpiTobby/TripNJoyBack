@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    @DeleteMapping("{id}")
+    @PostMapping("{id}")
     @Operation(summary = "Create a report")
     @ApiResponse(responseCode = "200", description = "The report has been created")
     @ApiResponse(responseCode = "422", description = "The submitter or reported user do not exist")
@@ -33,19 +34,20 @@ public class ReportController {
         return reportService.submitReport(submitterId, submitReportRequest);
     }
 
-    @DeleteMapping("{id}")
+    @GetMapping("{id}")
     @Operation(summary = "Get all the report posted by a user")
     public List<ReportModel> getBySubmitterId(@PathVariable("id") long submitterId) {
         return reportService.getBySubmitterId(submitterId);
     }
 
-    @DeleteMapping("{id}")
+    @GetMapping("admin/{id}")
+    @PreAuthorize("hasAuthority('admin')")
     @Operation(summary = "Get all the report of a user")
     public List<ReportModel> getByReporterUserId(@PathVariable("id") long reportedUserId) {
         return reportService.getByReportedUserId(reportedUserId);
     }
 
-    @DeleteMapping("{id}")
+    @PatchMapping("{id}")
     @Operation(summary = "Update a report")
     @ApiResponse(responseCode = "200", description = "The report has been updated")
     @ApiResponse(responseCode = "404", description = "The report does not exist")
@@ -58,7 +60,7 @@ public class ReportController {
     @ApiResponse(responseCode = "200", description = "The report has been deleted")
     @ApiResponse(responseCode = "404", description = "The report does not exist")
     public void deleteReport(@PathVariable("id") long reportId) {
-
+        reportService.deleteReport(reportId);
     }
 
     @ExceptionHandler(ReportNotFoundException.class)

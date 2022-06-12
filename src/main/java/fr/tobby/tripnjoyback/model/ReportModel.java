@@ -29,7 +29,7 @@ public class ReportModel {
         return ReportModel.builder()
                 .reason(ReportReason.valueOf(reportEntity.getReason()))
                 .submitter(GroupMemberModel.of(reportEntity.getSubmitter()))
-                .reportedUser(GroupMemberModel.of(reportEntity.getReported()))
+                .reportedUser(GroupMemberModel.of(reportEntity.getReportedUser()))
                 .build();
     }
 }
