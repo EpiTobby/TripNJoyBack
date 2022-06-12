@@ -5,10 +5,12 @@ import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.ReportNotFoundException;
 import fr.tobby.tripnjoyback.model.ReportModel;
 import fr.tobby.tripnjoyback.model.request.SubmitReportRequest;
+import fr.tobby.tripnjoyback.model.request.UpdateReportRequest;
 import fr.tobby.tripnjoyback.repository.ReportRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -21,6 +23,7 @@ public class ReportService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public ReportModel submitReport(long submitterId, SubmitReportRequest submitReportRequest){
         UserEntity submitter = userRepository.getById(submitterId);
         UserEntity reportedUser =  userRepository.getById(submitReportRequest.getReportedUserId());
@@ -37,6 +40,15 @@ public class ReportService {
         return reportRepository.findByReportedUserId(userId).stream().map(ReportModel::of).toList();
     }
 
+    @Transactional
+    public ReportModel updateReport(long reportId, UpdateReportRequest updateReportRequest){
+        ReportEntity reportEntity = reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException("No report found with id: " + reportId));
+        reportEntity.setReason(updateReportRequest.getReason().toString());
+        reportEntity.setDetails(updateReportRequest.getDetails());
+        return ReportModel.of(reportEntity);
+    }
+
+    @Transactional
     public void deleteReport(long reportId){
         ReportEntity reportEntity = reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException("No report found with id: " + reportId));
         reportRepository.delete(reportEntity);
