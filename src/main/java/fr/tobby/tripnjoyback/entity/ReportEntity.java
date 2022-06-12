@@ -27,4 +27,13 @@ public class ReportEntity {
     private UserEntity reported;
 
     private String reason;
+
+    private String details;
+
+    public ReportEntity(UserEntity submitter, UserEntity reported, String reason, String details) {
+        this.submitter = submitter;
+        this.reported = reported;
+        this.reason = reason;
+        this.details = details;
+    }
 }

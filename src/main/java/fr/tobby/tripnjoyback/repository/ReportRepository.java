@@ -9,5 +9,7 @@ import java.util.Optional;
 public interface ReportRepository extends CrudRepository<ReportEntity, Long> {
     Optional<ReportEntity> findById(long reportId);
 
-    List<ReportEntity> findBySubmitter(long submitterId);
+    List<ReportEntity> findBySubmitterId(long submitterId);
+
+    List<ReportEntity> findByReportedUserId(long reportedUserId);
 }
