@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 @NoArgsConstructor
 @Builder
 public class ReportModel {
+    private long id;
     @NotNull
     private ReportReason reason;
     @Nullable
@@ -27,7 +28,9 @@ public class ReportModel {
 
     public static ReportModel of(ReportEntity reportEntity){
         return ReportModel.builder()
+                .id(reportEntity.getId())
                 .reason(ReportReason.valueOf(reportEntity.getReason()))
+                .details(reportEntity.getDetails())
                 .submitter(GroupMemberModel.of(reportEntity.getSubmitter()))
                 .reportedUser(GroupMemberModel.of(reportEntity.getReportedUser()))
                 .build();

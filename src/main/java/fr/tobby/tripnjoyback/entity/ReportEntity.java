@@ -8,7 +8,6 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "report")
@@ -26,8 +25,10 @@ public class ReportEntity {
     @JoinColumn(name = "reported_id")
     private UserEntity reportedUser;
 
+    @Setter
     private String reason;
 
+    @Setter
     private String details;
 
     public ReportEntity(UserEntity submitter, UserEntity reportedUser, String reason, String details) {
