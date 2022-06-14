@@ -26,5 +26,12 @@ public class RecommendationEntity {
     private UserEntity recommendedUser;
 
     @Setter
-    private String details;
+    private String comment;
+
+    public RecommendationEntity(UserEntity submitter, UserEntity recommendedUser, String comment) {
+        this.id = null;
+        this.reviewer = submitter;
+        this.recommendedUser = recommendedUser;
+        this.comment = comment;
+    }
 }
