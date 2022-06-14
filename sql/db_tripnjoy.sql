@@ -57,19 +57,19 @@ CREATE TABLE "profiles" (
                             "active" bool
 );
 
-CREATE TABLE "reviews" (
+CREATE TABLE "recommandations" (
                            "id" SERIAL PRIMARY KEY,
-                           "user_id" int,
+                           "recommanded_user_id" int,
                            "reviewer_id" int,
-                           "comment" text,
-                           "grade" int
+                           "comment" text NULLABLE
 );
 
 CREATE TABLE "report" (
                           "id" SERIAL PRIMARY KEY,
                           "submitter_id" int,
                           "reported_id" int,
-                          "reason" text
+                          "reason" text,
+                          details text
 );
 
 CREATE TABLE "activities" (
@@ -226,10 +226,10 @@ ALTER TABLE "users"
 ALTER TABLE "users_groups"
     ADD FOREIGN KEY ("profile_id") REFERENCES "profiles" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE "reviews"
-    ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "recommandations"
+    ADD FOREIGN KEY ("recommanded_user_id") REFERENCES "users" ("id");
 
-ALTER TABLE "reviews"
+ALTER TABLE "recommandations"
     ADD FOREIGN KEY ("reviewer_id") REFERENCES "users" ("id");
 
 ALTER TABLE "report"
