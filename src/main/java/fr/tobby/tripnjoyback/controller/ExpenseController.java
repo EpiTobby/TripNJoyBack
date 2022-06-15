@@ -32,6 +32,11 @@ public class ExpenseController {
         return expenseService.createExpense(groupId, userId, createExpenseRequest);
     }
 
+    @GetMapping("{group}")
+    public Collection<ExpenseModel> getExpensesByGroup(@PathVariable("group") long groupId){
+        return expenseService.getExpensesByGroup(groupId);
+    }
+
     @GetMapping("{group}/user/{user}/debts")
     public Collection<MoneyDueResponse> getMoneyUserOwesToEachMemberInGroup(@PathVariable("group") long groupId, @PathVariable("user") long userId){
         return expenseService.getMoneyUserOwesToEachMemberInGroup(groupId, userId);

@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.model;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import fr.tobby.tripnjoyback.entity.ExpenseEntity;
 import fr.tobby.tripnjoyback.entity.ExpenseMemberEntity;
+import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,7 +22,7 @@ public class ExpenseModel {
     private String description;
     private double total;
     private GroupModel groupModel;
-    private UserModel purchaser;
+    private GroupMemberModel purchaser;
     private Date date;
     private List<ExpenseMemberModel> indebtedUsers;
 
@@ -31,7 +32,7 @@ public class ExpenseModel {
                 .total(expenseEntity.getTotal())
                 .description(expenseEntity.getDescription())
                 .date(expenseEntity.getDate())
-                .purchaser(UserModel.of(expenseEntity.getPurchaser()))
+                .purchaser(GroupMemberModel.of(expenseEntity.getPurchaser()))
                 .groupModel(GroupModel.of(expenseEntity.getGroup()))
                 .indebtedUsers(expenseMemberEntities.stream().map(ExpenseMemberModel::of).toList())
                 .build();

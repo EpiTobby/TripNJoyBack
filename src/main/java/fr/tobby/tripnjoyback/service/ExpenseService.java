@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
@@ -118,5 +119,10 @@ public class ExpenseService {
         if (expenseEntity.getGroup().getId() != groupId)
             throw new ForbiddenOperationException("You cannot perform this operation");
         expenseRepository.delete(expenseEntity);
+    }
+
+    public Collection<ExpenseModel> getExpensesByGroup(long groupId) {
+        List<ExpenseEntity> expenseEntities = expenseRepository.findByGroupId(groupId);
+        return expenseEntities.stream().map(e -> ExpenseModel.of(e, expenseMemberRepository.findByExpenseId(e.getId()))).toList();
     }
 }
