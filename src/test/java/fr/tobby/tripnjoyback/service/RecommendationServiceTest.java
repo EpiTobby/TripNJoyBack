@@ -9,10 +9,7 @@ import fr.tobby.tripnjoyback.model.RecommendationModel;
 import fr.tobby.tripnjoyback.model.request.SubmitRecommendationRequest;
 import fr.tobby.tripnjoyback.repository.*;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.ApplicationContext;
@@ -55,6 +52,22 @@ public class RecommendationServiceTest {
     {
         recommendationService = new RecommendationService(recommendationRepository, userRepository);
     }
+
+    @AfterEach
+    void tearDown()
+    {
+        userRepository.deleteAll();
+        recommendationRepository.deleteAll();
+    }
+
+    @AfterAll
+    static void afterAll()
+    {
+        genderRepository.deleteAll();
+        cityRepository.deleteAll();
+        languageRepository.deleteAll();
+    }
+
 
     @NotNull
     private UserEntity anyUser(String email) throws ParseException

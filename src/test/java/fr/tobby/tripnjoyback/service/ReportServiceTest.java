@@ -55,6 +55,21 @@ public class ReportServiceTest {
         reportService = new ReportService(reportRepository, userRepository);
     }
 
+    @AfterEach
+    void tearDown()
+    {
+        reportRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
+    @AfterAll
+    static void afterAll()
+    {
+        genderRepository.deleteAll();
+        cityRepository.deleteAll();
+        languageRepository.deleteAll();
+    }
+
     @NotNull
     private UserEntity anyUser(String email) throws ParseException
     {

@@ -27,7 +27,7 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    @PostMapping("{id}")
+    @PostMapping("")
     @Operation(summary = "Create a report")
     @ApiResponse(responseCode = "200", description = "The report has been created")
     @ApiResponse(responseCode = "422", description = "The submitter or reported user do not exist")
