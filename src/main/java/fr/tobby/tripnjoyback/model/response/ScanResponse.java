@@ -12,4 +12,5 @@ import java.util.Map;
 public class ScanResponse {
 
     private final Map<String, Float> items;
+    private final float total;
 }
