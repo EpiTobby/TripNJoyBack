@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,12 +24,13 @@ public class RecommendationController {
         this.recommendationService = recommendationService;
     }
 
-    @PostMapping("{id}")
+    @PostMapping("")
     @Operation(summary = "Create a recommendation")
     @ApiResponse(responseCode = "200", description = "The recommendation has been created")
     @ApiResponse(responseCode = "422", description = "The submitter or reviewed user do not exist")
-    public RecommendationModel submitRecommendation(@PathVariable("id") long submitterId, @RequestBody SubmitRecommendationRequest submitReportRequest) {
-        return recommendationService.submitRecommendation(submitterId, submitReportRequest);
+    public RecommendationModel submitRecommendation(@RequestBody SubmitRecommendationRequest submitReportRequest) {
+        String submitterEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return recommendationService.submitRecommendation(submitterEmail, submitReportRequest);
     }
 
     @GetMapping("{id}")

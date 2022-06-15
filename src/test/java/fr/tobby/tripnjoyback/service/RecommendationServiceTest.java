@@ -57,13 +57,13 @@ public class RecommendationServiceTest {
     }
 
     @NotNull
-    private UserEntity anyUser() throws ParseException
+    private UserEntity anyUser(String email) throws ParseException
     {
         return userRepository.save(UserEntity.builder()
                 .firstname("Test")
                 .lastname("1")
                 .gender(maleGender)
-                .email("test@1.com")
+                .email(email)
                 .birthDate(new SimpleDateFormat("dd-MM-yyyy").parse("01-01-2000").toInstant())
                 .city(cityEntity)
                 .confirmed(true)
@@ -74,9 +74,10 @@ public class RecommendationServiceTest {
 
     @Test
     void submitRecommendation() throws ParseException{
-        UserEntity submitter = anyUser();
-        UserEntity goodUser = anyUser();
-        RecommendationModel recommendationModel = recommendationService.submitRecommendation(submitter.getId(), SubmitRecommendationRequest.builder()
+        String submitterEmail = "submitter@gmail.com";
+        UserEntity submitter = anyUser(submitterEmail);
+        UserEntity goodUser = anyUser("user@gmail.com");
+        RecommendationModel recommendationModel = recommendationService.submitRecommendation(submitterEmail, SubmitRecommendationRequest.builder()
                 .reviewedUserId(goodUser.getId())
                 .comment("Il est très gentil")
                 .build());
@@ -87,9 +88,10 @@ public class RecommendationServiceTest {
 
     @Test
     void deleteRecommendation() throws ParseException{
-        UserEntity submitter = anyUser();
-        UserEntity goodUser = anyUser();
-        long reportId = recommendationService.submitRecommendation(submitter.getId(), SubmitRecommendationRequest.builder()
+        String submitterEmail = "submitter@gmail.com";
+        UserEntity submitter = anyUser(submitterEmail);
+        UserEntity goodUser = anyUser("user@gmail.com");
+        long reportId = recommendationService.submitRecommendation(submitterEmail, SubmitRecommendationRequest.builder()
                 .reviewedUserId(goodUser.getId())
                 .comment("Il est très gentil")
                 .build()).getId();
@@ -100,13 +102,14 @@ public class RecommendationServiceTest {
     @Test
     void getByReviewedUser() throws ParseException{
         int numberOfReports = 10;
-        UserEntity submitter = anyUser();
-        UserEntity goodUser = anyUser();
+        String submitterEmail = "submitter@gmail.com";
+        UserEntity submitter = anyUser(submitterEmail);
+        UserEntity goodUser = anyUser("user@gmail.com");
         for (int i = 0; i < numberOfReports; i++) {
-            recommendationService.submitRecommendation(submitter.getId(), SubmitRecommendationRequest.builder()
+            recommendationService.submitRecommendation(submitterEmail, SubmitRecommendationRequest.builder()
                     .reviewedUserId(goodUser.getId())
                     .comment("Il est très gentil")
-                    .build()).getId();
+                    .build());
         }
         Assertions.assertEquals(numberOfReports, recommendationService.getByReviewedUserId(goodUser.getId()).size());
     }

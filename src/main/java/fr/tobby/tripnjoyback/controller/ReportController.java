@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,8 +31,9 @@ public class ReportController {
     @Operation(summary = "Create a report")
     @ApiResponse(responseCode = "200", description = "The report has been created")
     @ApiResponse(responseCode = "422", description = "The submitter or reported user do not exist")
-    public ReportModel submitReport(@PathVariable("id") long submitterId, @RequestBody SubmitReportRequest submitReportRequest) {
-        return reportService.submitReport(submitterId, submitReportRequest);
+    public ReportModel submitReport(@RequestBody SubmitReportRequest submitReportRequest) {
+        String submitterEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        return reportService.submitReport(submitterEmail, submitReportRequest);
     }
 
     @GetMapping("{id}")

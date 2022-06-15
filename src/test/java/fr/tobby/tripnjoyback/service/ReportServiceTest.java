@@ -56,13 +56,13 @@ public class ReportServiceTest {
     }
 
     @NotNull
-    private UserEntity anyUser() throws ParseException
+    private UserEntity anyUser(String email) throws ParseException
     {
         return userRepository.save(UserEntity.builder()
                 .firstname("Test")
                 .lastname("1")
                 .gender(maleGender)
-                .email("test@1.com")
+                .email(email)
                 .birthDate(new SimpleDateFormat("dd-MM-yyyy").parse("01-01-2000").toInstant())
                 .city(cityEntity)
                 .confirmed(true)
@@ -73,9 +73,10 @@ public class ReportServiceTest {
 
     @Test
     void submitReport() throws ParseException{
-        UserEntity submitter = anyUser();
-        UserEntity badUser = anyUser();
-        ReportModel reportModel = reportService.submitReport(submitter.getId(), SubmitReportRequest.builder()
+        String submitterEmail = "submitter@gmail.com";
+        UserEntity submitter = anyUser(submitterEmail);
+        UserEntity badUser = anyUser("user@gmail.com");
+        ReportModel reportModel = reportService.submitReport(submitterEmail, SubmitReportRequest.builder()
                 .reportedUserId(badUser.getId())
                 .reason(ReportReason.INNAPROPRIATE_BEHAVIOR)
                 .details("Il fait caca partout")
@@ -88,9 +89,10 @@ public class ReportServiceTest {
     @Test
     void updateReport() throws ParseException{
         String expectedDetails = "Il fait pipi partout";
-        UserEntity submitter = anyUser();
-        UserEntity badUser = anyUser();
-        long reportId = reportService.submitReport(submitter.getId(), SubmitReportRequest.builder()
+        String submitterEmail = "submitter@gmail.com";
+        UserEntity submitter = anyUser(submitterEmail);
+        UserEntity badUser = anyUser("user@gmail.com");
+        long reportId = reportService.submitReport(submitterEmail, SubmitReportRequest.builder()
                 .reportedUserId(badUser.getId())
                 .reason(ReportReason.INNAPROPRIATE_BEHAVIOR)
                 .details("Il fait caca partout")
@@ -105,9 +107,10 @@ public class ReportServiceTest {
 
     @Test
     void deleteReport() throws ParseException{
-        UserEntity submitter = anyUser();
-        UserEntity badUser = anyUser();
-        long reportId = reportService.submitReport(submitter.getId(), SubmitReportRequest.builder()
+        String submitterEmail = "submitter@gmail.com";
+        UserEntity submitter = anyUser(submitterEmail);
+        UserEntity badUser = anyUser("user@gmail.com");
+        long reportId = reportService.submitReport(submitterEmail, SubmitReportRequest.builder()
                 .reportedUserId(badUser.getId())
                 .reason(ReportReason.INNAPROPRIATE_BEHAVIOR)
                 .details("Il fait caca partout")
@@ -119,10 +122,11 @@ public class ReportServiceTest {
     @Test
     void getByReportedUser() throws ParseException{
         int numberOfReports = 10;
-        UserEntity submitter = anyUser();
-        UserEntity badUser = anyUser();
+        String submitterEmail = "submitter@gmail.com";
+        UserEntity submitter = anyUser(submitterEmail);
+        UserEntity badUser = anyUser("user@gmail.com");
         for (int i = 0; i < numberOfReports; i++) {
-            reportService.submitReport(submitter.getId(), SubmitReportRequest.builder()
+            reportService.submitReport(submitterEmail, SubmitReportRequest.builder()
                     .reportedUserId(badUser.getId())
                     .reason(ReportReason.INNAPROPRIATE_BEHAVIOR)
                     .details("Il fait caca partout")
