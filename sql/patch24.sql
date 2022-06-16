@@ -18,3 +18,6 @@ alter table expenses_members
     add constraint expenses_members_expense_id_fkey
         foreign key (expense_id) references expenses
             on delete cascade;
+
+alter table expenses
+    add icon text;

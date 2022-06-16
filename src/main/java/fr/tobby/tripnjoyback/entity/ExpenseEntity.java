@@ -3,13 +3,14 @@ package fr.tobby.tripnjoyback.entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name  = "expenses")
+@Table(name = "expenses")
 @Builder
 @Getter
 @NoArgsConstructor
@@ -19,8 +20,10 @@ public class ExpenseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
     private double total;
 
+    @Setter
     private String description;
 
     @ManyToOne
@@ -33,4 +36,7 @@ public class ExpenseEntity {
 
     @Column(name = "expense_date")
     private Date date;
+
+    @Setter
+    private String icon;
 }

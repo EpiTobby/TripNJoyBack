@@ -2,10 +2,9 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.SpringContext;
 import fr.tobby.tripnjoyback.entity.*;
-import fr.tobby.tripnjoyback.exception.ExpenseNotFoundException;
 import fr.tobby.tripnjoyback.model.ExpenseModel;
 import fr.tobby.tripnjoyback.model.State;
-import fr.tobby.tripnjoyback.model.request.CreateExpenseRequest;
+import fr.tobby.tripnjoyback.model.request.ExpenseRequest;
 import fr.tobby.tripnjoyback.model.request.MoneyDueRequest;
 import fr.tobby.tripnjoyback.model.response.BalanceResponse;
 import fr.tobby.tripnjoyback.model.response.MoneyDueResponse;
@@ -117,7 +116,7 @@ public class ExpenseServiceTest {
         groupEntity.getMembers().add(new GroupMemberEntity(groupEntity, user2, null, false));
         groupEntity.getMembers().add(new GroupMemberEntity(groupEntity, user3, null, false));
 
-        CreateExpenseRequest createExpenseRequest = CreateExpenseRequest.builder()
+        ExpenseRequest expenseRequest = ExpenseRequest.builder()
                 .description("Food")
                 .isEvenlyDivided(true)
                 .total(60)
@@ -126,7 +125,7 @@ public class ExpenseServiceTest {
                         MoneyDueRequest.builder().userId(user3.getId()).build()))
                 .build();
 
-        ExpenseModel expenseModel = expenseService.createExpense(groupEntity.getId(),user1.getId(),createExpenseRequest);
+        ExpenseModel expenseModel = expenseService.createExpense(groupEntity.getId(),user1.getId(), expenseRequest);
         Assertions.assertFalse(expenseRepository.findById(expenseModel.getId()).isEmpty());
         List<ExpenseMemberEntity> expenseMemberEntities = expenseMemberRepository.findByGroupId(groupEntity.getId());
         Assertions.assertEquals(3, expenseMemberEntities.size());
@@ -144,7 +143,7 @@ public class ExpenseServiceTest {
         groupEntity.getMembers().add(new GroupMemberEntity(groupEntity, user2, null, false));
         groupEntity.getMembers().add(new GroupMemberEntity(groupEntity, user3, null, false));
 
-        CreateExpenseRequest createExpenseRequest = CreateExpenseRequest.builder()
+        ExpenseRequest expenseRequest = ExpenseRequest.builder()
                 .description("Food")
                 .isEvenlyDivided(false)
                 .total(60)
@@ -153,7 +152,7 @@ public class ExpenseServiceTest {
                         MoneyDueRequest.builder().userId(user3.getId()).money(30d).build()))
                 .build();
 
-        ExpenseModel expenseModel = expenseService.createExpense(groupEntity.getId(),user1.getId(),createExpenseRequest);
+        ExpenseModel expenseModel = expenseService.createExpense(groupEntity.getId(),user1.getId(), expenseRequest);
         Assertions.assertFalse(expenseRepository.findById(expenseModel.getId()).isEmpty());
         List<ExpenseMemberEntity> expenseMemberEntities = expenseMemberRepository.findByGroupId(groupEntity.getId());
         Assertions.assertEquals(3, expenseMemberEntities.size());
@@ -170,7 +169,7 @@ public class ExpenseServiceTest {
         groupEntity.getMembers().add(new GroupMemberEntity(groupEntity, user2, null, false));
         groupEntity.getMembers().add(new GroupMemberEntity(groupEntity, user3, null, false));
 
-        CreateExpenseRequest createExpenseRequest1 = CreateExpenseRequest.builder()
+        ExpenseRequest expenseRequest1 = ExpenseRequest.builder()
                 .description("Food")
                 .isEvenlyDivided(false)
                 .total(60)
@@ -179,7 +178,7 @@ public class ExpenseServiceTest {
                         MoneyDueRequest.builder().userId(user3.getId()).money(30d).build()))
                 .build();
 
-        CreateExpenseRequest createExpenseRequest2 = CreateExpenseRequest.builder()
+        ExpenseRequest expenseRequest2 = ExpenseRequest.builder()
                 .description("Food")
                 .isEvenlyDivided(false)
                 .total(30)
@@ -187,8 +186,8 @@ public class ExpenseServiceTest {
                         MoneyDueRequest.builder().userId(user2.getId()).money(12d).build(),
                         MoneyDueRequest.builder().userId(user3.getId()).money(12d).build()))
                 .build();
-        expenseService.createExpense(groupEntity.getId(),user3.getId(),createExpenseRequest1);
-        expenseService.createExpense(groupEntity.getId(),user3.getId(),createExpenseRequest2);
+        expenseService.createExpense(groupEntity.getId(),user3.getId(), expenseRequest1);
+        expenseService.createExpense(groupEntity.getId(),user3.getId(), expenseRequest2);
 
         List<MoneyDueResponse> moneyDueResponses = expenseService.getMoneyUserOwesToEachMemberInGroup(groupEntity.getId(), user1.getId());
         Assertions.assertEquals(moneyDueResponses.get(0).getTotal(),16);
@@ -206,7 +205,7 @@ public class ExpenseServiceTest {
         groupEntity.getMembers().add(new GroupMemberEntity(groupEntity, user2, null, false));
         groupEntity.getMembers().add(new GroupMemberEntity(groupEntity, user3, null, false));
 
-        CreateExpenseRequest createExpenseRequest1 = CreateExpenseRequest.builder()
+        ExpenseRequest expenseRequest1 = ExpenseRequest.builder()
                 .description("Food")
                 .isEvenlyDivided(false)
                 .total(60)
@@ -215,7 +214,7 @@ public class ExpenseServiceTest {
                         MoneyDueRequest.builder().userId(user3.getId()).money(30d).build()))
                 .build();
 
-        CreateExpenseRequest createExpenseRequest2 = CreateExpenseRequest.builder()
+        ExpenseRequest expenseRequest2 = ExpenseRequest.builder()
                 .description("Food")
                 .isEvenlyDivided(false)
                 .total(30)
@@ -223,8 +222,8 @@ public class ExpenseServiceTest {
                         MoneyDueRequest.builder().userId(user2.getId()).money(12d).build(),
                         MoneyDueRequest.builder().userId(user3.getId()).money(12d).build()))
                 .build();
-        expenseService.createExpense(groupEntity.getId(),user3.getId(),createExpenseRequest1);
-        expenseService.createExpense(groupEntity.getId(),user3.getId(),createExpenseRequest2);
+        expenseService.createExpense(groupEntity.getId(),user3.getId(), expenseRequest1);
+        expenseService.createExpense(groupEntity.getId(),user3.getId(), expenseRequest2);
 
         List<MoneyDueResponse> moneyDueResponses = expenseService.getMoneyEachMemberOwesToUserInGroup(groupEntity.getId(), user3.getId());
         Assertions.assertEquals(moneyDueResponses.get(0).getTotal(),16);
@@ -241,7 +240,7 @@ public class ExpenseServiceTest {
         groupEntity.getMembers().add(new GroupMemberEntity(groupEntity, user2, null, false));
         groupEntity.getMembers().add(new GroupMemberEntity(groupEntity, user3, null, false));
 
-        CreateExpenseRequest createExpenseRequest1 = CreateExpenseRequest.builder()
+        ExpenseRequest expenseRequest1 = ExpenseRequest.builder()
                 .description("Food")
                 .isEvenlyDivided(false)
                 .total(60)
@@ -250,7 +249,7 @@ public class ExpenseServiceTest {
                         MoneyDueRequest.builder().userId(user3.getId()).money(30d).build()))
                 .build();
 
-        CreateExpenseRequest createExpenseRequest2 = CreateExpenseRequest.builder()
+        ExpenseRequest expenseRequest2 = ExpenseRequest.builder()
                 .description("Food")
                 .isEvenlyDivided(false)
                 .total(30)
@@ -258,8 +257,8 @@ public class ExpenseServiceTest {
                         MoneyDueRequest.builder().userId(user2.getId()).money(12d).build(),
                         MoneyDueRequest.builder().userId(user3.getId()).money(12d).build()))
                 .build();
-        expenseService.createExpense(groupEntity.getId(),user3.getId(),createExpenseRequest1);
-        expenseService.createExpense(groupEntity.getId(),user3.getId(),createExpenseRequest2);
+        expenseService.createExpense(groupEntity.getId(),user3.getId(), expenseRequest1);
+        expenseService.createExpense(groupEntity.getId(),user3.getId(), expenseRequest2);
 
         List<BalanceResponse> balanceResponses = expenseService.computeBalances(groupEntity.getId());
 

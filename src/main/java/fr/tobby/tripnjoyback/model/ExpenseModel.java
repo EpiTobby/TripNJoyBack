@@ -24,9 +24,10 @@ public class ExpenseModel {
     private GroupModel groupModel;
     private GroupMemberModel purchaser;
     private Date date;
+    private String icon;
     private List<ExpenseMemberModel> indebtedUsers;
 
-    public static ExpenseModel of(ExpenseEntity expenseEntity, List<ExpenseMemberEntity> expenseMemberEntities){
+    public static ExpenseModel of(ExpenseEntity expenseEntity, List<ExpenseMemberEntity> expenseMemberEntities) {
         return ExpenseModel.builder()
                 .id(expenseEntity.getId())
                 .total(expenseEntity.getTotal())
@@ -34,6 +35,7 @@ public class ExpenseModel {
                 .date(expenseEntity.getDate())
                 .purchaser(GroupMemberModel.of(expenseEntity.getPurchaser()))
                 .groupModel(GroupModel.of(expenseEntity.getGroup()))
+                .icon(expenseEntity.getIcon())
                 .indebtedUsers(expenseMemberEntities.stream().map(ExpenseMemberModel::of).toList())
                 .build();
     }

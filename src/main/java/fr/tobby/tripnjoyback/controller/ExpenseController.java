@@ -5,7 +5,7 @@ import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.GroupNotFoundException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.ExpenseModel;
-import fr.tobby.tripnjoyback.model.request.CreateExpenseRequest;
+import fr.tobby.tripnjoyback.model.request.ExpenseRequest;
 import fr.tobby.tripnjoyback.model.response.BalanceResponse;
 import fr.tobby.tripnjoyback.model.response.DebtDetailsResponse;
 import fr.tobby.tripnjoyback.model.response.MoneyDueResponse;
@@ -28,37 +28,42 @@ public class ExpenseController {
     }
 
     @PostMapping("{group}/purchaser/{user}")
-    public ExpenseModel createExpense(@PathVariable("group") long groupId, @PathVariable("user") long userId, @RequestBody CreateExpenseRequest createExpenseRequest){
-        return expenseService.createExpense(groupId, userId, createExpenseRequest);
+    public ExpenseModel createExpense(@PathVariable("group") long groupId, @PathVariable("user") long userId, @RequestBody ExpenseRequest expenseRequest) {
+        return expenseService.createExpense(groupId, userId, expenseRequest);
     }
 
     @GetMapping("{group}")
-    public Collection<ExpenseModel> getExpensesByGroup(@PathVariable("group") long groupId){
+    public Collection<ExpenseModel> getExpensesByGroup(@PathVariable("group") long groupId) {
         return expenseService.getExpensesByGroup(groupId);
     }
 
     @GetMapping("{group}/user/{user}/debts")
-    public Collection<MoneyDueResponse> getMoneyUserOwesToEachMemberInGroup(@PathVariable("group") long groupId, @PathVariable("user") long userId){
+    public Collection<MoneyDueResponse> getMoneyUserOwesToEachMemberInGroup(@PathVariable("group") long groupId, @PathVariable("user") long userId) {
         return expenseService.getMoneyUserOwesToEachMemberInGroup(groupId, userId);
     }
 
     @GetMapping("{group}/user/{user}/debts/due")
-    public Collection<MoneyDueResponse> getMoneyEachMemberOwesToUserInGroup(@PathVariable("group") long groupId, @PathVariable("user") long userId){
+    public Collection<MoneyDueResponse> getMoneyEachMemberOwesToUserInGroup(@PathVariable("group") long groupId, @PathVariable("user") long userId) {
         return expenseService.getMoneyEachMemberOwesToUserInGroup(groupId, userId);
     }
 
     @GetMapping("{group}/user/{user}/debts/details")
-    public Collection<DebtDetailsResponse> getUserDebtsDetails(@PathVariable("group") long groupId, @PathVariable("user") long userId){
+    public Collection<DebtDetailsResponse> getUserDebtsDetails(@PathVariable("group") long groupId, @PathVariable("user") long userId) {
         return expenseService.getUserDebtsDetailsInGroup(groupId, userId);
     }
 
     @GetMapping("{group}/balances")
-    public Collection<BalanceResponse> computeBalances(@PathVariable("group") long groupId){
+    public Collection<BalanceResponse> computeBalances(@PathVariable("group") long groupId) {
         return expenseService.computeBalances(groupId);
     }
 
+    @PutMapping("{groupId}/{expenseId}")
+    public ExpenseModel updateExpense(@PathVariable("groupId") long groupId, @PathVariable("expenseId") long expenseId, @RequestBody ExpenseRequest updateExpenseRequest) {
+        return expenseService.updateExpense(groupId, expenseId, updateExpenseRequest);
+    }
+
     @DeleteMapping("{groupId}/{expenseId}")
-    public void deleteExpense(@PathVariable("groupId") long groupId, @PathVariable("expenseId") long expenseId){
+    public void deleteExpense(@PathVariable("groupId") long groupId, @PathVariable("expenseId") long expenseId) {
         expenseService.deleteExpense(groupId, expenseId);
     }
 
