@@ -37,7 +37,9 @@ public class PlanningController {
     {
         if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
-        return this.service.createActivity(groupId, request);
+        ActivityModel activity = this.service.createActivity(groupId, request);
+        this.service.joinActivity(activity.id(), idCheckerService.getCurrentUserId());
+        return activity;
     }
 
     @GetMapping
@@ -53,31 +55,37 @@ public class PlanningController {
     }
 
     @PatchMapping("{activityId}/join")
-    @Operation(summary = "Add the current user to the given activity")
+    @Operation(summary = "Add the user to the given activity")
     @ApiResponse(responseCode = "204", description = "User added")
     @ApiResponse(responseCode = "403", description = "User does not belong to the group")
     @ApiResponse(responseCode = "404", description = "The activity or group does not exist")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void joinActivity(@PathVariable(name = "groupId") final long groupId,
-                             @PathVariable(name = "activityId") final long activityId)
+                             @PathVariable(name = "activityId") final long activityId,
+                             @RequestParam(name = "userId") final long userId)
     {
         if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
-        this.service.joinActivity(activityId, idCheckerService.getCurrentUserId());
+        if (!idCheckerService.isUserInGroup(userId, groupId))
+            throw new ForbiddenOperationException();
+        this.service.joinActivity(activityId, userId);
     }
 
     @PatchMapping("{activityId}/leave")
-    @Operation(summary = "Remove the current user from the given activity")
+    @Operation(summary = "Remove the user from the given activity")
     @ApiResponse(responseCode = "204", description = "User removed")
     @ApiResponse(responseCode = "403", description = "User does not belong to the group")
     @ApiResponse(responseCode = "404", description = "The activity or group does not exist")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void leaveActivity(@PathVariable(name = "groupId") final long groupId,
-                              @PathVariable(name = "activityId") final long activityId)
+                              @PathVariable(name = "activityId") final long activityId,
+                              @RequestParam(name = "userId") final long userId)
     {
         if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
-        this.service.leaveActivity(activityId, idCheckerService.getCurrentUserId());
+        if (!idCheckerService.isUserInGroup(userId, groupId))
+            throw new ForbiddenOperationException();
+        this.service.leaveActivity(activityId, userId);
     }
 
     @DeleteMapping("{activityId}")

@@ -29,7 +29,8 @@ public class PlacesController {
     }
 
     @GetMapping("categories")
-    public Collection<PlaceCategory> getCategory(){
+    @Operation(summary = "Returns all the categories of locations")
+    public Collection<PlaceCategory> getCategories(){
         return List.of(PlaceCategory.ANTIQUES_SHOP,
                 PlaceCategory.ARTS_CENTER,
                 PlaceCategory.ART_SHOP,
@@ -39,14 +40,14 @@ public class PlacesController {
                 PlaceCategory.CHANGE,
                 PlaceCategory.CHINESE_RESTAURANT,
                 PlaceCategory.COFFEE_SHOP,
-                PlaceCategory.ENTERTAINEMENT,
+                PlaceCategory.ENTERTAINMENT,
                 PlaceCategory.FAST_FOOD,
                 PlaceCategory.FISH_AND_CHIPS_RESTAURANT,
                 PlaceCategory.ITALIAN_RESTAURANT,
                 PlaceCategory.MUSEUM,
                 PlaceCategory.PARKING,
                 PlaceCategory.RESTAURANT,
-                PlaceCategory.SEAFOOD_RESTARANT,
+                PlaceCategory.SEAFOOD_RESTAURANT,
                 PlaceCategory.SUPERMARKET,
                 PlaceCategory.SWIMMING_POOL,
                 PlaceCategory.SUBWAY,

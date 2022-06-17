@@ -7,7 +7,7 @@ import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
-import fr.tobby.tripnjoyback.model.request.UpdateGroupRequest;
+import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.repository.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
@@ -82,7 +82,7 @@ public class GroupServiceTest {
     @BeforeEach
     void initGroupService(){
         channelService = mock(ChannelService.class);
-        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository);
+        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository, mock(ProfileService.class));
         SpringContext.setContext(context);
     }
 
@@ -140,11 +140,11 @@ public class GroupServiceTest {
 
     @Test
     void testUpdateGroupNull() throws ParseException{
-        UpdateGroupRequest updateGroupRequest = new UpdateGroupRequest();
+        UpdatePrivateGroupRequest updatePrivateGroupRequest = new UpdatePrivateGroupRequest();
         CreatePrivateGroupRequest createPrivateGroupRequest = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
         UserEntity owner = anyUser();
         GroupModel model = groupService.createPrivateGroup(owner.getId(), createPrivateGroupRequest);
-        groupService.updatePrivateGroup(model.getId(), updateGroupRequest);
+        groupService.updatePrivateGroup(model.getId(), updatePrivateGroupRequest);
         Assertions.assertEquals("grouptest", model.getName());
         Assertions.assertEquals(3, model.getMaxSize());
     }
@@ -153,17 +153,17 @@ public class GroupServiceTest {
     void testUpdateGroupManyFields() throws ParseException{
         Date newStartDate = dateFormat.parse("01-07-2025");
         Date newEndDate = dateFormat.parse("06-07-2025");
-        UpdateGroupRequest updateGroupRequest = new UpdateGroupRequest().builder()
-                                                .name("new name")
-                                                .maxSize(5)
-                                                .startOfTrip(newStartDate)
-                                                .endOfTrip(newEndDate)
-                                                .picture("group.png")
-                                                .build();
+        UpdatePrivateGroupRequest updatePrivateGroupRequest = new UpdatePrivateGroupRequest().builder()
+                                                                                             .name("new name")
+                                                                                             .maxSize(5)
+                                                                                             .startOfTrip(newStartDate)
+                                                                                             .endOfTrip(newEndDate)
+                                                                                             .picture("group.png")
+                                                                                             .build();
         CreatePrivateGroupRequest createPrivateGroupRequest = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
         UserEntity owner = anyUser();
         GroupModel model = groupService.createPrivateGroup(owner.getId(), createPrivateGroupRequest);
-        groupService.updatePrivateGroup(model.getId(), updateGroupRequest);
+        groupService.updatePrivateGroup(model.getId(), updatePrivateGroupRequest);
         GroupEntity entity = groupRepository.findById(model.getId()).get();
         Assertions.assertEquals("new name", entity.getName());
         Assertions.assertEquals(5, entity.getMaxSize());

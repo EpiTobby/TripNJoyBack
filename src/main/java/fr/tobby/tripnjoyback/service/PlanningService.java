@@ -75,6 +75,7 @@ public class PlanningService {
     }
 
     @NotNull
+    @Transactional
     public ActivityModel updateActivity(final long activityId, @NotNull final UpdateActivityRequest updateRequest)
     {
         ActivityEntity activity = activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
@@ -103,6 +104,13 @@ public class PlanningService {
                     continue;
                 activity.getInfos().add(new ActivityInfoEntity(info));
             }
+        }
+        if (updateRequest.getParticipants() != null)
+        {
+            activity.getParticipants().removeIf(participant -> !updateRequest.getParticipants().contains(participant.getId()));
+            updateRequest.getParticipants().stream()
+                         .filter(participant -> activity.getParticipants().stream().noneMatch(entity -> entity.getId().equals(participant)))
+                         .forEach(participantId -> joinActivity(activityId, participantId));
         }
 
         return ActivityModel.from(activity);

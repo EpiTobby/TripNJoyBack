@@ -159,8 +159,43 @@ public class ProfileServiceTest {
                 .build();
         when(answersRepository.save(any())).thenReturn(entity);
         when(answersRepository.findByProfileId(anyLong())).thenReturn(entity);
-        long profileId = user.getProfiles().stream().findFirst().get().getId();
-        profileService.deleteProfile(profileId);
-        Assertions.assertThrows(ProfileNotFoundException.class, () -> profileService.getProfile(profileId));
+        ProfileEntity profile = user.getProfiles().stream().findFirst().get();
+        profile.setActive(false);
+
+        profileService.deleteProfile(profile.getId());
+
+        Assertions.assertThrows(ProfileNotFoundException.class, () -> profileService.getProfile(profile.getId()));
+    }
+
+    @Test
+    void testDeleteActiveProfileShouldThrow() throws ParseException {
+        UserEntity user = anyUserWithProfile();
+        AnswersEntity entity = AnswersEntity.builder()
+                .id("2")
+                .availabilities(List.of(new AvailabiltyEntity("01-07-2023", "16-07-2023")))
+                .durationMin(4)
+                .durationMax(7)
+                .groupSizeMin(2)
+                .groupSizeMax(5)
+                .budgetMin(1000)
+                .budgetMax(2000)
+                .destinationTypes(List.of("CITY","BEACH"))
+                .ageMin(25)
+                .ageMax(40)
+                .travelWithPersonFromSameCity(true)
+                .travelWithPersonFromSameCountry(true)
+                .travelWithPersonSameLanguage(true)
+                .gender("MALE")
+                .aboutFood("RESTAURANT")
+                .goOutAtNight(true)
+                .chillOrVisit("CHILL")
+                .sport(true)
+                .build();
+        when(answersRepository.save(any())).thenReturn(entity);
+        when(answersRepository.findByProfileId(anyLong())).thenReturn(entity);
+        ProfileEntity profile = user.getProfiles().stream().findFirst().get();
+        profile.setActive(true);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> profileService.deleteProfile(profile.getId()));
     }
 }

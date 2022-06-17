@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.controller;
 
+import fr.tobby.tripnjoyback.exception.DeleteChannelException;
 import fr.tobby.tripnjoyback.exception.EntityNotFoundException;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.model.ChannelModel;
@@ -76,6 +77,14 @@ public class ChannelController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String getError(ForbiddenOperationException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(DeleteChannelException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String getError(DeleteChannelException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }

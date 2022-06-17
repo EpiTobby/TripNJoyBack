@@ -4,6 +4,7 @@ import fr.tobby.tripnjoyback.entity.GroupEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.entity.messaging.ChannelEntity;
 import fr.tobby.tripnjoyback.exception.ChannelNotFoundException;
+import fr.tobby.tripnjoyback.exception.DeleteChannelException;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.GroupNotFoundException;
 import fr.tobby.tripnjoyback.model.ChannelModel;
@@ -99,6 +100,8 @@ public class ChannelService extends MemberCheckerService {
     public void deleteChannel(long channelId)
     {
         ChannelEntity channelEntity = channelRepository.findById(channelId).orElseThrow(() -> new ChannelNotFoundException(channelId));
+        if (channelEntity.getGroup().channels.size() == 1)
+            throw new DeleteChannelException("Cannot delete the last channel of a group");
         int indexOfDeletedChannel = channelEntity.getIndex();
         channelRepository.delete(channelEntity);
         List<ChannelEntity> channelEntities = channelRepository.findAllByGroupId(channelEntity.getGroup().getId()).stream().filter(c -> c.getIndex() > indexOfDeletedChannel).sorted(Comparator.comparing(ChannelEntity::getIndex)).toList();

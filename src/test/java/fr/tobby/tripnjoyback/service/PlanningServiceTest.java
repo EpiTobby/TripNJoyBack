@@ -30,6 +30,7 @@ class PlanningServiceTest {
     private static GenderRepository genderRepository;
     private static CityRepository cityRepository;
     private static LanguageRepository languageRepository;
+    private static GroupMemberRepository memberRepository;
     private static StateRepository stateRepository;
     private static CityEntity cityEntity;
     private static LanguageEntity languageEntity;
@@ -45,12 +46,14 @@ class PlanningServiceTest {
     @BeforeAll
     static void beforeAll(@Autowired GenderRepository genderRepository, @Autowired StateRepository stateRepository,
                           @Autowired ApplicationContext context,
-                          @Autowired CityRepository cityRepository, @Autowired LanguageRepository languageRepository)
+                          @Autowired CityRepository cityRepository, @Autowired LanguageRepository languageRepository,
+                          @Autowired GroupMemberRepository memberRepository)
     {
         maleGender = genderRepository.save(new GenderEntity("male"));
         PlanningServiceTest.genderRepository = genderRepository;
         PlanningServiceTest.cityRepository = cityRepository;
         PlanningServiceTest.languageRepository = languageRepository;
+        PlanningServiceTest.memberRepository = memberRepository;
 
         stateRepository.save(new StateEntity("CLOSED"));
         stateRepository.save(new StateEntity("OPEN"));
@@ -72,6 +75,7 @@ class PlanningServiceTest {
         activityRepository.deleteAll();
         groupRepository.deleteAll();
         userRepository.deleteAll();
+        memberRepository.deleteAll();
     }
 
     @AfterAll
@@ -110,6 +114,13 @@ class PlanningServiceTest {
                                              .language(languageEntity)
                                              .roles(List.of())
                                              .build());
+    }
+
+    private GroupMemberEntity userInGroup(UserEntity user, GroupEntity group)
+    {
+        GroupMemberEntity memberEntity = memberRepository.save(new GroupMemberEntity(group, user, null, false));
+        group.getMembers().add(memberEntity);
+        return memberEntity;
     }
 
     @Test
@@ -274,5 +285,74 @@ class PlanningServiceTest {
         ActivityModel result = planningService.updateActivity(activity.getId(), request);
 
         assertEquals(1, result.infos().size());
+    }
+
+    @Test
+    void updateActivityAddParticipantsFromEmptyTest() throws ParseException
+    {
+        GroupEntity group = anyGroup();
+        ActivityEntity activity = anyActivity(group);
+        UserEntity user = anyUser();
+        userInGroup(user, group);
+
+        UpdateActivityRequest request = UpdateActivityRequest.builder()
+                                                             .setParticipants(List.of(user.getId()))
+                                                             .build();
+        ActivityModel result = planningService.updateActivity(activity.getId(), request);
+
+        assertEquals(1, result.participants().size());
+    }
+
+    @Test
+    void updateActivityAddParticipantsFromNonEmptyTest() throws ParseException
+    {
+        GroupEntity group = anyGroup();
+        ActivityEntity activity = anyActivity(group);
+        UserEntity userA = anyUser();
+        activity.getParticipants().add(userInGroup(userA, group));
+        UserEntity userB = anyUser();
+        userInGroup(userB, group);
+
+        UpdateActivityRequest request = UpdateActivityRequest.builder()
+                                                             .setParticipants(List.of(userA.getId(), userB.getId()))
+                                                             .build();
+        ActivityModel result = planningService.updateActivity(activity.getId(), request);
+
+        assertEquals(2, result.participants().size());
+    }
+
+    @Test
+    void updateActivityRemoveParticipantTest() throws ParseException
+    {
+        GroupEntity group = anyGroup();
+        ActivityEntity activity = anyActivity(group);
+        UserEntity userA = anyUser();
+        activity.getParticipants().add(userInGroup(userA, group));
+
+        UpdateActivityRequest request = UpdateActivityRequest.builder()
+                                                             .setParticipants(List.of())
+                                                             .build();
+        ActivityModel result = planningService.updateActivity(activity.getId(), request);
+
+        assertEquals(0, result.participants().size());
+    }
+
+    @Test
+    void updateActivityAddParticipantsAndRemoveFromNonEmptyTest() throws ParseException
+    {
+        GroupEntity group = anyGroup();
+        ActivityEntity activity = anyActivity(group);
+        UserEntity userA = anyUser();
+        activity.getParticipants().add(userInGroup(userA, group));
+        UserEntity userB = anyUser();
+        userInGroup(userB, group);
+
+        UpdateActivityRequest request = UpdateActivityRequest.builder()
+                                                             .setParticipants(List.of(userB.getId()))
+                                                             .build();
+        ActivityModel result = planningService.updateActivity(activity.getId(), request);
+
+        assertEquals(1, result.participants().size());
+        assertEquals(userB.getId(), new ArrayList<>(activity.getParticipants()).get(0).getUser().getId());
     }
 }
