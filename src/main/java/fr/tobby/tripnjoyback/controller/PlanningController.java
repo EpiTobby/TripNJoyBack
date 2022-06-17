@@ -37,7 +37,9 @@ public class PlanningController {
     {
         if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
-        return this.service.createActivity(groupId, request);
+        ActivityModel activity = this.service.createActivity(groupId, request);
+        this.service.joinActivity(activity.id(), idCheckerService.getCurrentUserId());
+        return activity;
     }
 
     @GetMapping
