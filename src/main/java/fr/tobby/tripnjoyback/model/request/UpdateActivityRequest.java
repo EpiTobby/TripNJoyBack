@@ -27,6 +27,8 @@ public final class UpdateActivityRequest {
     private final String icon;
     @Nullable
     private final Collection<String> infos;
+    @Nullable
+    private final Collection<Long> participants;
 
     public UpdateActivityRequest(@Nullable @JsonProperty("name") final String name,
                                  @Nullable @JsonProperty("description") final String description,
@@ -35,12 +37,14 @@ public final class UpdateActivityRequest {
                                  @Nullable @JsonProperty("color") final String color,
                                  @Nullable @JsonProperty("location") final String location,
                                  @Nullable @JsonProperty("icon") final String icon,
-                                 @Nullable @JsonProperty("infos") final Collection<String> infos)
+                                 @Nullable @JsonProperty("infos") final Collection<String> infos,
+                                 @Nullable @JsonProperty("participants") final Collection<Long> participants)
     {
         this.name = name;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.participants = participants;
         if (color != null && !CreateActivityRequest.COLOR_PATTERN.matcher(color).matches())
             throw new IllegalArgumentException("Invalid color " + color);
         this.color = color;
@@ -71,6 +75,8 @@ public final class UpdateActivityRequest {
         private String icon = null;
         @Nullable
         private Collection<String> infos = null;
+        @Nullable
+        private Collection<Long> participants = null;
 
         Builder() {}
 
@@ -84,7 +90,8 @@ public final class UpdateActivityRequest {
                     color == null ? null : ColorUtils.colorToString(color),
                     location,
                     icon,
-                    infos
+                    infos,
+                    participants
             );
         }
 
@@ -133,6 +140,12 @@ public final class UpdateActivityRequest {
         public Builder setInfos(final Collection<String> infos)
         {
             this.infos = infos;
+            return this;
+        }
+
+        public Builder setParticipants(final Collection<Long> participants)
+        {
+            this.participants = participants;
             return this;
         }
     }
