@@ -19,13 +19,19 @@ public class ScanResult {
     public ScanResult(@JsonProperty("ParsedResults") final List<ParsedResult> parsedResults,
                       @JsonProperty("OCRExitCode") final int exitCode,
                       @JsonProperty("IsErroredOnProcessing") final boolean errorOnProcessing,
-                      @JsonProperty("ErrorMessage") final List<String> errorMessage,
-                      @JsonProperty("ErrorDetails") final List<String> errorDetails)
+                      @JsonProperty("ErrorMessage") final Object errorMessage,
+                      @JsonProperty("ErrorDetails") final Object errorDetails)
     {
         this.parsedResults = parsedResults;
         this.exitCode = exitCode;
         this.errorOnProcessing = errorOnProcessing;
-        this.errorMessage = errorMessage;
-        this.errorDetails = errorDetails;
+        if (errorMessage instanceof String str)
+            this.errorMessage = List.of(str);
+        else
+            this.errorMessage = (List<String>) errorMessage;
+        if (errorDetails instanceof String str)
+            this.errorDetails = List.of(str);
+        else
+            this.errorDetails = (List<String>) errorDetails;
     }
 }
