@@ -1,8 +1,12 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.model.response.ScanResponse;
+import fr.tobby.tripnjoyback.repository.scan.OcrScanner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,7 +17,7 @@ class ScanServiceTest {
     @BeforeEach
     void setUp()
     {
-        scanService = new ScanService("");
+        scanService = new ScanService(Mockito.mock(OcrScanner.class));
     }
 
     @Test
@@ -57,7 +61,7 @@ class ScanServiceTest {
     @Test
     void parseEmptyTest()
     {
-        ScanResponse scanResponse = scanService.parseContent("");
+        ScanResponse scanResponse = scanService.parseContent(List.of());
 
         assertEquals(0, scanResponse.getTotal());
         assertEquals(0, scanResponse.getItems().size());
@@ -66,7 +70,7 @@ class ScanServiceTest {
     @Test
     void parseContentOneLineTest()
     {
-        ScanResponse scanResponse = scanService.parseContent("PET Toy\t2.00");
+        ScanResponse scanResponse = scanService.parseContent(List.of("PET Toy\t2.00"));
 
         assertEquals(0, scanResponse.getTotal());
         assertEquals(1, scanResponse.getItems().size());
@@ -75,7 +79,7 @@ class ScanServiceTest {
     @Test
     void parseContentTwoLinesTest()
     {
-        ScanResponse scanResponse = scanService.parseContent("PET Toy\t2.00\t\r\nT-shirt\t16,05€");
+        ScanResponse scanResponse = scanService.parseContent(List.of("PET Toy\t2.00", "T-shirt\t16,05€"));
 
         assertEquals(0, scanResponse.getTotal());
         assertEquals(2, scanResponse.getItems().size());
@@ -86,7 +90,7 @@ class ScanServiceTest {
     @Test
     void parseContentTwoLinesWithUselessLinesTest()
     {
-        ScanResponse scanResponse = scanService.parseContent("MONOPRIX\t\r\nPET Toy\t2.00\t\r\nHello\tWorld!\t\r\nT-shirt\t16,05€\t\r\nGood Bye!");
+        ScanResponse scanResponse = scanService.parseContent(List.of("MONOPRIX", "PET Toy\t2.00", "", "Hello\tWorld!", "T-shirt\t16,05€", "Good Bye!"));
 
         assertEquals(0, scanResponse.getTotal());
         assertEquals(2, scanResponse.getItems().size());
