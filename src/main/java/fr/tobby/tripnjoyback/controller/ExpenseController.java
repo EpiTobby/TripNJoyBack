@@ -57,9 +57,9 @@ public class ExpenseController {
         return expenseService.computeBalances(groupId);
     }
 
-    @PutMapping("{groupId}/{expenseId}")
-    public ExpenseModel updateExpense(@PathVariable("groupId") long groupId, @PathVariable("expenseId") long expenseId, @RequestBody ExpenseRequest updateExpenseRequest) {
-        return expenseService.updateExpense(groupId, expenseId, updateExpenseRequest);
+    @PutMapping("{groupId}/{expenseId}/purchaser/{user}")
+    public ExpenseModel updateExpense(@PathVariable("groupId") long groupId, @PathVariable("expenseId") long expenseId, @PathVariable("user") long userId, @RequestBody ExpenseRequest expenseRequest) {
+        return expenseService.updateExpense(groupId, expenseId, userId, expenseRequest);
     }
 
     @DeleteMapping("{groupId}/{expenseId}")

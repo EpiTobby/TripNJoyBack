@@ -28,6 +28,7 @@ public class ExpenseEntity {
 
     @ManyToOne
     @JoinColumn(name = "purchaser_id")
+    @Setter
     private UserEntity purchaser;
 
     @ManyToOne

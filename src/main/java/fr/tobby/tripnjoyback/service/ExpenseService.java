@@ -124,7 +124,7 @@ public class ExpenseService {
     }
 
     @Transactional
-    public ExpenseModel updateExpense(long groupId, long expenseId, ExpenseRequest expenseRequest) {
+    public ExpenseModel updateExpense(long groupId, long expenseId, long purchaserId, ExpenseRequest expenseRequest) {
         if (!expenseRequest.isEvenlyDivided()) {
             if (expenseRequest.getMoneyDueByEachUser().stream().anyMatch(r -> r.getMoney() == null) ||
                     expenseRequest.getMoneyDueByEachUser().stream().mapToDouble(MoneyDueRequest::getMoney).sum() != expenseRequest.getTotal())
@@ -137,6 +137,7 @@ public class ExpenseService {
         expenseEntity.setDescription(expenseRequest.getDescription());
         expenseEntity.setIcon(expenseRequest.getIcon());
         expenseEntity.setTotal(expenseRequest.getTotal());
+        expenseEntity.setPurchaser(userRepository.findById(purchaserId).orElseThrow(() -> new UserNotFoundException(purchaserId)));
         return ExpenseModel.of(expenseEntity, addExpenseMembers(expenseRequest, expenseEntity));
     }
 
