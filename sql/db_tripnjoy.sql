@@ -129,6 +129,7 @@ CREATE TABLE "expenses" (
                             "total" float,
                             "group_id" int,
                             "description" text,
+                            purchaser_id int,
                             "expense_date" timestamp
 );
 
@@ -263,7 +264,9 @@ ALTER TABLE "expenses_members" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("
 
 ALTER TABLE "expenses" ADD FOREIGN KEY ("group_id") REFERENCES "groups" ("id");
 
-ALTER TABLE "expenses_members" ADD FOREIGN KEY ("expense_id") REFERENCES "expenses" ("id");
+ALTER TABLE "expenses" ADD FOREIGN KEY ("purchaser_id") REFERENCES "users" ("id");
+
+ALTER TABLE "expenses_members" ADD FOREIGN KEY ("expense_id") REFERENCES "expenses" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "suggestions"
     ADD FOREIGN KEY ("city_id") REFERENCES "cities" ("id");
