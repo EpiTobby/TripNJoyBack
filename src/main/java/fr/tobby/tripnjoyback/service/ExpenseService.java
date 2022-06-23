@@ -85,7 +85,8 @@ public class ExpenseService {
         };
         userEntities.forEach(u -> {
             double sum = expenseMemberEntities.stream().filter(e -> e.getExpense().getPurchaser().getId().equals(u.getId()) && e.getUser().getId() == userId).mapToDouble(ExpenseMemberEntity::getAmountToPay).sum();
-            if (sum != 0)
+            sum -= expenseMemberEntities.stream().filter(e -> e.getExpense().getPurchaser().getId() == userId && e.getUser().getId().equals(u.getId())).mapToDouble(ExpenseMemberEntity::getAmountToPay).sum();
+            if (sum > 0)
                 response.add(new MoneyDueResponse(GroupMemberModel.of(u), sum));
         });
         return response;
@@ -98,7 +99,8 @@ public class ExpenseService {
         Stream<UserEntity> userEntities = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId)).members.stream().map(GroupMemberEntity::getUser).filter(u -> u.getId() != userId);
         userEntities.forEach(u -> {
             double sum = expenseMemberEntities.stream().filter(e -> e.getExpense().getPurchaser().getId() == userId && e.getUser().getId().equals(u.getId())).mapToDouble(ExpenseMemberEntity::getAmountToPay).sum();
-            if (sum != 0)
+            sum -= expenseMemberEntities.stream().filter(e -> e.getExpense().getPurchaser().getId().equals(u.getId()) && e.getUser().getId() == userId).mapToDouble(ExpenseMemberEntity::getAmountToPay).sum();
+            if (sum > 0)
                 response.add(new MoneyDueResponse(GroupMemberModel.of(u), sum));
         });
         return response;
