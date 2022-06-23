@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -33,13 +34,19 @@ public class ScanService {
     public ScanResponse parseContent(List<String> lines)
     {
         Map<String, Float> items = new LinkedHashMap<>();
+        float total = 0;
         for (final String line : lines)
         {
             Pair<String, Float> item = parseLine(line);
             if (item != null)
-                items.put(item.left(), item.right());
+            {
+                if (item.left().toUpperCase(Locale.ROOT).contains("TOTAL"))
+                    total = item.right();
+                else
+                    items.put(item.left(), item.right());
+            }
         }
-        return new ScanResponse(items, 0);
+        return new ScanResponse(items, total);
     }
 
     @Nullable
