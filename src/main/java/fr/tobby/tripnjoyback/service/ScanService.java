@@ -46,7 +46,22 @@ public class ScanService {
                     items.put(item.left(), item.right());
             }
         }
+        // If we found a `total` field, remove all articles that do not match the total
+        if (total > 0)
+            removeInconsistentArticles(items, total);
         return new ScanResponse(items, total);
+    }
+
+    private void removeInconsistentArticles(Map<String, Float> items, float expectedTotal)
+    {
+        float sum = 0;
+        for (var it = items.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<String, Float> entry = it.next();
+            if (sum + entry.getValue() > expectedTotal)
+                it.remove();
+            else
+                sum += entry.getValue();
+        }
     }
 
     @Nullable

@@ -97,4 +97,38 @@ class ScanServiceTest {
         assertEquals(2, scanResponse.getItems().get("PET Toy"));
         assertEquals(16.05f, scanResponse.getItems().get("T-shirt"));
     }
+
+    @Test
+    void parseContentWithTotalTest()
+    {
+        ScanResponse scanResponse = scanService.parseContent(List.of("PET Toy\t2.00", "T-shirt\t16,05€", "Total\t18.05"));
+
+        assertEquals(18.05f, scanResponse.getTotal());
+        assertEquals(2, scanResponse.getItems().size());
+        assertEquals(2, scanResponse.getItems().get("PET Toy"));
+        assertEquals(16.05f, scanResponse.getItems().get("T-shirt"));
+    }
+
+    @Test
+    void parseContentWithTotalAndInconsistentArticlesTest()
+    {
+        ScanResponse scanResponse = scanService.parseContent(List.of("PET Toy\t2.00", "T-shirt\t16,05€", "Before taxes\t18.05", "Total TTC\t19.42"));
+
+        assertEquals(19.42f, scanResponse.getTotal());
+        assertEquals(2, scanResponse.getItems().size());
+        assertEquals(2, scanResponse.getItems().get("PET Toy"));
+        assertEquals(16.05f, scanResponse.getItems().get("T-shirt"));
+    }
+
+    @Test
+    void parseContentWithTotalAndTaxesTest()
+    {
+        ScanResponse scanResponse = scanService.parseContent(List.of("PET Toy\t2.00", "T-shirt\t16,05€", "Before taxes\t18.05", "Taxes\t1,37", "Total TTC\t19.42"));
+
+        assertEquals(19.42f, scanResponse.getTotal());
+        assertEquals(3, scanResponse.getItems().size());
+        assertEquals(2, scanResponse.getItems().get("PET Toy"));
+        assertEquals(16.05f, scanResponse.getItems().get("T-shirt"));
+        assertEquals(1.37f, scanResponse.getItems().get("Taxes"));
+    }
 }
