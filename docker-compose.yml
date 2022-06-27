@@ -7,6 +7,7 @@ networks:
 
 volumes:
   postgres:
+  minio:
 
 services:
   app:
@@ -17,6 +18,8 @@ services:
     depends_on:
       - db
       - mongo
+    ports:
+      - "8080:8080"
     environment:
       - "spring.datasource.url=jdbc:postgresql://db:5432/postgres"
       - "spring.data.mongodb.host=mongo"
@@ -40,3 +43,16 @@ services:
       - "27017:27017"
     networks:
       - internal
+
+  minio:
+    image: "quay.io/minio/minio"
+    networks:
+      - external
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - "MINIO_ROOT_USER=${MINIO_USER}"
+      - "MINIO_ROOT_PASSWORD=${MINIO_PASSWORD}"
+    volumes:
+      - "minio:/data"
