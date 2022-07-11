@@ -13,7 +13,6 @@ import java.util.Optional;
 @Table(name = "groups")
 @Builder
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class GroupEntity {
@@ -21,8 +20,10 @@ public class GroupEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
     private String name;
 
+    @Setter
     private String description;
 
     @Setter
@@ -30,26 +31,36 @@ public class GroupEntity {
     @JoinColumn(name = "state_id")
     private StateEntity stateEntity;
 
+    @Setter
     @ManyToOne()
     @JoinColumn(name = "owner_id")
     @Nullable
     private UserEntity owner;
 
+    @Setter
     @Column(name = "max_size")
     private int maxSize;
 
     @Column(name = "created_date")
     private Date createdDate;
 
+    @Setter
     @Column(name = "start_of_Trip")
     private Date startOfTrip;
 
+    @Setter
     @Column(name = "end_of_Trip")
     private Date endOfTrip;
 
+    @Setter
     @Column(name = "picture")
     private String picture;
 
+    @Setter
+    @Column(name = "destination")
+    private String destination;
+
+    @Setter
     @OneToMany
     @JoinColumn(name = "group_id")
     public Collection<GroupMemberEntity> members;
@@ -58,10 +69,12 @@ public class GroupEntity {
         return members.stream().filter(m -> !m.isPending()).count();
     }
 
+    @Setter
     @OneToOne(fetch = FetchType.LAZY)
     @JoinTable(name = "group_profiles", joinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "profile_id", referencedColumnName = "id"))
     private ProfileEntity profile;
 
+    @Setter
     @OneToMany
     @JoinColumn(name = "group_id")
     public Collection<ChannelEntity> channels;
