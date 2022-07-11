@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 @Component
 public class ScanService {
 
-    public static final Pattern PRICE_PATTERN = Pattern.compile("(-?(\\d|O|o)+[.,](\\d|O|o){2}) ?[$€£]?.*");
+    public static final Pattern PRICE_PATTERN = Pattern.compile("(-?[\\dOo]+ ?[.,] ?[\\dOo]{2}) ?[$€£]?.*");
 
     private final OcrScanner ocrScanner;
 
@@ -75,7 +75,9 @@ public class ScanService {
             var matcher = PRICE_PATTERN.matcher(column);
             if (matcher.matches())
             {
-                String priceRaw = matcher.group(1).replace(",", ".").replaceAll("[Oo]", "0");
+                String priceRaw = matcher.group(1).replace(",", ".")
+                                         .replaceAll("[Oo]", "0")
+                                         .replace(" ", "");
                 float price = Float.parseFloat(priceRaw);
                 return new Pair<>(columns[0], price);
             }
