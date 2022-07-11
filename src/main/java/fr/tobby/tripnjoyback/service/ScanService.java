@@ -70,6 +70,7 @@ public class ScanService {
         String[] columns = line.split("\t");
 
         // Search for price in columns
+        int columnIndex = 0;
         for (String column : columns)
         {
             var matcher = PRICE_PATTERN.matcher(column);
@@ -79,8 +80,12 @@ public class ScanService {
                                          .replaceAll("[Oo]", "0")
                                          .replace(" ", "");
                 float price = Float.parseFloat(priceRaw);
-                return new Pair<>(columns[0], price);
+                String itemName = columns[0].length() <= 3 && columnIndex > 1
+                                  ? columns[0] + " " + columns[1]
+                                  : columns[0];
+                return new Pair<>(itemName, price);
             }
+            columnIndex++;
         }
         // If no price found, there is no item in the line
         return null;
