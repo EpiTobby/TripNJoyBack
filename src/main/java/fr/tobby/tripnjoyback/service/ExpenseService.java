@@ -59,7 +59,7 @@ public class ExpenseService {
     public ExpenseModel createExpense(long groupId, long purchaserId, ExpenseRequest expenseRequest) {
         if (!expenseRequest.isEvenlyDivided()) {
             if (expenseRequest.getMoneyDueByEachUser().stream().anyMatch(r -> r.getMoney() == null) ||
-                    expenseRequest.getMoneyDueByEachUser().stream().mapToDouble(MoneyDueRequest::getMoney).sum() != expenseRequest.getTotal())
+                    Math.round(expenseRequest.getMoneyDueByEachUser().stream().mapToDouble(MoneyDueRequest::getMoney).sum() * 100) / 100 != Math.round(expenseRequest.getTotal() * 100) / 100)
                 throw new IllegalArgumentException();
         }
         UserEntity purchaser = userRepository.findById(purchaserId).orElseThrow(() -> new UserNotFoundException(purchaserId));
