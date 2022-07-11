@@ -113,16 +113,13 @@ public class ExpenseService {
 
     public List<BalanceResponse> computeBalances(long groupId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-        List<BalanceResponse> response = new ArrayList<>() {
-        };
         List<ExpenseEntity> expenses = expenseRepository.findByGroupId(groupId);
-        groupEntity.members.forEach(m -> {
+        return groupEntity.members.stream().map(m -> {
             List<ExpenseMemberEntity> debts = expenseMemberRepository.findByGroupIdAndUserId(groupId, m.getUser().getId());
             double balance = expenses.stream().filter(e -> e.getPurchaser().getId().equals(m.getUser().getId())).mapToDouble(ExpenseEntity::getTotal).sum()
                     - debts.stream().mapToDouble(ExpenseMemberEntity::getAmountToPay).sum();
-            response.add(new BalanceResponse(GroupMemberModel.of(m.getUser()), balance));
-        });
-        return response;
+            return new BalanceResponse(GroupMemberModel.of(m.getUser()), balance);
+        }).toList();
     }
 
     @Transactional
