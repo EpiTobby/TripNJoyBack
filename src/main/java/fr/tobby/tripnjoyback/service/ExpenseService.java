@@ -134,7 +134,7 @@ public class ExpenseService {
         }
         ExpenseEntity expenseEntity = expenseRepository.findById(expenseId).orElseThrow(() -> new ExpenseNotFoundException("Expense not found"));
         if (expenseEntity.getGroup().getId() != groupId)
-            throw new ForbiddenOperationException("You cannot perform this operation");
+            throw new IllegalArgumentException();
         expenseMemberRepository.findByExpenseId(expenseEntity.getId()).forEach(expenseMemberRepository::delete);
         expenseEntity.setDescription(expenseRequest.getDescription());
         expenseEntity.setIcon(expenseRequest.getIcon());
@@ -147,7 +147,7 @@ public class ExpenseService {
     public void deleteExpense(long groupId, long expenseId) {
         ExpenseEntity expenseEntity = expenseRepository.findById(expenseId).orElseThrow(() -> new ExpenseNotFoundException("Expense not found"));
         if (expenseEntity.getGroup().getId() != groupId)
-            throw new ForbiddenOperationException("You cannot perform this operation");
+            throw new IllegalArgumentException();
         expenseRepository.delete(expenseEntity);
     }
 
