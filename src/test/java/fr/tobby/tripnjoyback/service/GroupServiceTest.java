@@ -159,6 +159,7 @@ public class GroupServiceTest {
                                                                                              .startOfTrip(newStartDate)
                                                                                              .endOfTrip(newEndDate)
                                                                                              .picture("group.png")
+                                                                                             .destination("Madrid")
                                                                                              .build();
         CreatePrivateGroupRequest createPrivateGroupRequest = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
         UserEntity owner = anyUser();
@@ -168,6 +169,7 @@ public class GroupServiceTest {
         Assertions.assertEquals("new name", entity.getName());
         Assertions.assertEquals(5, entity.getMaxSize());
         Assertions.assertEquals("group.png", entity.getPicture());
+        Assertions.assertEquals("Madrid", entity.getDestination());
         Assertions.assertEquals(0, entity.getStartOfTrip().compareTo(newStartDate));
         Assertions.assertEquals(0, entity.getEndOfTrip().compareTo(newEndDate));
     }

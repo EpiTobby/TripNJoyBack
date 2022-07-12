@@ -86,7 +86,7 @@ public class ExpenseServiceTest {
     private GroupEntity anyGroup()
     {
         GroupEntity group = new GroupEntity(null, "test","description", State.OPEN.getEntity(), null, 10, new Date(), null, null,
-                "", new ArrayList<>(), null, new ArrayList<>());
+                "","",new ArrayList<>(), null, new ArrayList<>());
         return groupRepository.save(group);
     }
 

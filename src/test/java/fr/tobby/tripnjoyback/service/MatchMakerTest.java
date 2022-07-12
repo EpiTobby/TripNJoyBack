@@ -225,6 +225,7 @@ class MatchMakerTest {
                 null,
                 null,
                 "",
+                "",
                 new ArrayList<>(),
                 groupProfileEntity,
                 List.of(mock(ChannelEntity.class))));

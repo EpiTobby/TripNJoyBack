@@ -34,6 +34,8 @@ public class GroupModel {
     private Date createdDate;
     @Nullable
     private String picture;
+    @Nullable
+    private String destination;
     private List<MemberModel> members;
     private List<ChannelModel> channels;
 
@@ -54,6 +56,7 @@ public class GroupModel {
                          .endOfTrip(groupEntity.getEndOfTrip())
                          .createdDate(groupEntity.getCreatedDate())
                          .picture(groupEntity.getPicture())
+                         .destination(groupEntity.getDestination())
                          .members(groupEntity.members.stream().filter(m -> !m.isPending()).map(m -> MemberModel.of(m.getUser())).toList())
                          .channels(groupEntity.channels.stream().map(e -> ChannelModel.of(e)).toList())
                          .build();

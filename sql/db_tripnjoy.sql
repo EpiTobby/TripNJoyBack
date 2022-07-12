@@ -53,7 +53,8 @@ CREATE TABLE IF NOT EXISTS "groups"(
                          "created_date"  timestamp,
                          "start_of_trip" timestamp,
                          "end_of_trip"   timestamp,
-                         "picture"       text
+                         "picture"       text,
+                         "destination"   text
 );
 
 CREATE TABLE IF NOT EXISTS "profiles" (

@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.PlaceEntity;
 import fr.tobby.tripnjoyback.entity.api.request.GeocodeAddressRequest;
+import fr.tobby.tripnjoyback.model.PlaceCategory;
 import fr.tobby.tripnjoyback.model.request.PlacesFromAddressRequest;
 import fr.tobby.tripnjoyback.model.request.PlacesFromCoordinatesRequest;
 import fr.tobby.tripnjoyback.model.response.PlaceResponse;
@@ -24,12 +25,12 @@ public class PlacesService {
                 .address(placesFromAddressRequest.getAddress())
                 .city(placesFromAddressRequest.getCity())
                 .countryCode(placesFromAddressRequest.getCountryCode()).build();
-        List<PlaceEntity> placeEntities = placesRepository.getPlacesFromAddress(request, placesFromAddressRequest.getCategories().stream().map(p -> p.getCategoryValue()).toList(), placesFromAddressRequest.getRadiusMeter());
+        List<PlaceEntity> placeEntities = placesRepository.getPlacesFromAddress(request, placesFromAddressRequest.getCategories().stream().map(PlaceCategory::getCategoryValue).toList(), placesFromAddressRequest.getRadiusMeter());
         return placeEntities.stream().map(PlaceResponse::of).toList();
     }
 
     public Collection<PlaceResponse> getPlacesFromCoordinates(PlacesFromCoordinatesRequest placesFromCoordinatesRequest) {
-        List<PlaceEntity> placeEntities = placesRepository.getPlacesFromCoordinates(placesFromCoordinatesRequest, placesFromCoordinatesRequest.getCategories().stream().map(p -> p.getCategoryValue()).toList());
+        List<PlaceEntity> placeEntities = placesRepository.getPlacesFromCoordinates(placesFromCoordinatesRequest, placesFromCoordinatesRequest.getCategories().stream().map(PlaceCategory::getCategoryValue).toList());
         return placeEntities.stream().map(PlaceResponse::of).toList();
     }
 }

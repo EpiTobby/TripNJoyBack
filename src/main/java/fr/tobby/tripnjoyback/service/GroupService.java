@@ -38,8 +38,7 @@ public class GroupService {
 
     public GroupService(GroupRepository groupRepository, UserRepository userRepository, GroupMemberRepository groupMemberRepository,
                         ProfileRepository profileRepository, ChannelService channelService,
-                        final ActivityRepository activityRepository, final ProfileService profileService)
-    {
+                        final ActivityRepository activityRepository, final ProfileService profileService) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.groupMemberRepository = groupMemberRepository;
@@ -49,35 +48,30 @@ public class GroupService {
         this.profileService = profileService;
     }
 
-    public boolean isInGroup(final long groupId, final long userId)
-    {
+    public boolean isInGroup(final long groupId, final long userId) {
         GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
         return group.getMembers().stream().anyMatch(member -> member.getUser().getId().equals(userId));
     }
 
-    public GroupMemberModel getMember(long groupId, long userId)
-    {
+    public GroupMemberModel getMember(long groupId, long userId) {
         GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
         return group.getMembers().stream().filter(member -> member.getUser().getId().equals(userId))
-                    .findAny()
-                    .map(member -> GroupMemberModel.of(member.getUser()))
-                    .orElseThrow(UserNotFoundException::new);
+                .findAny()
+                .map(member -> GroupMemberModel.of(member.getUser()))
+                .orElseThrow(UserNotFoundException::new);
     }
 
-    public Collection<GroupModel> getUserGroups(long userId)
-    {
+    public Collection<GroupModel> getUserGroups(long userId) {
         List<GroupEntity> groups = groupRepository.findAll();
         return groups.stream().filter(g -> g.members.stream().anyMatch(m -> m.getUser().getId() == userId && !m.isPending())).map(GroupModel::of).toList();
     }
 
-    public Collection<GroupModel> getUserInvites(long userId)
-    {
+    public Collection<GroupModel> getUserInvites(long userId) {
         List<GroupEntity> groups = groupRepository.findAll();
         return groups.stream().filter(g -> g.members.stream().anyMatch(m -> m.getUser().getId() == userId && m.isPending())).map(GroupModel::of).toList();
     }
 
-    public String getOwnerEmail(long groupId) throws IllegalArgumentException
-    {
+    public String getOwnerEmail(long groupId) throws IllegalArgumentException {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         if (groupEntity.getOwner() == null)
             throw new IllegalArgumentException("The group " + groupId + " has no owner");
@@ -86,18 +80,17 @@ public class GroupService {
 
     @Transactional
     public GroupModel createPublicGroup(UserEntity user1Entity, ProfileEntity profile1Entity, UserEntity user2Entity, ProfileEntity profile2Entity,
-                                        int maxSize, ProfileEntity groupProfile)
-    {
+                                        int maxSize, ProfileEntity groupProfile) {
         GroupEntity groupEntity = GroupEntity.builder()
-                                             .maxSize(maxSize)
-                                             .createdDate(Date.from(Instant.now()))
-                                             .stateEntity(maxSize > 2
-                                                          ? State.OPEN.getEntity()
-                                                          : State.CLOSED.getEntity())
-                                             .members(List.of())
-                                             .profile(groupProfile)
-                                             .channels(new ArrayList<>())
-                                             .build();
+                .maxSize(maxSize)
+                .createdDate(Date.from(Instant.now()))
+                .stateEntity(maxSize > 2
+                        ? State.OPEN.getEntity()
+                        : State.CLOSED.getEntity())
+                .members(List.of())
+                .profile(groupProfile)
+                .channels(new ArrayList<>())
+                .build();
         groupRepository.save(groupEntity);
         groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity, false));
         groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity, false));
@@ -150,29 +143,28 @@ public class GroupService {
     @Transactional
     public void updatePrivateGroup(long groupId, UpdatePrivateGroupRequest updatePrivateGroupRequest) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-        if (updatePrivateGroupRequest.getName() != null)
-        {
+        if (updatePrivateGroupRequest.getName() != null) {
             groupEntity.setName(updatePrivateGroupRequest.getName());
         }
-        if (updatePrivateGroupRequest.getDescription() != null)
-        {
+        if (updatePrivateGroupRequest.getDescription() != null) {
             groupEntity.setDescription(updatePrivateGroupRequest.getDescription());
         }
-        if (updatePrivateGroupRequest.getMaxSize() != null && updatePrivateGroupRequest.getMaxSize() != 0)
-        {
+        if (updatePrivateGroupRequest.getMaxSize() != null && updatePrivateGroupRequest.getMaxSize() != 0) {
             int newMaxSize = updatePrivateGroupRequest.getMaxSize();
             if (newMaxSize < groupEntity.getNumberOfNonPendingUsers())
                 throw new UpdateGroupException("The maximum size of the group must be greater or equal than the current number of members in the private group");
             groupEntity.setMaxSize(newMaxSize);
         }
-        if (updatePrivateGroupRequest.getState() != null)
-        {
+        if (updatePrivateGroupRequest.getState() != null) {
             if (updatePrivateGroupRequest.getState() == State.CLOSED)
                 groupEntity.members.stream().filter(GroupMemberEntity::isPending).forEach(groupMemberRepository::delete);
             groupEntity.setStateEntity(updatePrivateGroupRequest.getState().getEntity());
         }
-        if (updatePrivateGroupRequest.getPicture() != null){
+        if (updatePrivateGroupRequest.getPicture() != null) {
             groupEntity.setPicture(updatePrivateGroupRequest.getPicture());
+        }
+        if (updatePrivateGroupRequest.getDestination() != null) {
+            groupEntity.setDestination(updatePrivateGroupRequest.getDestination());
         }
         if (groupEntity.getStateEntity().getValue().equals("CLOSED")) {
             if (updatePrivateGroupRequest.getStartOfTrip() != null)
@@ -180,23 +172,19 @@ public class GroupService {
             if (updatePrivateGroupRequest.getEndOfTrip() != null)
                 groupEntity.setEndOfTrip(updatePrivateGroupRequest.getEndOfTrip());
         }
-        if (updatePrivateGroupRequest.getOwnerId() != null)
-        {
+        if (updatePrivateGroupRequest.getOwnerId() != null) {
             long newOwnerId = updatePrivateGroupRequest.getOwnerId();
-            if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == newOwnerId))
-            {
+            if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == newOwnerId)) {
                 UserEntity newOwner = userRepository.findById(updatePrivateGroupRequest.getOwnerId())
-                                                    .orElseThrow(() -> new UserNotFoundException(updatePrivateGroupRequest.getOwnerId()));
+                        .orElseThrow(() -> new UserNotFoundException(updatePrivateGroupRequest.getOwnerId()));
                 groupEntity.setOwner(newOwner);
-            }
-            else
+            } else
                 throw new UpdateGroupException("The new owner does not exist or is not in this private group");
         }
     }
 
     @Transactional
-    public void updatePublicGroup(long groupId, UpdatePublicGroupRequest request) throws GroupNotFoundException
-    {
+    public void updatePublicGroup(long groupId, UpdatePublicGroupRequest request) throws GroupNotFoundException {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         if (request.getName() != null)
             groupEntity.setName(request.getName());
@@ -206,8 +194,10 @@ public class GroupService {
         if (request.getPicture() != null)
             groupEntity.setPicture(request.getPicture());
 
-        if (groupEntity.getStateEntity().equals(State.CLOSED.getEntity()))
-        {
+        if (request.getDestination() != null)
+            groupEntity.setDestination(request.getDestination());
+
+        if (groupEntity.getStateEntity().equals(State.CLOSED.getEntity())) {
             if (request.getStartOfTrip() != null)
                 groupEntity.setStartOfTrip(request.getStartOfTrip());
             if (request.getEndOfTrip() != null)
@@ -246,7 +236,7 @@ public class GroupService {
     public void removeUserFromGroup(long groupId, long userId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         activityRepository.findAllByGroupOrderByStartDate(groupEntity)
-                          .forEach(activity -> activity.getParticipants().removeIf(member -> member.getUser().getId().equals(userId)));
+                .forEach(activity -> activity.getParticipants().removeIf(member -> member.getUser().getId().equals(userId)));
         GroupMemberEntity groupMemberEntity = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not found in this group or does not exist"));
         groupEntity.members.removeIf(m -> m.getUser().getId() == userId);
         groupMemberRepository.delete(groupMemberEntity);
@@ -256,8 +246,7 @@ public class GroupService {
     }
 
     @Transactional
-    public void setGroupPublic(long groupId, ProfileCreationRequest profileRequest) throws GroupNotFoundException, IllegalArgumentException
-    {
+    public void setGroupPublic(long groupId, ProfileCreationRequest profileRequest) throws GroupNotFoundException, IllegalArgumentException {
         GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
         if (group.getOwner() == null)
             throw new IllegalArgumentException("This group is already public");

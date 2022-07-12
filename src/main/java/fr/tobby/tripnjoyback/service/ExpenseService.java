@@ -59,7 +59,7 @@ public class ExpenseService {
     public ExpenseModel createExpense(long groupId, long purchaserId, ExpenseRequest expenseRequest) {
         if (!expenseRequest.isEvenlyDivided()) {
             if (expenseRequest.getMoneyDueByEachUser().stream().anyMatch(r -> r.getMoney() == null) ||
-                    expenseRequest.getMoneyDueByEachUser().stream().mapToDouble(MoneyDueRequest::getMoney).sum() != expenseRequest.getTotal())
+                    Math.round(expenseRequest.getMoneyDueByEachUser().stream().mapToDouble(MoneyDueRequest::getMoney).sum() * 100) / 100 != Math.round(expenseRequest.getTotal() * 100) / 100)
                 throw new IllegalArgumentException();
         }
         UserEntity purchaser = userRepository.findById(purchaserId).orElseThrow(() -> new UserNotFoundException(purchaserId));
@@ -113,16 +113,13 @@ public class ExpenseService {
 
     public List<BalanceResponse> computeBalances(long groupId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-        List<BalanceResponse> response = new ArrayList<>() {
-        };
         List<ExpenseEntity> expenses = expenseRepository.findByGroupId(groupId);
-        groupEntity.members.forEach(m -> {
+        return groupEntity.members.stream().map(m -> {
             List<ExpenseMemberEntity> debts = expenseMemberRepository.findByGroupIdAndUserId(groupId, m.getUser().getId());
             double balance = expenses.stream().filter(e -> e.getPurchaser().getId().equals(m.getUser().getId())).mapToDouble(ExpenseEntity::getTotal).sum()
                     - debts.stream().mapToDouble(ExpenseMemberEntity::getAmountToPay).sum();
-            response.add(new BalanceResponse(GroupMemberModel.of(m.getUser()), balance));
-        });
-        return response;
+            return new BalanceResponse(GroupMemberModel.of(m.getUser()), balance);
+        }).toList();
     }
 
     @Transactional
@@ -134,7 +131,7 @@ public class ExpenseService {
         }
         ExpenseEntity expenseEntity = expenseRepository.findById(expenseId).orElseThrow(() -> new ExpenseNotFoundException("Expense not found"));
         if (expenseEntity.getGroup().getId() != groupId)
-            throw new ForbiddenOperationException("You cannot perform this operation");
+            throw new IllegalArgumentException();
         expenseMemberRepository.findByExpenseId(expenseEntity.getId()).forEach(expenseMemberRepository::delete);
         expenseEntity.setDescription(expenseRequest.getDescription());
         expenseEntity.setIcon(expenseRequest.getIcon());
@@ -147,7 +144,7 @@ public class ExpenseService {
     public void deleteExpense(long groupId, long expenseId) {
         ExpenseEntity expenseEntity = expenseRepository.findById(expenseId).orElseThrow(() -> new ExpenseNotFoundException("Expense not found"));
         if (expenseEntity.getGroup().getId() != groupId)
-            throw new ForbiddenOperationException("You cannot perform this operation");
+            throw new IllegalArgumentException();
         expenseRepository.delete(expenseEntity);
     }
 
