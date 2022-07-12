@@ -6,16 +6,13 @@ import fr.tobby.tripnjoyback.utils.Pair;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Component
 public class ScanService {
 
-    public static final Pattern PRICE_PATTERN = Pattern.compile("(-?[\\dOo]+ ?[.,] ?[\\dOo]{2}) ?[$€£]?.*");
+    public static final Pattern PRICE_PATTERN = Pattern.compile("(.* )?(-?[\\dOo]+ ?[.,] ?[\\dOo]{2}) ?[$€£]?.*");
 
     private final OcrScanner ocrScanner;
 
@@ -73,21 +70,33 @@ public class ScanService {
         int columnIndex = 0;
         for (String column : columns)
         {
-            var matcher = PRICE_PATTERN.matcher(column);
-            if (matcher.matches())
-            {
-                String priceRaw = matcher.group(1).replace(",", ".")
-                                         .replaceAll("[Oo]", "0")
-                                         .replace(" ", "");
-                float price = Float.parseFloat(priceRaw);
-                String itemName = columns[0].length() <= 3 && columnIndex > 1
-                                  ? columns[0] + " " + columns[1]
-                                  : columns[0];
-                return new Pair<>(itemName, price);
-            }
+            Pair<String, Float> itemName = extractItem(columns, columnIndex, column);
+            if (itemName != null)
+                return itemName;
             columnIndex++;
         }
         // If no price found, there is no item in the line
+        StringJoiner joiner = new StringJoiner(" ");
+        for (final String column : columns)
+            joiner.add(column);
+        return extractItem(columns, columnIndex, joiner.toString());
+    }
+
+    @Nullable
+    private Pair<String, Float> extractItem(final String[] columns, final int columnIndex, final String column)
+    {
+        var matcher = PRICE_PATTERN.matcher(column);
+        if (matcher.matches())
+        {
+            String priceRaw = matcher.group(2).replace(",", ".")
+                                     .replaceAll("[Oo]", "0")
+                                     .replace(" ", "");
+            float price = Float.parseFloat(priceRaw);
+            String itemName = columns[0].length() <= 3 && columnIndex > 1
+                              ? columns[0] + " " + columns[1]
+                              : columns[0];
+            return new Pair<>(itemName, price);
+        }
         return null;
     }
 }
