@@ -22,7 +22,7 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 
 @DataJpaTest
-public class ProfileServiceTest {
+class ProfileServiceTest {
     private static GenderEntity maleGender;
     private static GenderEntity femaleGender;
     private static GenderEntity otherGender;
@@ -84,7 +84,7 @@ public class ProfileServiceTest {
         long profileId = user.getProfiles().iterator().next().getId();
         profileService.updateProfile(user.getId(), profileId, request);
         ProfileEntity profileEntity = profileRepository.findById(profileId).get();
-        Assertions.assertEquals(profileEntity.getName(),"profile1");
+        Assertions.assertEquals("profile1", profileEntity.getName());
     }
 
     @Test
@@ -134,7 +134,7 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testDeleteProfile() throws ParseException {
+    void testDeleteProfile() throws ParseException {
         UserEntity user = anyUserWithProfile();
         AnswersEntity entity = AnswersEntity.builder()
                 .id("2")

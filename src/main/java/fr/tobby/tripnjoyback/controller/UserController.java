@@ -41,7 +41,7 @@ public class UserController {
     @GetMapping("")
     @PreAuthorize("hasAuthority('admin')")
     public List<UserEntity> getAll() {
-        List<UserEntity> userEntities = new ArrayList<UserEntity>();
+        List<UserEntity> userEntities = new ArrayList<>();
         userService.getAll().forEach(userEntities::add);
         return userEntities;
     }

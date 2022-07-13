@@ -1,27 +1,27 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.SpringContext;
-import fr.tobby.tripnjoyback.entity.*;
+import fr.tobby.tripnjoyback.entity.CityEntity;
+import fr.tobby.tripnjoyback.entity.GenderEntity;
+import fr.tobby.tripnjoyback.entity.LanguageEntity;
+import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.model.ReportModel;
 import fr.tobby.tripnjoyback.model.ReportReason;
 import fr.tobby.tripnjoyback.model.request.SubmitReportRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateReportRequest;
 import fr.tobby.tripnjoyback.repository.*;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.ApplicationContext;
-import org.junit.jupiter.api.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
 @DataJpaTest
-public class ReportServiceTest {
+class ReportServiceTest {
     private static GenderEntity maleGender;
     private static GenderRepository genderRepository;
     private static CityRepository cityRepository;

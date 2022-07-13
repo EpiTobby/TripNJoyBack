@@ -1,6 +1,5 @@
 package fr.tobby.tripnjoyback.controller;
 
-import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.ReportNotFoundException;
 import fr.tobby.tripnjoyback.model.ReportModel;
 import fr.tobby.tripnjoyback.model.request.SubmitReportRequest;

@@ -24,7 +24,7 @@ import java.util.Optional;
 import static org.mockito.Mockito.mock;
 
 @DataJpaTest
-public class GroupServiceTest {
+class GroupServiceTest {
     private static GenderEntity maleGender;
     private static GenderEntity femaleGender;
     private static GenderEntity otherGender;
@@ -185,7 +185,7 @@ public class GroupServiceTest {
         groupService.inviteUserInPrivateGroup(model.getId(), user3.getEmail());
         groupService.joinGroup(model.getId(), user1.getId());
         groupService.joinGroup(model.getId(), user2.getId());
-        Assertions.assertEquals(model.getState(),State.CLOSED);
+        Assertions.assertEquals(State.CLOSED, model.getState());
         Assertions.assertThrows(UserNotFoundException.class, () -> groupService.joinGroup(model.getId(), user3.getId()));
     }
 

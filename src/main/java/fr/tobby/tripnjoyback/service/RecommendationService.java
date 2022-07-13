@@ -1,18 +1,14 @@
 package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.entity.RecommendationEntity;
-import fr.tobby.tripnjoyback.entity.RecommendationEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.RecommendationNotFoundException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.RecommendationModel;
-import fr.tobby.tripnjoyback.model.RecommendationModel;
 import fr.tobby.tripnjoyback.model.request.SubmitRecommendationRequest;
 import fr.tobby.tripnjoyback.repository.RecommendationRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;

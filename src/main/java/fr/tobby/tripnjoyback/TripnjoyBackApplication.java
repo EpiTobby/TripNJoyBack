@@ -27,12 +27,6 @@ public class TripnjoyBackApplication {
 	@Bean
 	public CommandLineRunner startup(@Value("${spring.profiles.active}") String profiles, ScanService scanService)
 	{
-		return args -> {
-			logger.info("Application started with profiles {}", profiles);
-//			ScanResponse scan = scanService.scan("https://images-ext-1.discordapp.net/external/J3_EjXEM31n8QSyedYy5V3MqJNiffbfs7EFmopdu85s/https/ocr.space/Content/Images/receipt-ocr-original.jpg?width=459&height=1138");
-//
-//			scan.getItems().forEach((name, price) -> logger.info("{}: {}", name, price));
-//			logger.info("Total: {}", scan.getTotal());
-		};
+		return args -> logger.info("Application started with profiles {}", profiles);
 	}
 }

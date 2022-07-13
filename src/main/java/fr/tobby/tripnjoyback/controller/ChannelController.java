@@ -20,6 +20,7 @@ import java.util.Collection;
 @RequestMapping(path = "channels")
 public class ChannelController {
     private static final Logger logger = LoggerFactory.getLogger(ChannelController.class);
+    public static final String ERROR_ON_REQUEST = "Error on request";
     private final ChannelService channelService;
 
     public ChannelController(ChannelService channelService) {
@@ -69,7 +70,7 @@ public class ChannelController {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(EntityNotFoundException exception)
     {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_ON_REQUEST, exception);
         return exception.getMessage();
     }
 
@@ -77,7 +78,7 @@ public class ChannelController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String getError(ForbiddenOperationException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_ON_REQUEST, exception);
         return exception.getMessage();
     }
 
@@ -85,7 +86,7 @@ public class ChannelController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String getError(DeleteChannelException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_ON_REQUEST, exception);
         return exception.getMessage();
     }
 }

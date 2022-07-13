@@ -14,8 +14,6 @@ import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePublicGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import fr.tobby.tripnjoyback.repository.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -27,7 +25,6 @@ import java.util.List;
 
 @Service
 public class GroupService {
-    private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
     private final GroupMemberRepository groupMemberRepository;
@@ -227,8 +224,8 @@ public class GroupService {
         GroupMemberEntity invitedUser = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not invited or does not exist"));
         invitedUser.setPending(false);
         if (groupEntity.getMaxSize() == groupEntity.getNumberOfNonPendingUsers()) {
-            groupEntity.members.stream().filter(m -> m.isPending()).forEach(groupMemberRepository::delete);
-            groupEntity.members.removeIf(m -> m.isPending());
+            groupEntity.members.stream().filter(GroupMemberEntity::isPending).forEach(groupMemberRepository::delete);
+            groupEntity.members.removeIf(GroupMemberEntity::isPending);
             groupEntity.setStateEntity(State.CLOSED.getEntity());
         }
     }

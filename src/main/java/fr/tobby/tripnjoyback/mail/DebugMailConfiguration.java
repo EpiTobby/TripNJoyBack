@@ -32,42 +32,42 @@ class PassThroughJavaMailSender extends JavaMailSenderImpl {
     @Override
     public void send(final SimpleMailMessage simpleMessage) throws MailException
     {
-
+        // Pass through implementation
     }
 
     @Override
     public void send(final SimpleMailMessage... simpleMessages) throws MailException
     {
-
+        // Pass through implementation
     }
 
     @Override
     public void send(final MimeMessage mimeMessage) throws MailException
     {
-
+        // Pass through implementation
     }
 
     @Override
     public void send(final MimeMessage... mimeMessages) throws MailException
     {
-
+        // Pass through implementation
     }
 
     @Override
     public void send(final MimeMessagePreparator mimeMessagePreparator) throws MailException
     {
-
+        // Pass through implementation
     }
 
     @Override
     public void send(final MimeMessagePreparator... mimeMessagePreparators) throws MailException
     {
-
+        // Pass through implementation
     }
 
     @Override
     protected void doSend(final MimeMessage[] mimeMessages, final Object[] originalMessages) throws MailException
     {
-
+        // Pass through implementation
     }
 }

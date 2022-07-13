@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 @DataJpaTest
-public class RecommendationServiceTest {
+class RecommendationServiceTest {
     private static GenderEntity maleGender;
     private static GenderRepository genderRepository;
     private static CityRepository cityRepository;
