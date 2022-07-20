@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class GroupService {
@@ -61,6 +58,12 @@ public class GroupService {
     public Collection<GroupModel> getUserGroups(long userId) {
         List<GroupEntity> groups = groupRepository.findAll();
         return groups.stream().filter(g -> g.members.stream().anyMatch(m -> m.getUser().getId() == userId && !m.isPending())).map(GroupModel::of).toList();
+    }
+
+    public Optional<GroupModel> getGroup(long groupId)
+    {
+        return groupRepository.findById(groupId)
+                              .map(GroupModel::of);
     }
 
     public Collection<GroupModel> getUserInvites(long userId) {

@@ -7,6 +7,7 @@ import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePublicGroupRequest;
+import fr.tobby.tripnjoyback.model.response.GroupInfoModel;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import fr.tobby.tripnjoyback.service.GroupService;
 import fr.tobby.tripnjoyback.service.IdCheckerService;
@@ -48,6 +49,15 @@ public class GroupController {
     public Collection<GroupModel> getUserInvites(@PathVariable("id") final long userId)
     {
         return groupService.getUserInvites(userId);
+    }
+
+    @GetMapping("info/{id}")
+    @Operation(summary = "Get info about a group")
+    public GroupInfoModel getInfo(@PathVariable("id") final long groupId)
+    {
+        return groupService.getGroup(groupId)
+                           .map(GroupInfoModel::of)
+                           .orElseThrow(GroupNotFoundException::new);
     }
 
     private void checkOwnership(long groupId, Authentication authentication) {
