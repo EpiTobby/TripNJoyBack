@@ -1,6 +1,5 @@
 package fr.tobby.tripnjoyback;
 
-import fr.tobby.tripnjoyback.service.ScanService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +24,7 @@ public class TripnjoyBackApplication {
 	}
 
 	@Bean
-	public CommandLineRunner startup(@Value("${spring.profiles.active}") String profiles, ScanService scanService)
+	public CommandLineRunner startup(@Value("${spring.profiles.active}") String profiles)
 	{
 		return args -> logger.info("Application started with profiles {}", profiles);
 	}
