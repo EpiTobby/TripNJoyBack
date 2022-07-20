@@ -3,11 +3,9 @@ package fr.tobby.tripnjoyback.controller;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.ModelWithEmail;
-import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
-import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
-import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
-import fr.tobby.tripnjoyback.model.request.UpdatePublicGroupRequest;
+import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
+import fr.tobby.tripnjoyback.model.response.GroupMemoriesResponse;
 import fr.tobby.tripnjoyback.service.GroupService;
 import fr.tobby.tripnjoyback.service.IdCheckerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -175,6 +173,22 @@ public class GroupController {
         {
             throw new ForbiddenOperationException("This group is already public");
         }
+    }
+
+    @Operation(summary = "Get all the memories from a group")
+    @ApiResponse(responseCode = "200", description = "The memories are returned")
+    @ApiResponse(responseCode = "422", description = "Group does not exist")
+    @GetMapping("{groupId}/memories")
+    public GroupMemoriesResponse getMemories(@PathVariable("groupId") final long groupId) {
+        return groupService.getAllMemories(groupId);
+    }
+
+    @Operation(summary = "Add memory to a group")
+    @ApiResponse(responseCode = "200", description = "The memory is added to the group")
+    @ApiResponse(responseCode = "422", description = "Group or Memory does not exist")
+    @PostMapping("{groupId}/memories")
+    public void addMemory(@PathVariable("groupId") final long groupId, @RequestBody GroupMemoryRequest memoryCreationRequest) {
+        groupService.addMemory(groupId, memoryCreationRequest.getMemoryUrl());
     }
 
     @ExceptionHandler(UserNotFoundException.class)
