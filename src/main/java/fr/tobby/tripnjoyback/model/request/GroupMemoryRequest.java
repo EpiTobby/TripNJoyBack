@@ -12,6 +12,5 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 public class GroupMemoryRequest {
-    private Long groupId;
     private String memoryUrl;
 }

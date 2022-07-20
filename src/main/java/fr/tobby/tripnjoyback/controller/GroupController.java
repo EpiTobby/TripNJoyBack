@@ -187,8 +187,8 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "The memory is added to the group")
     @ApiResponse(responseCode = "422", description = "Group or Memory does not exist")
     @PostMapping("{groupId}/memories")
-    public void addMemory(@PathVariable("groupId") final long groupId, @RequestBody GroupMemoryRequest memoryCreationRequest) {
-        groupService.addMemory(groupId, memoryCreationRequest.getMemoryUrl());
+    public GroupMemoriesResponse addMemory(@PathVariable("groupId") final long groupId, @RequestBody GroupMemoryRequest memoryCreationRequest) {
+        return groupService.addMemory(groupId, memoryCreationRequest.getMemoryUrl());
     }
 
     @ExceptionHandler(UserNotFoundException.class)
