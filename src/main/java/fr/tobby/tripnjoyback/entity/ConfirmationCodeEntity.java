@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Random;
@@ -17,7 +18,7 @@ import java.util.Random;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConfirmationCodeEntity {
-    public static final Random RANDOM = new Random();
+    public static final Random RANDOM = new SecureRandom();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
