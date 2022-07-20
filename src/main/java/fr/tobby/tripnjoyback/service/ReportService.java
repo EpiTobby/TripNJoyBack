@@ -10,7 +10,6 @@ import fr.tobby.tripnjoyback.model.request.SubmitReportRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateReportRequest;
 import fr.tobby.tripnjoyback.repository.ReportRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;

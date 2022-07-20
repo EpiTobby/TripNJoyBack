@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    public static final String ERROR_RESPONSE_MSG = "Error on request";
 
     private final AuthService authService;
     private final TokenManager tokenManager;
@@ -128,7 +129,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String creationError(UserCreationException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -136,7 +137,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String getError(UpdatePasswordException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -144,7 +145,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(UpdateEmailException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -152,7 +153,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String expiredConfirmationCode(ExpiredCodeException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -160,7 +161,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String badCredentials(BadCredentialsException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -168,7 +169,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String badConfirmationCode(BadConfirmationCodeException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -176,7 +177,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String userNotFoundException(UserNotFoundException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -184,7 +185,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String userAlreadyConfirmedException(UserAlreadyConfirmedException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 }

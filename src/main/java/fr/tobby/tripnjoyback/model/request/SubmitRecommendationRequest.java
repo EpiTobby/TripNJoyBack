@@ -1,7 +1,6 @@
 package fr.tobby.tripnjoyback.model.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import fr.tobby.tripnjoyback.model.ReportReason;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

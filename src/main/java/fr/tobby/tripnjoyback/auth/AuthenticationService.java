@@ -26,7 +26,6 @@ public class AuthenticationService implements UserDetailsService {
     {
         UserEntity user = repository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return new UserDetailsImpl(
-                user.getId(),
                 user.getEmail(),
                 user.getPassword(),
                 user.getRoles());
@@ -35,15 +34,13 @@ public class AuthenticationService implements UserDetailsService {
 
 class UserDetailsImpl implements UserDetails
 {
-    private final long id;
     private final String username;
     private final String password;
     private final Collection<? extends GrantedAuthority> roles;
 
-    public UserDetailsImpl(final long id, final String username, final String password,
+    public UserDetailsImpl(final String username, final String password,
                            final Collection<? extends GrantedAuthority> roles)
     {
-        this.id = id;
         this.username = username;
         this.password = password;
         this.roles = roles;

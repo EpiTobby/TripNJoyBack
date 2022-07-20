@@ -1,5 +1,5 @@
 package fr.tobby.tripnjoyback.utils;
 
-public record Pair<LEFT, RIGHT>(LEFT left, RIGHT right) {
+public record Pair<L, R>(L left, R right) {
 
 }

@@ -48,8 +48,6 @@ public class PlacesRepository {
     }
 
     public LocationResponse getCoordinates(GeocodeAddressRequest request){
-        //if DAILY API LIMIT EXCEEDED
-//        return Optional.of(LocationResponse.builder().longitude(2.3548f).latitude(48.8279f).build());
         if (neutrinoApiKey != null && neutrinoUserId != null) {
             request.setUserId(neutrinoUserId);
             request.setApiKey(neutrinoApiKey);

@@ -17,7 +17,7 @@ public class CityService {
 
     @NonNull
     @Transactional
-    CityEntity getOrAddCity(final String name) {
+    public CityEntity getOrAddCity(final String name) {
         return cityRepository.findByName(name)
                 .orElseGet(() -> cityRepository.save(new CityEntity(name)));
     }

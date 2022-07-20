@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
-public class AuthServiceTest {
+class AuthServiceTest {
 
     UserRepository userRepository;
     UserMailUtils userMailUtils;
@@ -67,7 +67,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void createUserTest()
+    void createUserTest()
     {
         when(userMailUtils.userEmailIsValid(anyString())).thenReturn(true);
         UserEntity userEntity = new UserEntity("firstname",
@@ -88,7 +88,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void createUserInvalidEmailTest()
+    void createUserInvalidEmailTest()
     {
         when(userMailUtils.userEmailIsValid(anyString())).thenReturn(false);
         UserEntity userEntity = new UserEntity("firstname",
@@ -109,7 +109,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void createUserAlreadyExistsTest()
+    void createUserAlreadyExistsTest()
     {
         when(userMailUtils.userEmailIsValid(anyString())).thenReturn(true);
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mock(UserEntity.class)));

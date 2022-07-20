@@ -12,6 +12,7 @@ import javax.mail.internet.InternetAddress;
 @Component
 public class UserMailUtils {
 
+    public static final String USER_FIRST_NAME_PLACEHOLDER = "{userFirstName}";
     private final MailConfigRecord config;
     private final MailSender mailSender;
 
@@ -38,7 +39,7 @@ public class UserMailUtils {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getConfirmationSuccessMailSubject(user))
-                .setContent(messagesProperties.getConfirmationSuccessMailBody(user).replace("{userFirstName}", user.getFirstname()))
+                .setContent(messagesProperties.getConfirmationSuccessMailBody(user).replace(USER_FIRST_NAME_PLACEHOLDER, user.getFirstname()))
                 .build();
         mailSender.send(mail);
     }
@@ -47,7 +48,7 @@ public class UserMailUtils {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getConfirmationCodeSubject(user))
-                .setContent(messagesProperties.getConfirmationCodeBody(user).replace("{userFirstName}", user.getFirstname()).replace("{code}", code))
+                .setContent(messagesProperties.getConfirmationCodeBody(user).replace(USER_FIRST_NAME_PLACEHOLDER, user.getFirstname()).replace("{code}", code))
                 .build();
         mailSender.send(mail);
     }
@@ -56,7 +57,7 @@ public class UserMailUtils {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getForgotPasswordSubject(user))
-                .setContent(messagesProperties.getForgotPasswordBody(user).replace("{userFirstName}", user.getFirstname()).replace("{code}", code))
+                .setContent(messagesProperties.getForgotPasswordBody(user).replace(USER_FIRST_NAME_PLACEHOLDER, user.getFirstname()).replace("{code}", code))
                 .build();
         mailSender.send(mail);
     }
@@ -65,7 +66,7 @@ public class UserMailUtils {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getUpdatePasswordSuccessSubject(user))
-                .setContent(messagesProperties.getUpdatePasswordSuccessBody(user).replace("{userFirstName}", user.getFirstname()))
+                .setContent(messagesProperties.getUpdatePasswordSuccessBody(user).replace(USER_FIRST_NAME_PLACEHOLDER, user.getFirstname()))
                 .build();
         mailSender.send(mail);
     }
@@ -74,7 +75,7 @@ public class UserMailUtils {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getAccountDeletedSubject(user))
-                .setContent(messagesProperties.getAccountDeletedBody(user).replace("{userFirstName}", user.getFirstname()))
+                .setContent(messagesProperties.getAccountDeletedBody(user).replace(USER_FIRST_NAME_PLACEHOLDER, user.getFirstname()))
                 .build();
         mailSender.send(mail);
     }
@@ -83,7 +84,7 @@ public class UserMailUtils {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getAccountDeletedByAdminSubject(user))
-                .setContent(messagesProperties.getAccountDeletedByAdminBody(user).replace("{userFirstName}", user.getFirstname()).replace("{reason}", reason))
+                .setContent(messagesProperties.getAccountDeletedByAdminBody(user).replace(USER_FIRST_NAME_PLACEHOLDER, user.getFirstname()).replace("{reason}", reason))
                 .build();
         mailSender.send(mail);
     }
@@ -92,7 +93,7 @@ public class UserMailUtils {
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getEmailUpdateSubject(user))
-                .setContent(messagesProperties.getEmailUpdateBody(user).replace("{userFirstName}", user.getFirstname()))
+                .setContent(messagesProperties.getEmailUpdateBody(user).replace(USER_FIRST_NAME_PLACEHOLDER, user.getFirstname()))
                 .build();
         mailSender.send(mail);
     }

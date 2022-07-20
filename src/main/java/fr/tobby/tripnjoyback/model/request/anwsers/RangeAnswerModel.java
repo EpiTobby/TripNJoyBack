@@ -13,7 +13,7 @@ public class RangeAnswerModel implements AnswerModel {
 
     public RangeAnswerModel(@JsonProperty("minValue") final int minValue, @JsonProperty("maxValue") final int maxValue)
     {
-        if (minValue <= 0 || maxValue <= 0 || (maxValue != 0 && minValue > maxValue))
+        if (minValue <= 0 || maxValue <= 0 || minValue > maxValue)
         {
             throw new IllegalArgumentException("Cannot Serialize range Answer");
         }

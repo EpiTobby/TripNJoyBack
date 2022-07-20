@@ -58,7 +58,7 @@ public class GroupModel {
                          .picture(groupEntity.getPicture())
                          .destination(groupEntity.getDestination())
                          .members(groupEntity.members.stream().filter(m -> !m.isPending()).map(m -> MemberModel.of(m.getUser())).toList())
-                         .channels(groupEntity.channels.stream().map(e -> ChannelModel.of(e)).toList())
+                         .channels(groupEntity.channels.stream().map(ChannelModel::of).toList())
                          .build();
     }
 }

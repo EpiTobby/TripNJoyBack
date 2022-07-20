@@ -26,8 +26,6 @@ public class TripnjoyBackApplication {
 	@Bean
 	public CommandLineRunner startup(@Value("${spring.profiles.active}") String profiles)
 	{
-		return args -> {
-			logger.info("Application started with profiles {}", profiles);
-		};
+		return args -> logger.info("Application started with profiles {}", profiles);
 	}
 }

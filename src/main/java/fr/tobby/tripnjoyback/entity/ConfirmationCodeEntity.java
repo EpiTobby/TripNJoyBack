@@ -6,8 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Random;
 
 @Entity
 @Table(name  = "confirmation_codes")
@@ -16,6 +18,8 @@ import java.time.temporal.ChronoUnit;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConfirmationCodeEntity {
+    public static final Random RANDOM = new SecureRandom();
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,7 +34,7 @@ public class ConfirmationCodeEntity {
     public ConfirmationCodeEntity(long userId){
         this.id = null;
         this.userId = userId;
-        int code = (int) (Math.random() * (999999 - 100000) + 100000);
+        int code = RANDOM.nextInt() * (999999 - 100000) + 100000;
         this.value = String.valueOf(code);
         this.expirationDate = Instant.now().plus(24, ChronoUnit.HOURS);
     }
