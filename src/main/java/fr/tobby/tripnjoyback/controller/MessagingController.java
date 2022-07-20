@@ -44,7 +44,7 @@ public class MessagingController {
     @GetMapping("/chat/{channel_id}")
     @Operation(summary = "Get the most recent channel's messages, by pages of size 50")
     @ResponseBody
-    // @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
+    @ResponseStatus(HttpStatus.PARTIAL_CONTENT)
     public List<MessageResponse> getMessages(@PathVariable("channel_id") long channelId,
                                              @RequestParam(value = "page", required = false, defaultValue = "0") int page)
     {
