@@ -3,7 +3,6 @@ package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.SpringContext;
 import fr.tobby.tripnjoyback.entity.*;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
-import fr.tobby.tripnjoyback.exception.JoinGroupFailedException;
 import fr.tobby.tripnjoyback.exception.UserNotConfirmedException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.GroupModel;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -91,7 +89,7 @@ class GroupServiceTest {
     @BeforeEach
     void initGroupService(){
         channelService = mock(ChannelService.class);
-        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository, mock(ProfileService.class), mock(QRCodeGenerator.class));
+        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository, mock(ProfileService.class), mock(QRCodeGenerator.class), "");
         SpringContext.setContext(context);
     }
 
@@ -205,7 +203,7 @@ class GroupServiceTest {
         CreatePrivateGroupRequest request = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
         UserEntity owner = anyUser();
         GroupModel model = groupService.createPrivateGroup(owner.getId(), request);
-        String stringToHash = String.format("tripnjoy-group-qr:%o",model.getId());
+        String stringToHash = String.format("tripnjoy-group-qr:%o;",model.getId());
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         UserEntity user1 = anyUserWithEmail("usermaxsize1@gmail.com");
         UserEntity user2 = anyUserWithEmail("usermaxsize2@gmail.com");

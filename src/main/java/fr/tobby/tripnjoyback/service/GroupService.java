@@ -36,10 +36,11 @@ public class GroupService {
     private final ActivityRepository activityRepository;
     private final ProfileService profileService;
     private final QRCodeGenerator qrCodeGenerator;
+    private final String qrCodeSecret;
 
     public GroupService(GroupRepository groupRepository, UserRepository userRepository, GroupMemberRepository groupMemberRepository,
                         ProfileRepository profileRepository, ChannelService channelService,
-                        final ActivityRepository activityRepository, final ProfileService profileService, QRCodeGenerator qrCodeGenerator) {
+                        final ActivityRepository activityRepository, final ProfileService profileService, QRCodeGenerator qrCodeGenerator, @Value("${qrcode.secret}") final String qrCodeSecret) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.groupMemberRepository = groupMemberRepository;
@@ -48,6 +49,7 @@ public class GroupService {
         this.activityRepository = activityRepository;
         this.profileService = profileService;
         this.qrCodeGenerator = qrCodeGenerator;
+        this.qrCodeSecret = qrCodeSecret;
     }
 
     public boolean isInGroup(final long groupId, final long userId) {
@@ -287,7 +289,7 @@ public class GroupService {
     }
 
     private String getEncryptedStringToJoinGroup(long groupId) throws NoSuchAlgorithmException {
-        String stringToHash = String.format("tripnjoy-group-qr:%o",groupId);
+        String stringToHash = String.format("tripnjoy-group-qr:%o;%s",groupId,qrCodeSecret);
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         return Arrays.toString(digest.digest(stringToHash.getBytes(StandardCharsets.UTF_8)));
     }
