@@ -1,6 +1,5 @@
 package fr.tobby.tripnjoyback.service;
 
-import com.google.zxing.WriterException;
 import fr.tobby.tripnjoyback.entity.GroupEntity;
 import fr.tobby.tripnjoyback.entity.GroupMemberEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
@@ -19,7 +18,6 @@ import fr.tobby.tripnjoyback.utils.QRCodeGenerator;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
@@ -32,10 +30,11 @@ public class GroupService {
     private final ChannelService channelService;
     private final ActivityRepository activityRepository;
     private final ProfileService profileService;
+    private final QRCodeGenerator qrCodeGenerator;
 
     public GroupService(GroupRepository groupRepository, UserRepository userRepository, GroupMemberRepository groupMemberRepository,
                         ProfileRepository profileRepository, ChannelService channelService,
-                        final ActivityRepository activityRepository, final ProfileService profileService) {
+                        final ActivityRepository activityRepository, final ProfileService profileService, QRCodeGenerator qrCodeGenerator) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.groupMemberRepository = groupMemberRepository;
@@ -43,6 +42,7 @@ public class GroupService {
         this.channelService = channelService;
         this.activityRepository = activityRepository;
         this.profileService = profileService;
+        this.qrCodeGenerator = qrCodeGenerator;
     }
 
     public boolean isInGroup(final long groupId, final long userId) {
@@ -246,7 +246,7 @@ public class GroupService {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         GroupMemberEntity invitedUser = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not invited or does not exist"));
         if (!invitedUser.isPending())
-            throw new UserAlreadyInGroupException("User has joined the groupe so there is not invite");
+            throw new UserAlreadyInGroupException("User has joined the group so there is not invite");
         groupMemberRepository.delete(invitedUser);
     }
 
@@ -278,7 +278,7 @@ public class GroupService {
         if (group.getOwner() == null)
             throw new ForbiddenOperationException("Cannot generate QR Code for public group");
         try {
-            return QRCodeGenerator.generateQRCode(String.format("tripnjoy-group-qr:%o",group.getId()));
+            return qrCodeGenerator.generateQRCode(String.format("tripnjoy-group-qr:%o",group.getId()));
         } catch (Exception e) {
             throw new QRCodeGenerationFailedException("Cannot generate QR code for group with id:" + groupId);
         }

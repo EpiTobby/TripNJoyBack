@@ -5,16 +5,18 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 
+@Component
 public class QRCodeGenerator {
-    public static int QR_CODE_DIMENSION = 200;
-    public static String CHARSET = "UTF-8";
+    private static int QR_CODE_DIMENSION = 200;
+    private static String CHARSET = "UTF-8";
 
-    public static String generateQRCode(String data)
+    public String generateQRCode(String data)
             throws WriterException, IOException {
         BitMatrix matrix = new MultiFormatWriter().encode(
                 new String(data.getBytes(CHARSET), CHARSET),

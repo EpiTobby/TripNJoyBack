@@ -9,6 +9,7 @@ import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.repository.*;
+import fr.tobby.tripnjoyback.utils.QRCodeGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,7 @@ class GroupServiceTest {
     @BeforeEach
     void initGroupService(){
         channelService = mock(ChannelService.class);
-        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository, mock(ProfileService.class));
+        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository, mock(ProfileService.class), mock(QRCodeGenerator.class));
         SpringContext.setContext(context);
     }
 
