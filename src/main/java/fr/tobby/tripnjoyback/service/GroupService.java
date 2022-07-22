@@ -6,6 +6,7 @@ import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
+import fr.tobby.tripnjoyback.model.JoinGroupWithoutInviteModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
@@ -15,9 +16,13 @@ import fr.tobby.tripnjoyback.model.request.UpdatePublicGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import fr.tobby.tripnjoyback.repository.*;
 import fr.tobby.tripnjoyback.utils.QRCodeGenerator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.*;
 
@@ -232,9 +237,17 @@ public class GroupService {
     }
 
     @Transactional
-    public void joinGroupWithoutInvite(long groupId, long userId) {
+    public void joinGroupWithoutInvite(long groupId, long userId, JoinGroupWithoutInviteModel model) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        try {
+            if (!model.getMessage().equals(getEncryptedStringToJoinGroup(groupId))) {
+                throw new ForbiddenOperationException();
+            }
+        }
+        catch(NoSuchAlgorithmException e){
+            throw new JoinGroupFailedException("Cannot add user to group");
+        }
         GroupMemberEntity groupMemberEntity = new GroupMemberEntity(groupEntity, userEntity, null, false);
         groupMemberRepository.save(groupMemberEntity);
         groupEntity.members.add(groupMemberEntity);
@@ -273,12 +286,19 @@ public class GroupService {
         group.setOwner(null);
     }
 
+    private String getEncryptedStringToJoinGroup(long groupId) throws NoSuchAlgorithmException {
+        String stringToHash = String.format("tripnjoy-group-qr:%o",groupId);
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        return Arrays.toString(digest.digest(stringToHash.getBytes(StandardCharsets.UTF_8)));
+    }
+
     public String getQRCode(long groupId){
         GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
         if (group.getOwner() == null)
             throw new ForbiddenOperationException("Cannot generate QR Code for public group");
         try {
-            return qrCodeGenerator.generateQRCode(String.format("tripnjoy-group-qr:%o",group.getId()));
+            String data = String.format("%o;%s",group.getId(), getEncryptedStringToJoinGroup(group.getId()));
+            return qrCodeGenerator.generateQRCode(data);
         } catch (Exception e) {
             throw new QRCodeGenerationFailedException("Cannot generate QR code for group with id:" + groupId);
         }

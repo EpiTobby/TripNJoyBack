@@ -2,9 +2,12 @@ package fr.tobby.tripnjoyback.service;
 
 import fr.tobby.tripnjoyback.SpringContext;
 import fr.tobby.tripnjoyback.entity.*;
+import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
+import fr.tobby.tripnjoyback.exception.JoinGroupFailedException;
 import fr.tobby.tripnjoyback.exception.UserNotConfirmedException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.GroupModel;
+import fr.tobby.tripnjoyback.model.JoinGroupWithoutInviteModel;
 import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
@@ -15,9 +18,14 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -193,16 +201,30 @@ class GroupServiceTest {
     }
 
     @Test
-    void addUserWithoutInviteTest() throws ParseException {
+    void addUserWithoutInviteTest() throws ParseException, NoSuchAlgorithmException {
+        CreatePrivateGroupRequest request = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
+        UserEntity owner = anyUser();
+        GroupModel model = groupService.createPrivateGroup(owner.getId(), request);
+        String stringToHash = String.format("tripnjoy-group-qr:%o",model.getId());
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        UserEntity user1 = anyUserWithEmail("usermaxsize1@gmail.com");
+        UserEntity user2 = anyUserWithEmail("usermaxsize2@gmail.com");
+        groupService.joinGroupWithoutInvite(model.getId(), user1.getId(),
+                new JoinGroupWithoutInviteModel(Arrays.toString(digest.digest(stringToHash.getBytes(StandardCharsets.UTF_8)))));
+        groupService.joinGroupWithoutInvite(model.getId(), user2.getId(),
+                new JoinGroupWithoutInviteModel(Arrays.toString(digest.digest(stringToHash.getBytes(StandardCharsets.UTF_8)))));
+        Optional<GroupModel> updatedModel = groupService.getGroup(model.getId());
+        updatedModel.ifPresent(groupModel -> Assertions.assertEquals(3, groupModel.getMembers().size()));
+    }
+
+    @Test
+    void addUserWithoutInviteFailureTest() throws ParseException {
         CreatePrivateGroupRequest request = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
         UserEntity owner = anyUser();
         GroupModel model = groupService.createPrivateGroup(owner.getId(), request);
         UserEntity user1 = anyUserWithEmail("usermaxsize1@gmail.com");
-        UserEntity user2 = anyUserWithEmail("usermaxsize2@gmail.com");
-        groupService.joinGroupWithoutInvite(model.getId(), user1.getId());
-        groupService.joinGroupWithoutInvite(model.getId(), user2.getId());
-        Optional<GroupModel> updatedModel = groupService.getGroup(model.getId());
-        updatedModel.ifPresent(groupModel -> Assertions.assertEquals(3, groupModel.getMembers().size()));
+        Assertions.assertThrows(ForbiddenOperationException.class, () -> groupService.joinGroupWithoutInvite(model.getId(), user1.getId(),
+                new JoinGroupWithoutInviteModel("a")));
     }
 
     @Test
