@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.controller;
 
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
+import fr.tobby.tripnjoyback.model.JoinGroupWithoutInviteModel;
 import fr.tobby.tripnjoyback.model.ModelWithEmail;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
@@ -163,9 +164,9 @@ public class GroupController {
     @Operation(summary = "Accept the invitation to the group")
     @ApiResponse(responseCode = "200", description = "The user has joined the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
-    public void joinGroupWithoutInvite(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
+    public void joinGroupWithoutInvite(@PathVariable("group") final long groupId, @PathVariable("id") final long userId, @RequestBody JoinGroupWithoutInviteModel model) {
         idCheckerService.checkId(userId);
-        groupService.joinGroupWithoutInvite(groupId, userId);
+        groupService.joinGroupWithoutInvite(groupId, userId, model);
     }
 
     @PatchMapping("{group}/decline/{id}")
@@ -233,6 +234,14 @@ public class GroupController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(UpdateGroupException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(JoinGroupFailedException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(JoinGroupFailedException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }
