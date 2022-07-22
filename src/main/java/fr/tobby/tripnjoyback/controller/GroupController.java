@@ -159,6 +159,15 @@ public class GroupController {
         groupService.joinGroup(groupId, userId);
     }
 
+    @PatchMapping("private/{group}/join/{id}")
+    @Operation(summary = "Accept the invitation to the group")
+    @ApiResponse(responseCode = "200", description = "The user has joined the group")
+    @ApiResponse(responseCode = "422", description = "Group or User does not exist")
+    public void joinGroupWithoutInvite(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
+        idCheckerService.checkId(userId);
+        groupService.joinGroupWithoutInvite(groupId, userId);
+    }
+
     @PatchMapping("{group}/decline/{id}")
     @Operation(summary = "Decline the invitation to the group")
     @ApiResponse(responseCode = "200", description = "The user has declined the invite")
@@ -185,6 +194,15 @@ public class GroupController {
         {
             throw new ForbiddenOperationException("This group is already public");
         }
+    }
+
+    @GetMapping("private/{group}/qrcode")
+    @Operation(summary = "Get the QR code to join a private group")
+    @ApiResponse(responseCode = "200", description = "Returns the encoded qr code")
+    public String getQRCode(@PathVariable("group") final long groupId) {
+        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+            throw new ForbiddenOperationException();
+        return groupService.getQRCode(groupId);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
