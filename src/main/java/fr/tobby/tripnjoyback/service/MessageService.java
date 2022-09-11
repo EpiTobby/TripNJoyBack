@@ -52,7 +52,7 @@ public class MessageService {
 
         MessageEntity created = messageRepository.save(new MessageEntity(sender, channel, message.getContent(), message.getType().getEntity(), new Date()));
         logger.debug("Posted message in channel {} by user {}, content: {}", channel.getName(), sender.getEmail(), message.getContent());
-        notificationService.sendToTopic("chat/" + channel.getGroup().getId(),
+        notificationService.sendToTopic("chat_" + channel.getGroup().getId(),
                 String.format("%s : %s#%s", sender.getFirstname(), channel.getGroup().getName(), channel.getName()),
                 message.getContent(),
                 Map.of("channel", String.valueOf(channelId),
