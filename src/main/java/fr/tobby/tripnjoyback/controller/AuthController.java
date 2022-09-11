@@ -144,6 +144,14 @@ public class AuthController {
         return "Invalid username or password";
     }
 
+    @ExceptionHandler(ForbiddenOperationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String creationError(ForbiddenOperationException exception) {
+        logger.debug(ERROR_RESPONSE_MSG, exception);
+        return exception.getMessage();
+    }
+
     @ExceptionHandler(UserCreationException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
