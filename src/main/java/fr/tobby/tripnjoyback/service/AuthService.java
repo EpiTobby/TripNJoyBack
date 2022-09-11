@@ -9,6 +9,7 @@ import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.GoogleTokenVerificationModel;
 import fr.tobby.tripnjoyback.model.UserModel;
+import fr.tobby.tripnjoyback.model.UserRole;
 import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.request.auth.GoogleRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
@@ -104,6 +105,13 @@ public class AuthService {
         return created;
     }
 
+    @Transactional
+    public UserModel createAdmin(UserCreationRequest model) throws UserCreationException {
+        UserEntity userEntity = userRepository.getById(createUser(model).getId());
+        userEntity.setRoles(List.of(userRoleRepository.getByName("admin"),userRoleRepository.getByName("default")));
+        return UserModel.of(userEntity);
+    }
+
     UserEntity createUser(UserEntity entity) {
         if (userRepository.findByEmail(entity.getEmail()).isPresent())
             throw new UserCreationException("Email is already in use");
@@ -165,6 +173,18 @@ public class AuthService {
         UserModel userModel = userService.findByEmail(username).orElseThrow();
         String token = tokenManager.generateFor(userDetails, userModel.getId());
         logger.debug("User {} logged in. jwt = {}", username, token);
+        return token;
+    }
+
+    public String loginAdmin(@NonNull String username, @NonNull String password) throws AuthenticationException {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UserModel userModel = userService.findByEmail(username).orElseThrow();
+        if (!userModel.getRoles().contains(UserRole.ADMIN))
+            throw new ForbiddenOperationException("You cannot perform this operation.");
+        String token = tokenManager.generateFor(userDetails, userModel.getId());
+        logger.debug("Admin {} logged in. jwt = {}", username, token);
         return token;
     }
 
