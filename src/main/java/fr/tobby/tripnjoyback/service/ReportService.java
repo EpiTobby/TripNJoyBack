@@ -19,10 +19,12 @@ import java.util.List;
 public class ReportService {
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
+    private final IdCheckerService idCheckerService;
 
-    public ReportService(ReportRepository reportRepository, UserRepository userRepository) {
+    public ReportService(ReportRepository reportRepository, UserRepository userRepository, IdCheckerService idCheckerService) {
         this.reportRepository = reportRepository;
         this.userRepository = userRepository;
+        this.idCheckerService = idCheckerService;
     }
 
     @Transactional
@@ -47,6 +49,8 @@ public class ReportService {
     @Transactional
     public ReportModel updateReport(long reportId, UpdateReportRequest updateReportRequest){
         ReportEntity reportEntity = reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException("No report found with id: " + reportId));
+        if (reportEntity.getSubmitter().getId() != idCheckerService.getCurrentUserId())
+            throw new ForbiddenOperationException("You cannot perform this operation.");
         reportEntity.setReason(updateReportRequest.getReason().toString());
         reportEntity.setDetails(updateReportRequest.getDetails());
         return ReportModel.of(reportEntity);
@@ -54,6 +58,14 @@ public class ReportService {
 
     @Transactional
     public void deleteReport(long reportId){
+        ReportEntity reportEntity = reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException("No report found with id: " + reportId));
+        if (reportEntity.getSubmitter().getId() != idCheckerService.getCurrentUserId())
+            throw new ForbiddenOperationException("You cannot perform this operation.");
+        reportRepository.delete(reportEntity);
+    }
+
+    @Transactional
+    public void deleteReportAdmin(long reportId){
         ReportEntity reportEntity = reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException("No report found with id: " + reportId));
         reportRepository.delete(reportEntity);
     }

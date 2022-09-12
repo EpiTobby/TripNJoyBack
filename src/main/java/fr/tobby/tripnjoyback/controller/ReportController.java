@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.controller;
 
+import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.ReportNotFoundException;
 import fr.tobby.tripnjoyback.model.ReportModel;
 import fr.tobby.tripnjoyback.model.request.SubmitReportRequest;
@@ -44,7 +45,7 @@ public class ReportController {
     @GetMapping("admin/{id}")
     @PreAuthorize("hasAuthority('admin')")
     @Operation(summary = "Get all the report of a user")
-    public List<ReportModel> getByReporterUserId(@PathVariable("id") long reportedUserId) {
+    public List<ReportModel> getByReportedUserId(@PathVariable("id") long reportedUserId) {
         return reportService.getByReportedUserId(reportedUserId);
     }
 
@@ -56,7 +57,7 @@ public class ReportController {
         return reportService.updateReport(reportId, updateReportRequest);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("{id}/")
     @Operation(summary = "Delete a report")
     @ApiResponse(responseCode = "200", description = "The report has been deleted")
     @ApiResponse(responseCode = "404", description = "The report does not exist")
@@ -64,10 +65,27 @@ public class ReportController {
         reportService.deleteReport(reportId);
     }
 
+    @DeleteMapping("{id}/admin")
+    @Operation(summary = "Delete a report")
+    @PreAuthorize("hasAuthority('admin')")
+    @ApiResponse(responseCode = "200", description = "The report has been deleted")
+    @ApiResponse(responseCode = "404", description = "The report does not exist")
+    public void deleteReportAdmin(@PathVariable("id") long reportId) {
+        reportService.deleteReportAdmin(reportId);
+    }
+
     @ExceptionHandler(ReportNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String getError(ReportNotFoundException exception) {
+        logger.debug("Error on request", exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(ForbiddenOperationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String getError(ForbiddenOperationException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }

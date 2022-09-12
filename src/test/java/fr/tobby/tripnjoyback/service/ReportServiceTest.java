@@ -5,6 +5,7 @@ import fr.tobby.tripnjoyback.entity.CityEntity;
 import fr.tobby.tripnjoyback.entity.GenderEntity;
 import fr.tobby.tripnjoyback.entity.LanguageEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
+import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.model.ReportModel;
 import fr.tobby.tripnjoyback.model.ReportReason;
 import fr.tobby.tripnjoyback.model.request.SubmitReportRequest;
@@ -19,6 +20,9 @@ import org.springframework.context.ApplicationContext;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @DataJpaTest
 class ReportServiceTest {
@@ -52,7 +56,9 @@ class ReportServiceTest {
     @BeforeEach
     void setUp()
     {
-        reportService = new ReportService(reportRepository, userRepository);
+        IdCheckerService idCheckerService = mock(IdCheckerService.class);
+        when(idCheckerService.getCurrentUserId()).thenReturn(1L);
+        reportService = new ReportService(reportRepository, userRepository, idCheckerService);
     }
 
     @AfterEach
@@ -87,7 +93,7 @@ class ReportServiceTest {
     }
 
     @Test
-    void submitReport() throws ParseException{
+    void submitReportTest() throws ParseException{
         String submitterEmail = "submitter@gmail.com";
         UserEntity submitter = anyUser(submitterEmail);
         UserEntity badUser = anyUser("user@gmail.com");
@@ -102,10 +108,21 @@ class ReportServiceTest {
     }
 
     @Test
-    void updateReport() throws ParseException{
-        String expectedDetails = "Il fait pipi partout";
+    void submitReportSelfTest() throws ParseException{
         String submitterEmail = "submitter@gmail.com";
         UserEntity submitter = anyUser(submitterEmail);
+        Assertions.assertThrows(ForbiddenOperationException.class, () -> reportService.submitReport(submitterEmail, SubmitReportRequest.builder()
+                .reportedUserId(submitter.getId())
+                .reason(ReportReason.INNAPROPRIATE_BEHAVIOR)
+                .details("Il fait caca partout")
+                .build()));
+    }
+
+    @Test
+    void updateReportTest() throws ParseException{
+        String expectedDetails = "Il fait pipi partout";
+        String submitterEmail = "submitter@gmail.com";
+        anyUser(submitterEmail);
         UserEntity badUser = anyUser("user@gmail.com");
         long reportId = reportService.submitReport(submitterEmail, SubmitReportRequest.builder()
                 .reportedUserId(badUser.getId())
@@ -121,7 +138,7 @@ class ReportServiceTest {
     }
 
     @Test
-    void deleteReport() throws ParseException{
+    void deleteReportTest() throws ParseException{
         String submitterEmail = "submitter@gmail.com";
         UserEntity submitter = anyUser(submitterEmail);
         UserEntity badUser = anyUser("user@gmail.com");
@@ -130,15 +147,15 @@ class ReportServiceTest {
                 .reason(ReportReason.INNAPROPRIATE_BEHAVIOR)
                 .details("Il fait caca partout")
                 .build()).getId();
-        reportService.deleteReport(reportId);
+        reportService.deleteReportAdmin(reportId);
         Assertions.assertTrue(reportService.getBySubmitterId(submitter.getId()).isEmpty());
     }
 
     @Test
-    void getByReportedUser() throws ParseException{
+    void getByReportedUserTest() throws ParseException{
         int numberOfReports = 10;
         String submitterEmail = "submitter@gmail.com";
-        UserEntity submitter = anyUser(submitterEmail);
+        anyUser(submitterEmail);
         UserEntity badUser = anyUser("user@gmail.com");
         for (int i = 0; i < numberOfReports; i++) {
             reportService.submitReport(submitterEmail, SubmitReportRequest.builder()
