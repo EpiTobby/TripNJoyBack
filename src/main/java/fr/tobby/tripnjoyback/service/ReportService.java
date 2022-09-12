@@ -49,7 +49,7 @@ public class ReportService {
     @Transactional
     public ReportModel updateReport(long reportId, UpdateReportRequest updateReportRequest){
         ReportEntity reportEntity = reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException("No report found with id: " + reportId));
-        if (reportEntity.getSubmitter().getId() != idCheckerService.getCurrentUserId())
+        if (reportEntity.getSubmitter().getId() == idCheckerService.getCurrentUserId())
             throw new ForbiddenOperationException("You cannot perform this operation.");
         reportEntity.setReason(updateReportRequest.getReason().toString());
         reportEntity.setDetails(updateReportRequest.getDetails());
@@ -59,7 +59,7 @@ public class ReportService {
     @Transactional
     public void deleteReport(long reportId){
         ReportEntity reportEntity = reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException("No report found with id: " + reportId));
-        if (reportEntity.getSubmitter().getId() != idCheckerService.getCurrentUserId())
+        if (reportEntity.getSubmitter().getId() == idCheckerService.getCurrentUserId())
             throw new ForbiddenOperationException("You cannot perform this operation.");
         reportRepository.delete(reportEntity);
     }
