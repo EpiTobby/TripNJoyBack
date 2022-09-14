@@ -10,6 +10,7 @@ import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
+import fr.tobby.tripnjoyback.notification.INotificationService;
 import fr.tobby.tripnjoyback.repository.GroupRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
@@ -38,13 +39,14 @@ public class MatchMaker {
     private final GroupService groupService;
     private final GroupRepository groupRepository;
     private final ProfileService profileService;
+    private final INotificationService notificationService;
 
     private long taskIndex = 1L;
     private final Map<Long, CompletableFuture<MatchMakingResult>> tasks = new HashMap<>();
 
     public MatchMaker(final ProfileRepository profileRepository, final UserRepository userRepository, final MatchMakerScoreComputer scoreComputer,
                       final GroupService groupService, final GroupRepository groupRepository,
-                      final ProfileService profileService)
+                      final ProfileService profileService, final INotificationService notificationService)
     {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
@@ -52,6 +54,7 @@ public class MatchMaker {
         this.groupService = groupService;
         this.groupRepository = groupRepository;
         this.profileService = profileService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -93,6 +96,11 @@ public class MatchMaker {
             logger.info("User {} joining group {}", user.getUserId(), group.getId());
             profileService.setActiveProfile(user.getProfile().getId(), false);
             groupService.addUserToPublicGroup(group.getId(), user.getUserId(), user.getProfile().getId());
+            notificationService.sendToGroup(group.getId(),
+                    "Nouveau membre",
+                    String.format("%s a rejoint l'aventure !", userRepository.findById(user.getUserId()).orElseThrow().getFirstname()),
+                    Map.of("newMemberId", String.valueOf(user.getUserId()),
+                            "groupId", String.valueOf(group.getId())));
             return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.JOINED, GroupModel.of(group)));
         }
 
@@ -119,6 +127,13 @@ public class MatchMaker {
             matchedEntity.setWaitingForGroup(false);
             profileService.setActiveProfile(matched.getProfile().getId(), false);
             profileService.setActiveProfile(user.getProfile().getId(), false);
+            if (matchedEntity.getFirebaseToken() != null)
+            {
+                notificationService.sendToToken(matchedEntity.getFirebaseToken(),
+                        "Groupe trouvé",
+                        "Un nouveau groupe de voyage a été créé",
+                        Map.of("groupId", String.valueOf(created.getId())));
+            }
             return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.CREATED, created));
         }
         else

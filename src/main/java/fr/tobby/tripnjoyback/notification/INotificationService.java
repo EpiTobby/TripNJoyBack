@@ -52,4 +52,10 @@ public interface INotificationService {
                                  .build();
         return send(message);
     }
+
+    @Nullable
+    default String sendToGroup(long groupId, String title, String body, Map<String, String> data)
+    {
+        return sendToTopic("group_" + groupId, title, body, data);
+    }
 }
