@@ -12,6 +12,7 @@ import fr.tobby.tripnjoyback.model.request.UserUpdateRequest;
 import fr.tobby.tripnjoyback.repository.GenderRepository;
 import fr.tobby.tripnjoyback.repository.LanguageRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -97,5 +98,19 @@ public class UserService {
         profileService.deleteProfilesByUserId(userId);
         userRepository.delete(user);
         userMailUtils.sendDeleteAccountByAdminMail(UserModel.of(user), deleteUserByAdminRequest.getReason());
+    }
+
+    @Nullable
+    public String getFirebaseToken(long userId)
+    {
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        return user.getFirebaseToken();
+    }
+
+    @Transactional
+    public void setFirebaseToken(long userId, @Nullable String token)
+    {
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        user.setFirebaseToken(token);
     }
 }
