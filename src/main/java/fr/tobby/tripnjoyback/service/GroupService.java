@@ -295,7 +295,11 @@ public class GroupService {
     }
 
     public GroupMemoriesResponse getAllMemories(long groupId) {
-        groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
+        var group = groupRepository.findById(groupId);
+
+        if (group.isEmpty())
+            throw new GroupNotFoundException(groupId);
+
         List<GroupMemoryEntity> groupMemoryEntities = groupMemoryRepository.findByGroupId(groupId);
         return new GroupMemoriesResponse(groupMemoryEntities.stream().map(GroupMemoryEntity::getMemoryUrl).collect(Collectors.toList()));
     }
