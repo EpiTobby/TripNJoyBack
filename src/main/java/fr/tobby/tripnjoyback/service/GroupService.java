@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.entity.*;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
+import fr.tobby.tripnjoyback.model.JoinGroupWithoutInviteModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
@@ -12,15 +13,21 @@ import fr.tobby.tripnjoyback.model.request.UpdatePublicGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
 import fr.tobby.tripnjoyback.model.response.GroupMemoriesResponse;
 import fr.tobby.tripnjoyback.repository.*;
+import fr.tobby.tripnjoyback.utils.QRCodeGenerator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class GroupService {
@@ -33,9 +40,12 @@ public class GroupService {
     private final ProfileService profileService;
     private final GroupMemoryRepository groupMemoryRepository;
 
+    private final QRCodeGenerator qrCodeGenerator;
+    private final String qrCodeSecret;
+
     public GroupService(GroupRepository groupRepository, UserRepository userRepository, GroupMemberRepository groupMemberRepository,
                         ProfileRepository profileRepository, ChannelService channelService,
-                        final ActivityRepository activityRepository, final ProfileService profileService, GroupMemoryRepository groupMemoryRepository) {
+                        final ActivityRepository activityRepository, final ProfileService profileService, GroupMemoryRepository groupMemoryRepository, QRCodeGenerator qrCodeGenerator, @Value("${qrcode.secret}") final String qrCodeSecret) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.groupMemberRepository = groupMemberRepository;
@@ -44,6 +54,8 @@ public class GroupService {
         this.activityRepository = activityRepository;
         this.profileService = profileService;
         this.groupMemoryRepository = groupMemoryRepository;
+        this.qrCodeGenerator = qrCodeGenerator;
+        this.qrCodeSecret = qrCodeSecret;
     }
 
     public boolean isInGroup(final long groupId, final long userId) {
@@ -62,6 +74,12 @@ public class GroupService {
     public Collection<GroupModel> getUserGroups(long userId) {
         List<GroupEntity> groups = groupRepository.findAll();
         return groups.stream().filter(g -> g.members.stream().anyMatch(m -> m.getUser().getId() == userId && !m.isPending())).map(GroupModel::of).toList();
+    }
+
+    public Optional<GroupModel> getGroup(long groupId)
+    {
+        return groupRepository.findById(groupId)
+                              .map(GroupModel::of);
     }
 
     public Collection<GroupModel> getUserInvites(long userId) {
@@ -120,7 +138,7 @@ public class GroupService {
     public void addUserToPublicGroup(long groupId, long userId, long profileId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with this id " + userId));
-        if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == userEntity.getId()))
+        if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId().equals(userEntity.getId())))
             throw new UserAlreadyInGroupException("User already in group");
         ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with id " + profileId));
         groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, profileEntity, true));
@@ -132,7 +150,7 @@ public class GroupService {
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("No user with this email " + email));
         if (!userEntity.isConfirmed())
             throw new UserNotConfirmedException("The user you want to invite is not confirmed");
-        if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId() == userEntity.getId()))
+        if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId().equals(userEntity.getId())))
             throw new UserAlreadyInGroupException("User already in group");
         GroupMemberEntity groupMemberEntity = groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, null, true));
         groupEntity.members.add(groupMemberEntity);
@@ -210,10 +228,7 @@ public class GroupService {
     }
 
     @Transactional
-    public void joinGroup(long groupId, long userId) {
-        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-        GroupMemberEntity invitedUser = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not invited or does not exist"));
-        invitedUser.setPending(false);
+    protected void updateGroupState(GroupEntity groupEntity){
         if (groupEntity.getMaxSize() == groupEntity.getNumberOfNonPendingUsers()) {
             groupEntity.members.stream().filter(GroupMemberEntity::isPending).forEach(groupMemberRepository::delete);
             groupEntity.members.removeIf(GroupMemberEntity::isPending);
@@ -222,11 +237,37 @@ public class GroupService {
     }
 
     @Transactional
+    public void joinGroup(long groupId, long userId) {
+        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
+        GroupMemberEntity invitedUser = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not invited or does not exist"));
+        invitedUser.setPending(false);
+        updateGroupState(groupEntity);
+    }
+
+    @Transactional
+    public void joinGroupWithoutInvite(long groupId, long userId, JoinGroupWithoutInviteModel model) {
+        GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        try {
+            if (!model.getMessage().equals(getEncryptedStringToJoinGroup(groupId))) {
+                throw new ForbiddenOperationException();
+            }
+        }
+        catch(NoSuchAlgorithmException e){
+            throw new JoinGroupFailedException("Cannot add user to group");
+        }
+        GroupMemberEntity groupMemberEntity = new GroupMemberEntity(groupEntity, userEntity, null, false);
+        groupMemberRepository.save(groupMemberEntity);
+        groupEntity.members.add(groupMemberEntity);
+        updateGroupState(groupEntity);
+    }
+
+    @Transactional
     public void declineGroupInvite(long groupId, long userId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         GroupMemberEntity invitedUser = groupEntity.members.stream().filter(m -> m.getUser().getId() == userId).findFirst().orElseThrow(() -> new UserNotFoundException("User not invited or does not exist"));
         if (!invitedUser.isPending())
-            throw new UserAlreadyInGroupException("User has joined the groupe so there is not invite");
+            throw new UserAlreadyInGroupException("User has joined the group so there is not invite");
         groupMemberRepository.delete(invitedUser);
     }
 
@@ -260,11 +301,29 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupMemoriesResponse addMemory(long groupId, String memoryUrl) {
-        GroupMemoryEntity groupMemoryEntity = new GroupMemoryEntity();
-        groupMemoryEntity.setGroup(groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId)));
-        groupMemoryEntity.setMemoryUrl(memoryUrl);
-        groupMemoryRepository.save(groupMemoryEntity);
-        return new GroupMemoriesResponse(groupMemoryRepository.findByGroupId(groupId).stream().map(GroupMemoryEntity::getMemoryUrl).collect(Collectors.toList()));
+    public GroupMemoriesResponse addMemory(long groupId, String memoryUrl){
+            GroupMemoryEntity groupMemoryEntity = new GroupMemoryEntity();
+            groupMemoryEntity.setGroup(groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId)));
+            groupMemoryEntity.setMemoryUrl(memoryUrl);
+            groupMemoryRepository.save(groupMemoryEntity);
+            return new GroupMemoriesResponse(groupMemoryRepository.findByGroupId(groupId).stream().map(GroupMemoryEntity::getMemoryUrl).collect(Collectors.toList()));
+        }
+
+    private String getEncryptedStringToJoinGroup(long groupId) throws NoSuchAlgorithmException {
+        String stringToHash = String.format("tripnjoy-group-qr:%o;%s",groupId,qrCodeSecret);
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        return Arrays.toString(digest.digest(stringToHash.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    public String getQRCode(long groupId){
+        GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
+        if (group.getOwner() == null)
+            throw new ForbiddenOperationException("Cannot generate QR Code for public group");
+        try {
+            String data = String.format("%o;%s",group.getId(), getEncryptedStringToJoinGroup(group.getId()));
+            return qrCodeGenerator.generateQRCode(data);
+        } catch (Exception e) {
+            throw new QRCodeGenerationFailedException("Cannot generate QR code for group with id:" + groupId);
+        }
     }
 }

@@ -9,6 +9,7 @@ import fr.tobby.tripnjoyback.exception.MessageNotFoundException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.MessageType;
 import fr.tobby.tripnjoyback.model.request.messaging.PostMessageRequest;
+import fr.tobby.tripnjoyback.notification.INotificationService;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import fr.tobby.tripnjoyback.repository.messaging.ChannelRepository;
 import fr.tobby.tripnjoyback.repository.messaging.MessageRepository;
@@ -21,6 +22,7 @@ import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MessageService {
@@ -29,13 +31,16 @@ public class MessageService {
     private final ChannelRepository channelRepository;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
+    private final INotificationService notificationService;
 
     public MessageService(final ChannelRepository channelRepository,
-                          final MessageRepository messageRepository, final UserRepository userRepository)
+                          final MessageRepository messageRepository, final UserRepository userRepository,
+                          final INotificationService notificationService)
     {
         this.channelRepository = channelRepository;
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     public MessageEntity postMessage(final long channelId, final PostMessageRequest message)
@@ -47,6 +52,12 @@ public class MessageService {
 
         MessageEntity created = messageRepository.save(new MessageEntity(sender, channel, message.getContent(), message.getType().getEntity(), new Date()));
         logger.debug("Posted message in channel {} by user {}, content: {}", channel.getName(), sender.getEmail(), message.getContent());
+        notificationService.sendToTopic("chat_" + channel.getGroup().getId(),
+                String.format("%s : %s#%s", sender.getFirstname(), channel.getGroup().getName(), channel.getName()),
+                message.getContent(),
+                Map.of("channel", String.valueOf(channelId),
+                        "sender", String.valueOf(sender.getId()),
+                        "content", message.getContent()));
         return created;
     }
 

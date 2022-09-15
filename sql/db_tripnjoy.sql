@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS "users" (
                          "created_date"      timestamp,
                          "confirmed"         boolean,
                          "waiting_for_group" boolean default false not null,
-                         "language_id"      int references languages
+                         "language_id"      int references languages,
+                         "firebase_token" varchar
 );
 
 CREATE TABLE IF NOT EXISTS "states"
