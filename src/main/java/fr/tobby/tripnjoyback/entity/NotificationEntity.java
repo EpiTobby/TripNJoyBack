@@ -15,13 +15,15 @@ public class NotificationEntity {
 
     private String title;
     private String body;
+    private String firebaseId;
     @ManyToOne
     private UserEntity user;
 
-    public NotificationEntity(final String title, final String body, final UserEntity user)
+    public NotificationEntity(final String title, final String body, final UserEntity user, final String firebaseId)
     {
         this.title = title;
         this.body = body;
         this.user = user;
+        this.firebaseId = firebaseId;
     }
 }

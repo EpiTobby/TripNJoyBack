@@ -10,6 +10,7 @@ public class NotificationModel {
     private final String body;
     private final long userId;
     private final long id;
+    private final String firebaseId;
 
     @JsonProperty
     public String getTitle()
@@ -35,13 +36,20 @@ public class NotificationModel {
         return id;
     }
 
+    @JsonProperty
+    public String getFirebaseId()
+    {
+        return firebaseId;
+    }
+
     public static NotificationModel from(NotificationEntity entity)
     {
         return new NotificationModel(
                 entity.getTitle(),
                 entity.getBody(),
                 entity.getUser().getId(),
-                entity.getId()
+                entity.getId(),
+                entity.getFirebaseId()
         );
     }
 }

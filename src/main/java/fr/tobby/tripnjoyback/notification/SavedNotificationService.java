@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -20,20 +21,24 @@ public class SavedNotificationService {
     private final NotificationRepository repository;
     private final UserRepository userRepository;
     private final IdCheckerService idCheckerService;
+    private final INotificationService notificationService;
 
     public SavedNotificationService(final NotificationRepository repository, final UserRepository userRepository,
-                                    final IdCheckerService idCheckerService)
+                                    final IdCheckerService idCheckerService,
+                                    final INotificationService notificationService)
     {
         this.repository = repository;
         this.userRepository = userRepository;
         this.idCheckerService = idCheckerService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
-    public NotificationModel save(long userId, String title, String body)
+    public NotificationModel send(long userId, String title, String body, Map<String, String> data)
     {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        NotificationEntity created = repository.save(new NotificationEntity(title, body, user));
+        String id = notificationService.sendToToken(user.getFirebaseToken(), title, body, data);
+        NotificationEntity created = repository.save(new NotificationEntity(title, body, user, id));
         return NotificationModel.from(created);
     }
 

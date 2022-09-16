@@ -8,5 +8,6 @@ create table notifications
         references users
         on update cascade on delete cascade,
     title varchar,
-    body varchar
+    body varchar,
+    firebase_id varchar
 );
