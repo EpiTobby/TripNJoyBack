@@ -10,7 +10,7 @@ import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
-import fr.tobby.tripnjoyback.notification.INotificationService;
+import fr.tobby.tripnjoyback.notification.SavedNotificationService;
 import fr.tobby.tripnjoyback.repository.GroupRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
@@ -39,14 +39,14 @@ public class MatchMaker {
     private final GroupService groupService;
     private final GroupRepository groupRepository;
     private final ProfileService profileService;
-    private final INotificationService notificationService;
+    private final SavedNotificationService notificationService;
 
     private long taskIndex = 1L;
     private final Map<Long, CompletableFuture<MatchMakingResult>> tasks = new HashMap<>();
 
     public MatchMaker(final ProfileRepository profileRepository, final UserRepository userRepository, final MatchMakerScoreComputer scoreComputer,
                       final GroupService groupService, final GroupRepository groupRepository,
-                      final ProfileService profileService, final INotificationService notificationService)
+                      final ProfileService profileService, final SavedNotificationService notificationService)
     {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
@@ -129,7 +129,7 @@ public class MatchMaker {
             profileService.setActiveProfile(user.getProfile().getId(), false);
             if (matchedEntity.getFirebaseToken() != null)
             {
-                notificationService.sendToToken(matchedEntity.getFirebaseToken(),
+                notificationService.sendToUser(matchedEntity.getId(),
                         "Groupe trouvé",
                         "Un nouveau groupe de voyage a été créé",
                         Map.of("groupId", String.valueOf(created.getId())));

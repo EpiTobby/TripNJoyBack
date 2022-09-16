@@ -6,7 +6,7 @@ import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
-import fr.tobby.tripnjoyback.notification.NotificationService;
+import fr.tobby.tripnjoyback.notification.SavedNotificationService;
 import fr.tobby.tripnjoyback.repository.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
@@ -76,7 +76,7 @@ class MatchMakerTest {
         matchMaker = new MatchMaker(profileRepository, userRepository, new MatchMakerScoreComputer(),
                 groupService,
                 groupRepository,
-                profileService, mock(NotificationService.class));
+                profileService, mock(SavedNotificationService.class));
     }
 
     /**
