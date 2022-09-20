@@ -4,12 +4,14 @@ import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.JoinGroupWithoutInviteModel;
 import fr.tobby.tripnjoyback.model.ModelWithEmail;
+import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePublicGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupInfoModel;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
+import fr.tobby.tripnjoyback.model.response.GroupMemoriesResponse;
 import fr.tobby.tripnjoyback.service.GroupService;
 import fr.tobby.tripnjoyback.service.IdCheckerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,8 +32,7 @@ public class GroupController {
     private final GroupService groupService;
     private final IdCheckerService idCheckerService;
 
-    public GroupController(GroupService groupService, final IdCheckerService idCheckerService)
-    {
+    public GroupController(GroupService groupService, final IdCheckerService idCheckerService) {
         this.groupService = groupService;
         this.idCheckerService = idCheckerService;
     }
@@ -39,26 +40,23 @@ public class GroupController {
     @GetMapping("{id}")
     @Operation(summary = "Get all the group of the user")
     @ApiResponse(responseCode = "200", description = "Return the list of groups the user is in")
-    public Collection<GroupModel> getUserGroups(@PathVariable("id") final long userId)
-    {
+    public Collection<GroupModel> getUserGroups(@PathVariable("id") final long userId) {
         return groupService.getUserGroups(userId);
     }
 
     @GetMapping("invites/{id}")
     @Operation(summary = "Get all the group invitation of the user")
     @ApiResponse(responseCode = "200", description = "Return the list of groups the user is invited to")
-    public Collection<GroupModel> getUserInvites(@PathVariable("id") final long userId)
-    {
+    public Collection<GroupModel> getUserInvites(@PathVariable("id") final long userId) {
         return groupService.getUserInvites(userId);
     }
 
     @GetMapping("info/{id}")
     @Operation(summary = "Get info about a group")
-    public GroupInfoModel getInfo(@PathVariable("id") final long groupId)
-    {
+    public GroupInfoModel getInfo(@PathVariable("id") final long groupId) {
         return groupService.getGroup(groupId)
-                           .map(GroupInfoModel::of)
-                           .orElseThrow(GroupNotFoundException::new);
+                .map(GroupInfoModel::of)
+                .orElseThrow(GroupNotFoundException::new);
     }
 
     private void checkOwnership(long groupId, Authentication authentication) {
@@ -71,8 +69,7 @@ public class GroupController {
     @Operation(summary = "Remove the user from a group")
     @ApiResponse(responseCode = "200", description = "The user has left the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
-    public void leaveGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId)
-    {
+    public void leaveGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
         idCheckerService.checkId(userId);
         groupService.removeUserFromGroup(groupId, userId);
     }
@@ -82,8 +79,7 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "User information")
     @ApiResponse(responseCode = "422", description = "User or group not found")
     @ApiResponse(responseCode = "403", description = "You are not allowed to view members of this group")
-    public GroupMemberModel getMember(@PathVariable("groupId") final long groupId, @PathVariable("userId") final long userId)
-    {
+    public GroupMemberModel getMember(@PathVariable("groupId") final long groupId, @PathVariable("userId") final long userId) {
         if (!groupService.isInGroup(groupId, idCheckerService.getCurrentUserId()))
             throw new ForbiddenOperationException("You are not a member of this group");
         return groupService.getMember(groupId, userId);
@@ -114,8 +110,7 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "The user is removed")
     @ApiResponse(responseCode = "403", description = "The client is not the owner of the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
-    public void removeUserFromPrivateGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId)
-    {
+    public void removeUserFromPrivateGroup(@PathVariable("group") final long groupId, @PathVariable("id") final long userId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         checkOwnership(groupId, authentication);
         groupService.removeUserFromGroup(groupId, userId);
@@ -183,18 +178,30 @@ public class GroupController {
     @ApiResponse(responseCode = "422", description = "Group does not exist")
     @ApiResponse(responseCode = "403", description = "User is not in the group, or the group is already public")
     @PatchMapping("private/{groupId}/public")
-    public void setGroupPublic(@PathVariable("groupId") final long groupId, @RequestBody ProfileCreationRequest profile)
-    {
+    public void setGroupPublic(@PathVariable("groupId") final long groupId, @RequestBody ProfileCreationRequest profile) {
         if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
-        try
-        {
+        try {
             groupService.setGroupPublic(groupId, profile);
-        }
-        catch (IllegalArgumentException e)
-        {
+        } catch (IllegalArgumentException e) {
             throw new ForbiddenOperationException("This group is already public");
         }
+    }
+
+    @Operation(summary = "Get all the memories from a group")
+    @ApiResponse(responseCode = "200", description = "The memories are returned")
+    @ApiResponse(responseCode = "422", description = "Group does not exist")
+    @GetMapping("{groupId}/memories")
+    public GroupMemoriesResponse getMemories(@PathVariable("groupId") final long groupId) {
+        return groupService.getAllMemories(groupId);
+    }
+
+    @Operation(summary = "Add memory to a group")
+    @ApiResponse(responseCode = "200", description = "The memory is added to the group")
+    @ApiResponse(responseCode = "422", description = "Group or Memory does not exist")
+    @PostMapping("{groupId}/memories")
+    public GroupMemoriesResponse addMemory(@PathVariable("groupId") final long groupId, @RequestBody GroupMemoryRequest memoryCreationRequest) {
+        return groupService.addMemory(groupId, memoryCreationRequest.getMemoryUrl());
     }
 
     @GetMapping("private/{group}/qrcode")

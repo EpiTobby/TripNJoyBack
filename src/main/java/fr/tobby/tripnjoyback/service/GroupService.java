@@ -1,9 +1,6 @@
 package fr.tobby.tripnjoyback.service;
 
-import fr.tobby.tripnjoyback.entity.GroupEntity;
-import fr.tobby.tripnjoyback.entity.GroupMemberEntity;
-import fr.tobby.tripnjoyback.entity.ProfileEntity;
-import fr.tobby.tripnjoyback.entity.UserEntity;
+import fr.tobby.tripnjoyback.entity.*;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.JoinGroupWithoutInviteModel;
@@ -14,6 +11,7 @@ import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePublicGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
+import fr.tobby.tripnjoyback.model.response.GroupMemoriesResponse;
 import fr.tobby.tripnjoyback.repository.*;
 import fr.tobby.tripnjoyback.utils.QRCodeGenerator;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +22,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.*;
 
 @Service
@@ -35,12 +38,14 @@ public class GroupService {
     private final ChannelService channelService;
     private final ActivityRepository activityRepository;
     private final ProfileService profileService;
+    private final GroupMemoryRepository groupMemoryRepository;
+
     private final QRCodeGenerator qrCodeGenerator;
     private final String qrCodeSecret;
 
     public GroupService(GroupRepository groupRepository, UserRepository userRepository, GroupMemberRepository groupMemberRepository,
                         ProfileRepository profileRepository, ChannelService channelService,
-                        final ActivityRepository activityRepository, final ProfileService profileService, QRCodeGenerator qrCodeGenerator, @Value("${qrcode.secret}") final String qrCodeSecret) {
+                        final ActivityRepository activityRepository, final ProfileService profileService, GroupMemoryRepository groupMemoryRepository, QRCodeGenerator qrCodeGenerator, @Value("${qrcode.secret}") final String qrCodeSecret) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.groupMemberRepository = groupMemberRepository;
@@ -48,6 +53,7 @@ public class GroupService {
         this.channelService = channelService;
         this.activityRepository = activityRepository;
         this.profileService = profileService;
+        this.groupMemoryRepository = groupMemoryRepository;
         this.qrCodeGenerator = qrCodeGenerator;
         this.qrCodeSecret = qrCodeSecret;
     }
@@ -287,6 +293,25 @@ public class GroupService {
         group.setProfile(profileRepository.getById(profile.getId()));
         group.setOwner(null);
     }
+
+    public GroupMemoriesResponse getAllMemories(long groupId) {
+        var group = groupRepository.findById(groupId);
+
+        if (group.isEmpty())
+            throw new GroupNotFoundException(groupId);
+
+        List<GroupMemoryEntity> groupMemoryEntities = groupMemoryRepository.findByGroupId(groupId);
+        return new GroupMemoriesResponse(groupMemoryEntities.stream().map(GroupMemoryEntity::getMemoryUrl).collect(Collectors.toList()));
+    }
+
+    @Transactional
+    public GroupMemoriesResponse addMemory(long groupId, String memoryUrl){
+            GroupMemoryEntity groupMemoryEntity = new GroupMemoryEntity();
+            groupMemoryEntity.setGroup(groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId)));
+            groupMemoryEntity.setMemoryUrl(memoryUrl);
+            groupMemoryRepository.save(groupMemoryEntity);
+            return new GroupMemoriesResponse(groupMemoryRepository.findByGroupId(groupId).stream().map(GroupMemoryEntity::getMemoryUrl).collect(Collectors.toList()));
+        }
 
     private String getEncryptedStringToJoinGroup(long groupId) throws NoSuchAlgorithmException {
         String stringToHash = String.format("tripnjoy-group-qr:%o;%s",groupId,qrCodeSecret);
