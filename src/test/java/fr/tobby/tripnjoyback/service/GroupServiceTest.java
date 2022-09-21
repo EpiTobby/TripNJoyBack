@@ -10,6 +10,7 @@ import fr.tobby.tripnjoyback.model.JoinGroupWithoutInviteModel;
 import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
+import fr.tobby.tripnjoyback.notification.SavedNotificationService;
 import fr.tobby.tripnjoyback.repository.*;
 import fr.tobby.tripnjoyback.utils.QRCodeGenerator;
 import org.jetbrains.annotations.NotNull;
@@ -89,7 +90,7 @@ class GroupServiceTest {
     @BeforeEach
     void initGroupService(){
         channelService = mock(ChannelService.class);
-        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository, mock(ProfileService.class), mock(QRCodeGenerator.class), "");
+        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository, mock(ProfileService.class), mock(QRCodeGenerator.class), "", mock(SavedNotificationService.class));
         SpringContext.setContext(context);
     }
 

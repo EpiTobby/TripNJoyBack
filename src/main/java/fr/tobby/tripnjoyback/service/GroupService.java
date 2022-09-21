@@ -14,6 +14,7 @@ import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePublicGroupRequest;
 import fr.tobby.tripnjoyback.model.response.GroupMemberModel;
+import fr.tobby.tripnjoyback.notification.SavedNotificationService;
 import fr.tobby.tripnjoyback.repository.*;
 import fr.tobby.tripnjoyback.utils.QRCodeGenerator;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,10 +38,13 @@ public class GroupService {
     private final ProfileService profileService;
     private final QRCodeGenerator qrCodeGenerator;
     private final String qrCodeSecret;
+    private final SavedNotificationService savedNotificationService;
 
     public GroupService(GroupRepository groupRepository, UserRepository userRepository, GroupMemberRepository groupMemberRepository,
                         ProfileRepository profileRepository, ChannelService channelService,
-                        final ActivityRepository activityRepository, final ProfileService profileService, QRCodeGenerator qrCodeGenerator, @Value("${qrcode.secret}") final String qrCodeSecret) {
+                        final ActivityRepository activityRepository, final ProfileService profileService, QRCodeGenerator qrCodeGenerator,
+                        @Value("${qrcode.secret}") final String qrCodeSecret,
+                        final SavedNotificationService savedNotificationService) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.groupMemberRepository = groupMemberRepository;
@@ -50,6 +54,7 @@ public class GroupService {
         this.profileService = profileService;
         this.qrCodeGenerator = qrCodeGenerator;
         this.qrCodeSecret = qrCodeSecret;
+        this.savedNotificationService = savedNotificationService;
     }
 
     public boolean isInGroup(final long groupId, final long userId) {
@@ -227,6 +232,9 @@ public class GroupService {
             groupEntity.members.stream().filter(GroupMemberEntity::isPending).forEach(groupMemberRepository::delete);
             groupEntity.members.removeIf(GroupMemberEntity::isPending);
             groupEntity.setStateEntity(State.CLOSED.getEntity());
+            savedNotificationService.sendToGroup(groupEntity.getId(), "Groupe complet", "Le groupe est complet", Map.of(
+                    "groupId", String.valueOf(groupEntity.getId())
+            ));
         }
     }
 
