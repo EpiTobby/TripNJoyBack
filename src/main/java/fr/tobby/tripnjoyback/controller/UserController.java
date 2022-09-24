@@ -27,6 +27,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "/users")
+@CrossOrigin
 public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -40,10 +41,8 @@ public class UserController {
 
     @GetMapping("")
     @PreAuthorize("hasAuthority('admin')")
-    public List<UserEntity> getAll() {
-        List<UserEntity> userEntities = new ArrayList<>();
-        userService.getAll().forEach(userEntities::add);
-        return userEntities;
+    public List<UserModel> getAll() {
+        return userService.getAll();
     }
 
     @GetMapping("{id}")

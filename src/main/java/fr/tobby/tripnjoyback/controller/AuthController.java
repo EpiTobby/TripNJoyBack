@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     public static final String ERROR_RESPONSE_MSG = "Error on request";

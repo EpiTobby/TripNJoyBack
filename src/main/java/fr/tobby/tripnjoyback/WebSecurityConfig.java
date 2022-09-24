@@ -52,6 +52,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             // Do not persist session. Auth is done via jwt and checked at each request
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
+            .cors()
+            .and()
             .csrf().disable();
         // jwt filter will authenticate the user at each request if jwt is valid
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

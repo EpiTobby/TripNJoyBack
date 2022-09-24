@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,8 +43,10 @@ public class UserService {
         this.userMailUtils = userMailUtils;
     }
 
-    public Iterable<UserEntity> getAll() {
-        return userRepository.findAll();
+    public List<UserModel> getAll() {
+        List<UserModel> users = new ArrayList<>();
+        userRepository.findAll().forEach(userEntity -> users.add(UserModel.of(userEntity)));
+        return users;
     }
 
     public Optional<UserModel> findById(final long id) {
