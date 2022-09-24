@@ -72,7 +72,7 @@ public class UserService {
             user.setBirthDate(userUpdateRequest.getBirthdate().toInstant());
         }
         if (userUpdateRequest.getGender() != null) {
-            user.setGender(genderRepository.findByValue(userUpdateRequest.getGender()).orElseThrow(() -> new UserCreationException("Invalid gender " + userUpdateRequest.getGender())));
+            user.setGender(genderRepository.findByValue(userUpdateRequest.getGender().toLowerCase()).orElseThrow(() -> new UserCreationException("Invalid gender " + userUpdateRequest.getGender())));
         }
         if (userUpdateRequest.getLanguage() != null) {
             user.setLanguage(languageRepository.findByValue(userUpdateRequest.getLanguage().toUpperCase()).orElseThrow(() -> new UserCreationException("Invalid langage " + userUpdateRequest.getLanguage())));
