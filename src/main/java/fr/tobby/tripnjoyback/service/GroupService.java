@@ -52,6 +52,15 @@ public class GroupService {
         this.qrCodeSecret = qrCodeSecret;
     }
 
+    public List<GroupModel> getAll() {
+        return groupRepository.findAll().stream().map(GroupModel::of).toList();
+    }
+
+    public List<GroupModel> getActiveGroups() {
+        return groupRepository.findAll().stream()
+                .filter(g -> !g.getStateEntity().getValue().equals("ARCHIVED")).map(GroupModel::of).toList();
+    }
+    
     public boolean isInGroup(final long groupId, final long userId) {
         GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
         return group.getMembers().stream().anyMatch(member -> member.getUser().getId().equals(userId));
