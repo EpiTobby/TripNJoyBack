@@ -41,7 +41,6 @@ public class UserController {
 
     @GetMapping("")
     @PreAuthorize("hasAuthority('admin')")
-    @ResponseStatus(code = HttpStatus.PARTIAL_CONTENT)
     public List<UserModel> getAll() {
         return userService.getAll();
     }

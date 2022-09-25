@@ -41,7 +41,6 @@ public class GroupController {
     @GetMapping("")
     @PreAuthorize("hasAuthority('admin')")
     @Operation(summary = "Get all the group")
-    @ResponseStatus(code = HttpStatus.PARTIAL_CONTENT)
     public List<GroupModel> getAll() {
         return groupService.getAll();
     }
@@ -49,7 +48,6 @@ public class GroupController {
     @GetMapping("/active")
     @PreAuthorize("hasAuthority('admin')")
     @Operation(summary = "Get all the group that are not archived")
-    @ResponseStatus(code = HttpStatus.PARTIAL_CONTENT)
     public List<GroupModel> getActiveGroups() {
         return groupService.getActiveGroups();
     }
