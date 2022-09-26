@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -35,6 +36,7 @@ public class ProfileModel implements IProfile {
     private YesNoAnswer goOutAtNight;
     private YesNoAnswer sport;
     private boolean isActive;
+    private Instant createdDate;
 
     public static ProfileModel of(ProfileEntity profileEntity, AnswersEntity answersEntity){
         return ProfileModel.builder()
@@ -55,6 +57,7 @@ public class ProfileModel implements IProfile {
                            .sport(YesNoAnswer.of(answersEntity.getSport()))
                            .isActive(profileEntity.isActive())
                            .name(profileEntity.getName())
+                           .createdDate(profileEntity.getCreatedDate())
                            .build();
     }
 

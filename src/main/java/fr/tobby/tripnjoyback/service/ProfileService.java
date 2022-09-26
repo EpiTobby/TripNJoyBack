@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,7 +51,9 @@ public class ProfileService {
     {
         ProfileEntity profileEntity = ProfileEntity.builder()
                                                    .name(profileCreationRequest.getName())
-                                                   .active(true).build();
+                                                   .active(true)
+                                                   .createdDate(Instant.now())
+                                                   .build();
         profileEntity = profileRepository.save(profileEntity);
         AnswersEntity answersEntity = createAnswersEntity(profileCreationRequest, profileEntity.getId());
         return ProfileModel.of(profileEntity, answersEntity);
@@ -87,6 +90,7 @@ public class ProfileService {
         ProfileEntity profileEntity = profileRepository.save(ProfileEntity.builder()
                                                                           .name(model.getName())
                                                                           .active(true)
+                                                                          .createdDate(Instant.now())
                                                                           .build());
         createAnswersEntity(model, profileEntity.getId());
         return profileEntity;

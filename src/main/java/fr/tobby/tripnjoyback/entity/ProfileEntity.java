@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.entity;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.Instant;
 
 @Entity
 @Table(name  = "profiles")
@@ -22,4 +23,6 @@ public class ProfileEntity {
     @Column(name = "active")
     @Setter
     private boolean active;
+
+    private Instant createdDate;
 }

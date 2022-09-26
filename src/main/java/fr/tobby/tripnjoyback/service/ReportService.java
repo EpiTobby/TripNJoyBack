@@ -13,6 +13,7 @@ import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -34,7 +35,7 @@ public class ReportService {
         if (reportedUser.getId().equals(submitter.getId()))
             throw new ForbiddenOperationException("You cannot report yourself");
         ReportEntity reportEntity = reportRepository.save(new ReportEntity(submitter, reportedUser, submitReportRequest.getReason().toString(),
-                submitReportRequest.getDetails()));
+                submitReportRequest.getDetails(), Instant.now()));
         return ReportModel.of(reportEntity);
     }
 
