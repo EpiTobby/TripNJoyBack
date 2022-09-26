@@ -3,6 +3,7 @@ package fr.tobby.tripnjoyback.controller;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.ReportNotFoundException;
 import fr.tobby.tripnjoyback.model.ReportModel;
+import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.SubmitReportRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateReportRequest;
 import fr.tobby.tripnjoyback.service.ReportService;
@@ -25,6 +26,12 @@ public class ReportController {
 
     public ReportController(ReportService reportService) {
         this.reportService = reportService;
+    }
+
+    @GetMapping("")
+    @PreAuthorize("hasAuthority('admin')")
+    public List<ReportModel> getAll() {
+        return reportService.getAll();
     }
 
     @PostMapping("")

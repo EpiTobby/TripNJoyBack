@@ -6,6 +6,7 @@ import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.ReportNotFoundException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.ReportModel;
+import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.SubmitReportRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateReportRequest;
 import fr.tobby.tripnjoyback.repository.ReportRepository;
@@ -13,6 +14,7 @@ import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,6 +27,12 @@ public class ReportService {
         this.reportRepository = reportRepository;
         this.userRepository = userRepository;
         this.idCheckerService = idCheckerService;
+    }
+
+    public List<ReportModel> getAll(){
+        List<ReportModel> reports = new ArrayList<>();
+        reportRepository.findAll().forEach(reportEntity -> reports.add(ReportModel.of(reportEntity)));
+        return reports;
     }
 
     @Transactional
