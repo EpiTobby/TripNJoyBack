@@ -69,7 +69,7 @@ public class ProfileController {
     @ApiResponse(responseCode = "422", description = "No profile has been found")
     public void deleteProfile(@PathVariable("id") final long userId, @PathVariable("profile") final long profileId) {
         idCheckerService.checkId(userId);
-        profileService.deleteProfile(profileId);
+        profileService.deleteProfile(userId, profileId);
     }
 
     @ExceptionHandler(ProfileNotFoundException.class)

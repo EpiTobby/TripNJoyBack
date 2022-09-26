@@ -170,7 +170,7 @@ class ProfileServiceTest {
         ProfileEntity profile = user.getProfiles().stream().findFirst().get();
         profile.setActive(false);
 
-        profileService.deleteProfile(profile.getId());
+        profileService.deleteProfile(user.getId(), profile.getId());
 
         Assertions.assertThrows(ProfileNotFoundException.class, () -> profileService.getProfile(profile.getId()));
     }
@@ -204,6 +204,6 @@ class ProfileServiceTest {
         ProfileEntity profile = user.getProfiles().stream().findFirst().get();
         profile.setActive(true);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> profileService.deleteProfile(profile.getId()));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> profileService.deleteProfile(user.getId(), profile.getId()));
     }
 }
