@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.PromStats;
 import fr.tobby.tripnjoyback.entity.AnswersEntity;
 import fr.tobby.tripnjoyback.entity.AvailabiltyEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
@@ -28,12 +29,14 @@ public class ProfileService {
     private final AnswersRepository answersRepository;
     private final UserRepository userRepository;
     private final DateFormat dateFormat;
+    private final PromStats promStats;
 
-    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository, final UserRepository userRepository) {
+    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository, final UserRepository userRepository, final PromStats promStats) {
         this.profileRepository = profileRepository;
         this.answersRepository = answersRepository;
         this.userRepository = userRepository;
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        this.promStats = promStats;
     }
 
     @Transactional
@@ -55,6 +58,7 @@ public class ProfileService {
                                                    .createdDate(Instant.now())
                                                    .build();
         profileEntity = profileRepository.save(profileEntity);
+        promStats.getProfileCount().set(profileRepository.count());
         AnswersEntity answersEntity = createAnswersEntity(profileCreationRequest, profileEntity.getId());
         return ProfileModel.of(profileEntity, answersEntity);
     }
@@ -92,6 +96,7 @@ public class ProfileService {
                                                                           .active(true)
                                                                           .createdDate(Instant.now())
                                                                           .build());
+        promStats.getProfileCount().set(profileRepository.count());
         createAnswersEntity(model, profileEntity.getId());
         return profileEntity;
     }
@@ -158,6 +163,7 @@ public class ProfileService {
         if (profileEntity.isActive())
             throw new IllegalArgumentException("Cannot delete an active profile");
         profileRepository.delete(profileEntity);
+        promStats.getProfileCount().set(profileRepository.count());
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
         answersRepository.deleteByProfileId(answersEntity.getProfileId());
     }

@@ -1,11 +1,13 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.PromStats;
 import fr.tobby.tripnjoyback.entity.*;
 import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
 import fr.tobby.tripnjoyback.repository.*;
+import io.prometheus.client.Gauge;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,13 +51,16 @@ class ProfileServiceTest {
 
     @BeforeEach
     void initProfileService(){
-        profileService = new ProfileService(profileRepository, answersRepository, userRepository);
+        PromStats promStats = mock(PromStats.class);
+        when(promStats.getProfileCount()).thenReturn(mock(Gauge.class));
+        profileService = new ProfileService(profileRepository, answersRepository, userRepository, promStats);
     }
 
     private ProfileEntity anyProfile(){
         ProfileEntity profileEntity =  profileRepository.save(ProfileEntity.builder()
                 .active(true)
                 .name("profile1")
+                .createdDate(Instant.now())
                 .build());
         return profileEntity;
     }
@@ -63,7 +69,7 @@ class ProfileServiceTest {
     private UserEntity anyUserWithProfile() throws ParseException {
         CityEntity city = cityRepository.save(new CityEntity("Paris"));
         LanguageEntity language = languageRepository.save(new LanguageEntity("French"));
-        return userRepository.save(UserEntity.builder()
+        UserEntity userEntity = userRepository.save(UserEntity.builder()
                                              .firstname("Test")
                                              .lastname("1")
                                              .gender(maleGender)
@@ -73,8 +79,10 @@ class ProfileServiceTest {
                                              .confirmed(true)
                                              .language(language)
                                              .roles(List.of())
-                                             .profiles(new ArrayList(){{ add(anyProfile()); }})
+                                             .profiles(new ArrayList<>())
                                              .build());
+        userEntity.getProfiles().add(anyProfile());
+        return userEntity;
     }
 
     @Test

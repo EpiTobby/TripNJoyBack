@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.PromStats;
 import fr.tobby.tripnjoyback.entity.CityEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.UserCreationException;
@@ -30,9 +31,10 @@ public class UserService {
     private final CityService cityService;
     private final PasswordEncoder encoder;
     private final UserMailUtils userMailUtils;
+    private final PromStats promStats;
 
     public UserService(UserRepository userRepository, GenderRepository genderRepository, ProfileService profileService,
-                       LanguageRepository languageRepository, final CityService cityService, PasswordEncoder encoder, UserMailUtils userMailUtils) {
+                       LanguageRepository languageRepository, final CityService cityService, PasswordEncoder encoder, UserMailUtils userMailUtils, PromStats promStats) {
         this.userRepository = userRepository;
         this.genderRepository = genderRepository;
         this.profileService = profileService;
@@ -40,6 +42,7 @@ public class UserService {
         this.cityService = cityService;
         this.encoder = encoder;
         this.userMailUtils = userMailUtils;
+        this.promStats = promStats;
     }
 
     public Iterable<UserEntity> getAll() {
@@ -83,21 +86,27 @@ public class UserService {
 
     @Transactional
     public void deleteUserAccount(long userId, DeleteUserRequest deleteUserRequest) {
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
-        if (!encoder.matches(deleteUserRequest.getPassword(), user.getPassword())) {
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        if (!encoder.matches(deleteUserRequest.getPassword(), userEntity.getPassword())) {
             throw new BadCredentialsException("Bad Password");
         }
         profileService.deleteProfilesByUserId(userId);
-        userRepository.delete(user);
-        userMailUtils.sendDeleteAccountMail(UserModel.of(user));
+        deleteUserEntity(userEntity);
+        userMailUtils.sendDeleteAccountMail(UserModel.of(userEntity));
     }
 
     @Transactional
     public void deleteUserByAdmin(long userId, DeleteUserByAdminRequest deleteUserByAdminRequest) {
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         profileService.deleteProfilesByUserId(userId);
-        userRepository.delete(user);
-        userMailUtils.sendDeleteAccountByAdminMail(UserModel.of(user), deleteUserByAdminRequest.getReason());
+        deleteUserEntity(userEntity);
+        userMailUtils.sendDeleteAccountByAdminMail(UserModel.of(userEntity), deleteUserByAdminRequest.getReason());
+    }
+
+    @Transactional
+    protected void deleteUserEntity(UserEntity userEntity){
+        userRepository.delete(userEntity);
+        promStats.getUserCount().set(userRepository.count());
     }
 
     @Nullable

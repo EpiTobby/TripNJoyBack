@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.PromStats;
 import fr.tobby.tripnjoyback.entity.*;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.GroupModel;
@@ -43,9 +44,11 @@ public class GroupService {
     private final QRCodeGenerator qrCodeGenerator;
     private final String qrCodeSecret;
 
+    private final PromStats promStats;
+
     public GroupService(GroupRepository groupRepository, UserRepository userRepository, GroupMemberRepository groupMemberRepository,
                         ProfileRepository profileRepository, ChannelService channelService,
-                        final ActivityRepository activityRepository, final ProfileService profileService, GroupMemoryRepository groupMemoryRepository, QRCodeGenerator qrCodeGenerator, @Value("${qrcode.secret}") final String qrCodeSecret) {
+                        final ActivityRepository activityRepository, final ProfileService profileService, GroupMemoryRepository groupMemoryRepository, QRCodeGenerator qrCodeGenerator, @Value("${qrcode.secret}") final String qrCodeSecret, PromStats promStats) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.groupMemberRepository = groupMemberRepository;
@@ -56,6 +59,7 @@ public class GroupService {
         this.groupMemoryRepository = groupMemoryRepository;
         this.qrCodeGenerator = qrCodeGenerator;
         this.qrCodeSecret = qrCodeSecret;
+        this.promStats = promStats;
     }
 
     public boolean isInGroup(final long groupId, final long userId) {
@@ -111,6 +115,7 @@ public class GroupService {
         groupMemberRepository.save(new GroupMemberEntity(groupEntity, user1Entity, profile1Entity, false));
         groupMemberRepository.save(new GroupMemberEntity(groupEntity, user2Entity, profile2Entity, false));
         channelService.createDefaultChannel(groupEntity);
+        promStats.getGroupCount().set(groupRepository.count());
         return GroupModel.of(groupEntity);
     }
 
@@ -131,6 +136,7 @@ public class GroupService {
         groupMemberRepository.save(groupMemberEntity);
         groupEntity.members.add(groupMemberEntity);
         channelService.createDefaultChannel(groupEntity);
+        promStats.getGroupCount().set(groupRepository.count());
         return GroupModel.of(groupEntity);
     }
 
@@ -224,7 +230,8 @@ public class GroupService {
     @Transactional
     public void deletePrivateGroup(long groupId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-        groupRepository.delete(groupEntity);
+        deleteGroup(groupEntity);
+        promStats.getGroupCount().set(groupRepository.count());
     }
 
     @Transactional
@@ -280,8 +287,14 @@ public class GroupService {
         groupEntity.members.removeIf(m -> m.getUser().getId() == userId);
         groupMemberRepository.delete(groupMemberEntity);
         if (groupEntity.getNumberOfNonPendingUsers() == 0) {
-            groupRepository.delete(groupEntity);
+            deleteGroup(groupEntity);
         }
+    }
+
+    @Transactional
+    protected void deleteGroup(GroupEntity groupEntity){
+        groupRepository.delete(groupEntity);
+        promStats.getGroupCount().set(groupRepository.count());
     }
 
     @Transactional
