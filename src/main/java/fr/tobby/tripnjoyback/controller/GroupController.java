@@ -27,6 +27,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "groups")
+@CrossOrigin
 public class GroupController {
     private static final Logger logger = LoggerFactory.getLogger(GroupController.class);
     private final GroupService groupService;

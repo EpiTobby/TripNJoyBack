@@ -17,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("groups/{groupId}/planning")
+@CrossOrigin
 public class PlanningController {
 
     private final PlanningService service;

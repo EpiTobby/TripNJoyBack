@@ -20,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "reports")
+@CrossOrigin
 public class ReportController {
     private static final Logger logger = LoggerFactory.getLogger(ReportController.class);
     private final ReportService reportService;
