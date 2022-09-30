@@ -22,7 +22,6 @@ public class UserMailUtils {
     public UserMailUtils(final MailConfigRecord config, final MailSender mailSender) {
         this.config = config;
         this.mailSender = mailSender;
-
     }
 
     public boolean userEmailIsValid(String email) {
