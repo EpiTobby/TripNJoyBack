@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.PromStats;
 import fr.tobby.tripnjoyback.SpringContext;
 import fr.tobby.tripnjoyback.entity.CityEntity;
 import fr.tobby.tripnjoyback.entity.GenderEntity;
@@ -11,6 +12,7 @@ import fr.tobby.tripnjoyback.model.ReportReason;
 import fr.tobby.tripnjoyback.model.request.SubmitReportRequest;
 import fr.tobby.tripnjoyback.model.request.UpdateReportRequest;
 import fr.tobby.tripnjoyback.repository.*;
+import io.prometheus.client.Gauge;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +42,7 @@ class ReportServiceTest {
     private ReportService reportService;
 
     @BeforeAll
-    static void beforeAll(@Autowired GenderRepository genderRepository, @Autowired StateRepository stateRepository,
-                          @Autowired ApplicationContext context,
+    static void beforeAll(@Autowired GenderRepository genderRepository, @Autowired ApplicationContext context,
                           @Autowired CityRepository cityRepository, @Autowired LanguageRepository languageRepository)
     {
         maleGender = genderRepository.save(new GenderEntity("male"));
@@ -58,7 +59,9 @@ class ReportServiceTest {
     {
         IdCheckerService idCheckerService = mock(IdCheckerService.class);
         when(idCheckerService.getCurrentUserId()).thenReturn(1L);
-        reportService = new ReportService(reportRepository, userRepository, idCheckerService);
+        PromStats promStats = mock(PromStats.class);
+        when(promStats.getReportCount()).thenReturn(mock(Gauge.class));
+        reportService = new ReportService(reportRepository, userRepository, idCheckerService, promStats);
     }
 
     @AfterEach

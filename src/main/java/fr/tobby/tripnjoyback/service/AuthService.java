@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.PromStats;
 import fr.tobby.tripnjoyback.auth.TokenManager;
 import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
@@ -55,6 +56,7 @@ public class AuthService {
     private final UserService userService;
     private final UserRoleRepository userRoleRepository;
     private final LanguageRepository languageRepository;
+    private final PromStats promStats;
 
     @Value("${google.secret}")
     private String googleSecret;
@@ -66,7 +68,7 @@ public class AuthService {
                        final CityService cityService, final ConfirmationCodeRepository confirmationCodeRepository,
                        final AuthenticationManager authenticationManager, final TokenManager tokenManager,
                        final UserDetailsService userDetailsService, final UserService userService,
-                       final UserRoleRepository userRoleRepository, LanguageRepository languageRepository) {
+                       final UserRoleRepository userRoleRepository, LanguageRepository languageRepository, PromStats promStats) {
         this.userRepository = userRepository;
         this.userMailUtils = userMailUtils;
         this.encoder = encoder;
@@ -79,6 +81,7 @@ public class AuthService {
         this.userService = userService;
         this.userRoleRepository = userRoleRepository;
         this.languageRepository = languageRepository;
+        this.promStats = promStats;
     }
 
     @Transactional
@@ -100,6 +103,7 @@ public class AuthService {
                 .roles(List.of(userRoleRepository.getByName("default")))
                 .build();
         UserModel created = UserModel.of(createUser(userEntity));
+        promStats.getUserCount().set(userRepository.count());
         generateConfirmationCode(created);
         logger.debug("Created new user {}", created);
         return created;
@@ -162,6 +166,7 @@ public class AuthService {
                 .build();
 
         UserModel userModel = UserModel.of(userRepository.save(userEntity));
+        promStats.getUserCount().set(userRepository.count());
         logger.debug("Created new user {}", userModel);
         return new GoogleUserResponse(userModel, true);
     }
@@ -236,7 +241,6 @@ public class AuthService {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         user.setConfirmed(true);
         UserModel userModel = UserModel.of(user);
-        userRepository.save(user);
         userMailUtils.sendConfirmationSuccessMail(userModel);
         return userModel;
     }

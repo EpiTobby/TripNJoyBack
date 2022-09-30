@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.PromStats;
 import fr.tobby.tripnjoyback.entity.AnswersEntity;
 import fr.tobby.tripnjoyback.entity.AvailabiltyEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,12 +29,14 @@ public class ProfileService {
     private final AnswersRepository answersRepository;
     private final UserRepository userRepository;
     private final DateFormat dateFormat;
+    private final PromStats promStats;
 
-    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository, final UserRepository userRepository) {
+    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository, final UserRepository userRepository, final PromStats promStats) {
         this.profileRepository = profileRepository;
         this.answersRepository = answersRepository;
         this.userRepository = userRepository;
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        this.promStats = promStats;
     }
 
     @Transactional
@@ -50,8 +54,11 @@ public class ProfileService {
     {
         ProfileEntity profileEntity = ProfileEntity.builder()
                                                    .name(profileCreationRequest.getName())
-                                                   .active(true).build();
+                                                   .active(true)
+                                                   .createdDate(Instant.now())
+                                                   .build();
         profileEntity = profileRepository.save(profileEntity);
+        promStats.getProfileCount().set(profileRepository.count());
         AnswersEntity answersEntity = createAnswersEntity(profileCreationRequest, profileEntity.getId());
         return ProfileModel.of(profileEntity, answersEntity);
     }
@@ -87,7 +94,9 @@ public class ProfileService {
         ProfileEntity profileEntity = profileRepository.save(ProfileEntity.builder()
                                                                           .name(model.getName())
                                                                           .active(true)
+                                                                          .createdDate(Instant.now())
                                                                           .build());
+        promStats.getProfileCount().set(profileRepository.count());
         createAnswersEntity(model, profileEntity.getId());
         return profileEntity;
     }
@@ -148,12 +157,14 @@ public class ProfileService {
     }
 
     @Transactional
-    public void deleteProfile(long profileId)
+    public void deleteProfile(long userId, long profileId)
     {
         ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
         if (profileEntity.isActive())
             throw new IllegalArgumentException("Cannot delete an active profile");
+        userRepository.getById(userId).getProfiles().remove(profileEntity);
         profileRepository.delete(profileEntity);
+        promStats.getProfileCount().set(profileRepository.count());
         AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
         answersRepository.deleteByProfileId(answersEntity.getProfileId());
     }

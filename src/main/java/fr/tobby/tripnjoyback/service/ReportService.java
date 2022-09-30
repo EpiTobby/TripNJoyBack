@@ -1,5 +1,6 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.PromStats;
 import fr.tobby.tripnjoyback.entity.ReportEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
@@ -13,6 +14,7 @@ import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -20,11 +22,13 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final IdCheckerService idCheckerService;
+    private final PromStats promStats;
 
-    public ReportService(ReportRepository reportRepository, UserRepository userRepository, IdCheckerService idCheckerService) {
+    public ReportService(ReportRepository reportRepository, UserRepository userRepository, IdCheckerService idCheckerService, PromStats promStats) {
         this.reportRepository = reportRepository;
         this.userRepository = userRepository;
         this.idCheckerService = idCheckerService;
+        this.promStats = promStats;
     }
 
     @Transactional
@@ -34,7 +38,8 @@ public class ReportService {
         if (reportedUser.getId().equals(submitter.getId()))
             throw new ForbiddenOperationException("You cannot report yourself");
         ReportEntity reportEntity = reportRepository.save(new ReportEntity(submitter, reportedUser, submitReportRequest.getReason().toString(),
-                submitReportRequest.getDetails()));
+                submitReportRequest.getDetails(), Instant.now()));
+        promStats.getReportCount().set(reportRepository.count());
         return ReportModel.of(reportEntity);
     }
 
@@ -61,12 +66,18 @@ public class ReportService {
         ReportEntity reportEntity = reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException("No report found with id: " + reportId));
         if (reportEntity.getSubmitter().getId() == idCheckerService.getCurrentUserId())
             throw new ForbiddenOperationException("You cannot perform this operation.");
-        reportRepository.delete(reportEntity);
+        deleteReport(reportEntity);
     }
 
     @Transactional
     public void deleteReportAdmin(long reportId){
         ReportEntity reportEntity = reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException("No report found with id: " + reportId));
+        deleteReport(reportEntity);
+    }
+
+    @Transactional
+    protected void deleteReport(ReportEntity reportEntity){
         reportRepository.delete(reportEntity);
+        promStats.getReportCount().set(reportRepository.count());
     }
 }

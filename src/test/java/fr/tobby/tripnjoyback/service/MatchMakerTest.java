@@ -210,7 +210,7 @@ class MatchMakerTest {
         when(profileService.getProfile(1)).thenReturn(profileA);
         when(profileService.getProfile(2)).thenReturn(profileGroup);
 
-        ProfileEntity groupProfileEntity = profileRepository.save(new ProfileEntity(1L, "test", true));
+        ProfileEntity groupProfileEntity = profileRepository.save(new ProfileEntity(1L, "test", true, Instant.now()));
         when(profileService.getProfile(groupProfileEntity)).thenReturn(profileGroup);
 
         ProfileEntity profileEntity = mock(ProfileEntity.class);

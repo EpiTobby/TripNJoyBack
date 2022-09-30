@@ -9,6 +9,7 @@ volumes:
   postgres:
   minio:
   mongodb:
+  tripnjoy-grafana:
 
 services:
   app:
@@ -21,6 +22,7 @@ services:
       - mongo
     ports:
       - "8080:8080"
+      - "25570:25570"
     environment:
       - "spring.datasource.url=jdbc:postgresql://db:5432/postgres"
       - "spring.data.mongodb.host=mongo"
@@ -38,6 +40,7 @@ services:
     environment:
       - "POSTGRES_PASSWORD=root"
       - "POSTGRES_USER=root"
+      - "POSTGRES_DB=postgres"
 
   mongo:
     image: "mongo:latest"
@@ -60,3 +63,24 @@ services:
       - "MINIO_ROOT_PASSWORD=${MINIO_PASSWORD}"
     volumes:
       - "minio:/data"
+
+  grafana:
+    image: "grafana/grafana-oss:latest"
+    networks:
+      - internal
+      - external
+    ports:
+      - "3001:3000"
+    volumes:
+      - "tripnjoy-grafana:/var/lib/grafana"
+
+  prometheus:
+    image: "prom/prometheus"
+    depends_on:
+      - app
+    networks:
+      - internal
+    ports:
+      - "9091:9090"
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
