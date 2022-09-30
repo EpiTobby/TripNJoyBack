@@ -104,7 +104,7 @@ public class UserService {
     }
 
     @Transactional
-    protected void deleteUserEntity(UserEntity userEntity){
+    public void deleteUserEntity(UserEntity userEntity){
         userRepository.delete(userEntity);
         promStats.getUserCount().set(userRepository.count());
     }

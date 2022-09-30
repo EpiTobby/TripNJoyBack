@@ -204,6 +204,8 @@ class ProfileServiceTest {
         ProfileEntity profile = user.getProfiles().stream().findFirst().get();
         profile.setActive(true);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> profileService.deleteProfile(user.getId(), profile.getId()));
+        long userId = user.getId();
+        long profileId = profile.getId();
+        Assertions.assertThrows(IllegalArgumentException.class, () -> profileService.deleteProfile(userId, profileId));
     }
 }
