@@ -40,13 +40,15 @@ public class MatchMaker {
     private final GroupRepository groupRepository;
     private final ProfileService profileService;
     private final SavedNotificationService notificationService;
+    private final ReportService reportService;
 
     private long taskIndex = 1L;
     private final Map<Long, CompletableFuture<MatchMakingResult>> tasks = new HashMap<>();
 
     public MatchMaker(final ProfileRepository profileRepository, final UserRepository userRepository, final MatchMakerScoreComputer scoreComputer,
                       final GroupService groupService, final GroupRepository groupRepository,
-                      final ProfileService profileService, final SavedNotificationService notificationService)
+                      final ProfileService profileService, final SavedNotificationService notificationService,
+                      final ReportService reportService)
     {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
@@ -55,6 +57,7 @@ public class MatchMaker {
         this.groupRepository = groupRepository;
         this.profileService = profileService;
         this.notificationService = notificationService;
+        this.reportService = reportService;
     }
 
     @Transactional
@@ -158,6 +161,7 @@ public class MatchMaker {
                      .filter(pair -> scoreComputer.isUserCompatible(pair.right(), user))
                      .map(pair -> {
                          float score = scoreComputer.computeMatchingScore(user.getProfile(), pair.right());
+                         score -= reportService.getReportCountForUser(user.getUserId());
                          return new Pair<>(pair.left(), score);
                      })
                      .filter(pair -> pair.right() > MINIMAL_MATCHING_SCORE)
@@ -180,6 +184,8 @@ public class MatchMaker {
                      .filter(other -> scoreComputer.isUserCompatible(user.getProfile(), other) && scoreComputer.isUserCompatible(other.getProfile(), user))
                      .map(other -> {
                          float score = scoreComputer.computeMatchingScore(user.getProfile(), other.getProfile());
+                         score -= reportService.getReportCountForUser(user.getUserId());
+                         score -= reportService.getReportCountForUser(other.getUserId());
                          return new Pair<>(other, score);
                      })
                      .filter(pair -> pair.right() > MINIMAL_MATCHING_SCORE)

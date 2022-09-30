@@ -76,7 +76,7 @@ class MatchMakerTest {
         matchMaker = new MatchMaker(profileRepository, userRepository, new MatchMakerScoreComputer(),
                 groupService,
                 groupRepository,
-                profileService, mock(SavedNotificationService.class));
+                profileService, mock(SavedNotificationService.class), mock(ReportService.class));
     }
 
     /**

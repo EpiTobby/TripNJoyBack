@@ -51,6 +51,11 @@ public class ReportService {
         return reportRepository.findByReportedUserId(userId).stream().map(ReportModel::of).toList();
     }
 
+    public int getReportCountForUser(long userId)
+    {
+        return getByReportedUserId(userId).size();
+    }
+
     @Transactional
     public ReportModel updateReport(long reportId, UpdateReportRequest updateReportRequest){
         ReportEntity reportEntity = reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException("No report found with id: " + reportId));
