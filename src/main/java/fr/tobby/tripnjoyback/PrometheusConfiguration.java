@@ -1,6 +1,8 @@
 package fr.tobby.tripnjoyback;
 
 import fr.tobby.tripnjoyback.repository.GroupRepository;
+import fr.tobby.tripnjoyback.repository.ProfileRepository;
+import fr.tobby.tripnjoyback.repository.UserRepository;
 import io.prometheus.client.exporter.HTTPServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +37,13 @@ public class PrometheusConfiguration {
     }
 
     @Bean
-    public CommandLineRunner task(ThreadPoolTaskScheduler scheduler, PromStats stats, GroupRepository groupRepository)
+    public CommandLineRunner task(ThreadPoolTaskScheduler scheduler, PromStats stats, GroupRepository groupRepository, UserRepository userRepository, ProfileRepository profileRepository)
     {
         return args -> {
+            stats.getGroupCount().set(groupRepository.count());
+            stats.getUserCount().set(userRepository.count());
+            stats.getProfileCount().set(profileRepository.count());
             scheduler.scheduleAtFixedRate(() -> {
-                stats.getGroupCount().set(groupRepository.count());
                 stats.getRamUsed().set(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
             }, Duration.of(1, ChronoUnit.SECONDS));
         };
