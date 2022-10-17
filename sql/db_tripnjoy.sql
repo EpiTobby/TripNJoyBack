@@ -138,7 +138,10 @@ CREATE TABLE IF NOT EXISTS "surveys" (
                            "id" SERIAL PRIMARY KEY,
                            "channel_id" int references channels,
                            "submitter_id" int references users,
-                           "question" text
+                           "question" text,
+                           "quizz" boolean,
+                           "send_date" timestamp,
+                           "modified_date" timestamp
 );
 
 CREATE TABLE IF NOT EXISTS "survey_answers" (
@@ -150,7 +153,8 @@ CREATE TABLE IF NOT EXISTS "survey_answers" (
 CREATE TABLE IF NOT EXISTS "answers" (
                            "id" SERIAL PRIMARY KEY,
                            "content" varchar,
-                           "survey_id" int references surveys
+                           "survey_id" int references surveys,
+                           "right_answer" boolean
 );
 
 CREATE TABLE IF NOT EXISTS "expenses" (
@@ -273,6 +277,8 @@ INSERT INTO public.message_type (id, name)
 VALUES (2, 'IMAGE');
 INSERT INTO public.message_type (id, name)
 VALUES (3, 'FILE');
+INSERT INTO public.message_type (id, name)
+VALUES (4, 'SURVEY');
 
 CREATE TABLE IF NOT EXISTS activities_info
 (

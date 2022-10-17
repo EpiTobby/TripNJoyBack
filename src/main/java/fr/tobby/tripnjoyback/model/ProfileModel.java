@@ -1,7 +1,7 @@
 package fr.tobby.tripnjoyback.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import fr.tobby.tripnjoyback.entity.AnswersEntity;
+import fr.tobby.tripnjoyback.entity.ProfileAnswersEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
 import lombok.AllArgsConstructor;
@@ -38,23 +38,23 @@ public class ProfileModel implements IProfile {
     private boolean isActive;
     private Instant createdDate;
 
-    public static ProfileModel of(ProfileEntity profileEntity, AnswersEntity answersEntity){
+    public static ProfileModel of(ProfileEntity profileEntity, ProfileAnswersEntity profileAnswersEntity){
         return ProfileModel.builder()
                            .id(profileEntity.getId())
-                           .availabilities(answersEntity.getAvailabilities().stream().map(a -> AvailabilityAnswerModel.of(a.getStartDate(), a.getEndDate())).toList())
-                           .duration(new RangeAnswerModel(answersEntity.getDurationMin(), answersEntity.getDurationMax()))
-                           .budget(new RangeAnswerModel(answersEntity.getBudgetMin(), answersEntity.getBudgetMax()))
-                           .destinationTypes(answersEntity.getDestinationTypes().stream().map(DestinationTypeAnswer::valueOf).toList())
-                           .ages(new RangeAnswerModel(answersEntity.getAgeMin(), answersEntity.getAgeMax()))
-                           .travelWithPersonFromSameCity(YesNoAnswer.of(answersEntity.getTravelWithPersonFromSameCity()))
-                           .travelWithPersonFromSameCountry(YesNoAnswer.of(answersEntity.getTravelWithPersonFromSameCountry()))
-                           .travelWithPersonSameLanguage(YesNoAnswer.of(answersEntity.getTravelWithPersonSameLanguage()))
-                           .gender(GenderAnswer.valueOf(answersEntity.getGender()))
-                           .groupSize(new RangeAnswerModel(answersEntity.getGroupSizeMin(), answersEntity.getGroupSizeMax()))
-                           .chillOrVisit(ChillOrVisitAnswer.valueOf(answersEntity.getChillOrVisit()))
-                           .aboutFood(AboutFoodAnswer.valueOf(answersEntity.getAboutFood()))
-                           .goOutAtNight(YesNoAnswer.of(answersEntity.getGoOutAtNight()))
-                           .sport(YesNoAnswer.of(answersEntity.getSport()))
+                           .availabilities(profileAnswersEntity.getAvailabilities().stream().map(a -> AvailabilityAnswerModel.of(a.getStartDate(), a.getEndDate())).toList())
+                           .duration(new RangeAnswerModel(profileAnswersEntity.getDurationMin(), profileAnswersEntity.getDurationMax()))
+                           .budget(new RangeAnswerModel(profileAnswersEntity.getBudgetMin(), profileAnswersEntity.getBudgetMax()))
+                           .destinationTypes(profileAnswersEntity.getDestinationTypes().stream().map(DestinationTypeAnswer::valueOf).toList())
+                           .ages(new RangeAnswerModel(profileAnswersEntity.getAgeMin(), profileAnswersEntity.getAgeMax()))
+                           .travelWithPersonFromSameCity(YesNoAnswer.of(profileAnswersEntity.getTravelWithPersonFromSameCity()))
+                           .travelWithPersonFromSameCountry(YesNoAnswer.of(profileAnswersEntity.getTravelWithPersonFromSameCountry()))
+                           .travelWithPersonSameLanguage(YesNoAnswer.of(profileAnswersEntity.getTravelWithPersonSameLanguage()))
+                           .gender(GenderAnswer.valueOf(profileAnswersEntity.getGender()))
+                           .groupSize(new RangeAnswerModel(profileAnswersEntity.getGroupSizeMin(), profileAnswersEntity.getGroupSizeMax()))
+                           .chillOrVisit(ChillOrVisitAnswer.valueOf(profileAnswersEntity.getChillOrVisit()))
+                           .aboutFood(AboutFoodAnswer.valueOf(profileAnswersEntity.getAboutFood()))
+                           .goOutAtNight(YesNoAnswer.of(profileAnswersEntity.getGoOutAtNight()))
+                           .sport(YesNoAnswer.of(profileAnswersEntity.getSport()))
                            .isActive(profileEntity.isActive())
                            .name(profileEntity.getName())
                            .createdDate(profileEntity.getCreatedDate())
