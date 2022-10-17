@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.controller;
 
 import fr.tobby.tripnjoyback.model.SurveyModel;
+import fr.tobby.tripnjoyback.model.request.VoteSurveyRequest;
 import fr.tobby.tripnjoyback.model.request.messaging.PostSurveyRequest;
 import fr.tobby.tripnjoyback.model.request.messaging.UpdateSurveyRequest;
 import fr.tobby.tripnjoyback.service.SurveyService;
@@ -31,6 +32,13 @@ public class SurveyController {
     @ApiResponse(responseCode = "200", description = "The survey has been created")
     public SurveyModel createSurvey(@PathVariable("id") long channelId, @RequestBody PostSurveyRequest postSurveyRequest) {
         return surveyService.createSurvey(channelId, postSurveyRequest);
+    }
+
+    @PostMapping("vote/{id}")
+    @Operation(summary = "Vote for a survey")
+    @ApiResponse(responseCode = "200", description = "The vote has been submitted")
+    public SurveyModel createSurvey(@PathVariable("id") long surveyId, @RequestBody VoteSurveyRequest voteSurveyRequest) {
+        return surveyService.submitVote(surveyId, voteSurveyRequest);
     }
 
     @PatchMapping("{id}")

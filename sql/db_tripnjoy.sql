@@ -145,6 +145,7 @@ CREATE TABLE IF NOT EXISTS "surveys" (
 );
 
 CREATE TABLE IF NOT EXISTS "survey_vote" (
+                                  "id" SERIAL PRIMARY KEY,
                                   "voter_id" int,
                                   "survey_id" int references surveys,
                                   "answer_id" int
@@ -291,4 +292,14 @@ CREATE TABLE IF NOT EXISTS activities_info
             on update cascade on delete cascade,
     content text not null
 );
+
+alter table survey_vote
+    add constraint survey_answers_voter_id_fkey
+        foreign key (voter_id) references users
+            on delete cascade;
+
+alter table survey_vote
+    add constraint survey_answers_answer_id_fkey
+        foreign key (answer_id) references answers
+            on delete cascade;
 

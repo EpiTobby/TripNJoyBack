@@ -2,6 +2,7 @@ package fr.tobby.tripnjoyback.entity.messaging;
 
 import fr.tobby.tripnjoyback.entity.SurveyAnswerEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
+import fr.tobby.tripnjoyback.entity.VoteEntity;
 import fr.tobby.tripnjoyback.entity.messaging.ChannelEntity;
 import lombok.*;
 
@@ -38,9 +39,15 @@ public class SurveyEntity {
         this.quizz = quizz;
         this.sendDate = sendDate;
         this.modifiedDate = modifiedDate;
+        answers = new ArrayList<>();
+        votes = new ArrayList<>();
     }
 
     @OneToMany
     @JoinColumn(name = "survey_id")
     private Collection<SurveyAnswerEntity> answers;
+
+    @OneToMany
+    @JoinColumn(name = "survey_id")
+    private Collection<VoteEntity> votes;
 }

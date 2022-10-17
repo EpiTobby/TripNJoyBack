@@ -28,6 +28,8 @@ public class SurveyModel {
                 .channelId(surveyEntity.getChannel().getId())
                 .question(surveyEntity.getQuestion())
                 .sendDate(surveyEntity.getSendDate())
-                .modifiedDate(surveyEntity.getModifiedDate()).build();
+                .modifiedDate(surveyEntity.getModifiedDate())
+                .possibleAnswers(surveyEntity.getAnswers().stream().map(PossibleAnswerModel::of).toList())
+                .votes(surveyEntity.getVotes().stream().map(VoteModel::of).toList()).build();
     }
 }
