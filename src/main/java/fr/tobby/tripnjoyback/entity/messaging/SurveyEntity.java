@@ -30,6 +30,16 @@ public class SurveyEntity {
     private boolean quizz;
     private Date sendDate;
     private Date modifiedDate;
+
+    public SurveyEntity(UserEntity submitter, ChannelEntity channel, String question, boolean quizz, Date sendDate, Date modifiedDate) {
+        this.submitter = submitter;
+        this.channel = channel;
+        this.question = question;
+        this.quizz = quizz;
+        this.sendDate = sendDate;
+        this.modifiedDate = modifiedDate;
+    }
+
     @OneToMany
     @JoinColumn(name = "survey_id")
     private Collection<SurveyAnswerEntity> answers;

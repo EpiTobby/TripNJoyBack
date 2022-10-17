@@ -12,3 +12,5 @@ alter table answers
 
 INSERT INTO public.message_type (id, name)
 VALUES (4, 'SURVEY');
+
+alter table survey_answers rename to survey_vote;

@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS "surveys" (
                            "modified_date" timestamp
 );
 
-CREATE TABLE IF NOT EXISTS "survey_answers" (
+CREATE TABLE IF NOT EXISTS "survey_vote" (
                                   "voter_id" int,
                                   "survey_id" int references surveys,
                                   "answer_id" int

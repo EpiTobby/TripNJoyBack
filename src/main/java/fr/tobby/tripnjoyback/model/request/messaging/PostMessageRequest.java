@@ -7,9 +7,9 @@ import lombok.Getter;
 @Getter
 public class PostMessageRequest {
 
-    private final long userId;
-    private final String content;
-    private final MessageType type;
+    protected final long userId;
+    protected final String content;
+    protected final MessageType type;
 
     public PostMessageRequest(@JsonProperty("userId") final long userId,
                               @JsonProperty("content") final String content,
