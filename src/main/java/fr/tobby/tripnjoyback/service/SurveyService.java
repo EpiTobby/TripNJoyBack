@@ -39,20 +39,20 @@ public class SurveyService {
         this.channelRepository = channelRepository;
     }
 
-    public List<SurveyModel> getByChannelId(long channelId){
+    public List<SurveyModel> getByChannelId(long channelId) {
         return surveyRepository.findByChannelId(channelId).stream().map(SurveyModel::of).toList();
     }
 
     @Transactional
-    public SurveyModel createSurvey(long channelId, PostSurveyRequest postSurveyRequest){
+    public SurveyModel createSurvey(long channelId, PostSurveyRequest postSurveyRequest) {
         ChannelEntity channelEntity = channelRepository.findById(channelId).orElseThrow(() -> new ChannelNotFoundException(channelId));
         UserEntity userEntity = userRepository.findById(postSurveyRequest.getUserId()).orElseThrow(() -> new UserNotFoundException(postSurveyRequest.getUserId()));
         SurveyEntity surveyEntity = surveyRepository.save(
-                new SurveyEntity(userEntity, channelEntity, postSurveyRequest.getContent(), postSurveyRequest.isQuizz(), Date.from(Instant.now()), null)
+                new SurveyEntity(userEntity, channelEntity, postSurveyRequest.getContent(), postSurveyRequest.isQuizz(), Date.from(Instant.now()), null, postSurveyRequest.isCanBeAnsweredMultipleTimes())
         );
-        postSurveyRequest.getPossibleAnswers().forEach(possibleAnswer ->{
+        postSurveyRequest.getPossibleAnswers().forEach(possibleAnswer -> {
             SurveyAnswerEntity surveyAnswerEntity = surveyAnswerRepository.save(
-                    new SurveyAnswerEntity(postSurveyRequest.getContent(), surveyEntity, possibleAnswer.isRightAnswer())
+                    new SurveyAnswerEntity(possibleAnswer.getContent(), surveyEntity, possibleAnswer.isRightAnswer())
             );
             surveyEntity.getAnswers().add(surveyAnswerEntity);
         });
@@ -60,31 +60,42 @@ public class SurveyService {
     }
 
     @Transactional
-    public SurveyModel updateSurvey(long surveyId, UpdateSurveyRequest updateSurveyRequest){
+    public SurveyModel updateSurvey(long surveyId, UpdateSurveyRequest updateSurveyRequest) {
         SurveyEntity surveyEntity = surveyRepository.findById(surveyId).orElseThrow(() -> new SurveyNotFoundException(surveyId));
         surveyEntity.setQuestion(updateSurveyRequest.getQuestion());
+        surveyEntity.setCanBeAnsweredMultipleTimes(updateSurveyRequest.isCanBeAnsweredMultipleTimes());
+        surveyEntity.setModifiedDate(Date.from(Instant.now()));
+        voteRepository.findBySurveyId(surveyId).forEach(voteRepository::delete);
+        if (!updateSurveyRequest.getPossibleAnswers().isEmpty()) {
+            surveyAnswerRepository.findBySurveyId(surveyId).forEach(surveyAnswerRepository::delete);
+            updateSurveyRequest.getPossibleAnswers().forEach(possibleAnswer -> {
+                SurveyAnswerEntity surveyAnswerEntity = surveyAnswerRepository.save(
+                        new SurveyAnswerEntity(possibleAnswer.getContent(), surveyEntity, possibleAnswer.isRightAnswer())
+                );
+                surveyEntity.getAnswers().add(surveyAnswerEntity);
+            });
+        }
         return SurveyModel.of(surveyEntity);
     }
 
     @Transactional
-    public SurveyModel submitVote(long surveyId, VoteSurveyRequest voteSurveyRequest){
+    public SurveyModel submitVote(long surveyId, VoteSurveyRequest voteSurveyRequest) {
         SurveyEntity surveyEntity = surveyRepository.findById(surveyId).orElseThrow(() -> new SurveyNotFoundException(surveyId));
         UserEntity userEntity = userRepository.findById(voteSurveyRequest.getVoterId()).orElseThrow(() -> new UserNotFoundException(voteSurveyRequest.getVoterId()));
         SurveyAnswerEntity surveyAnswerEntity = surveyAnswerRepository.findById(voteSurveyRequest.getAnswerId()).orElseThrow(() -> new SurveyAnswerNotFoundException(surveyId));
         if (!surveyAnswerEntity.getSurvey().getId().equals(surveyEntity.getId()))
             throw new SurveyVoteException("Cannot submit this vote for the survey!");
-        Optional<VoteEntity> voteEntity = voteRepository.findByVoterIdAndByAndSurveyId(userEntity.getId(), surveyId);
-        if (voteEntity.isPresent()) {
+        Optional<VoteEntity> voteEntity = voteRepository.findByVoterIdAndSurveyId(userEntity.getId(), surveyId);
+        if (voteEntity.isPresent() && !surveyEntity.isCanBeAnsweredMultipleTimes()) {
             voteEntity.get().setAnswer(surveyAnswerEntity);
-        }
-        else {
-            surveyEntity.getVotes().add(voteRepository.save(new VoteEntity(surveyEntity,surveyAnswerEntity,userEntity)));
+        } else {
+            surveyEntity.getVotes().add(voteRepository.save(new VoteEntity(surveyEntity, surveyAnswerEntity, userEntity)));
         }
         return SurveyModel.of(surveyEntity);
     }
 
     @Transactional
-    public void deleteSurvey(long surveyId){
+    public void deleteSurvey(long surveyId) {
         SurveyEntity surveyEntity = surveyRepository.findById(surveyId).orElseThrow(() -> new SurveyNotFoundException(surveyId));
         surveyRepository.delete(surveyEntity);
     }

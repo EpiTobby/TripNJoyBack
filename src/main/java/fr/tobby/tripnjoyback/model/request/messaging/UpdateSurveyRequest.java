@@ -16,4 +16,5 @@ import java.util.List;
 public class UpdateSurveyRequest {
     private String question;
     private List<PossibleAnswerRequest> possibleAnswers;
+    private boolean canBeAnsweredMultipleTimes;
 }

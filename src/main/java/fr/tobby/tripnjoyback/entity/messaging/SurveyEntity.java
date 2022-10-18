@@ -30,15 +30,20 @@ public class SurveyEntity {
     @Setter
     private boolean quizz;
     private Date sendDate;
+    @Setter
     private Date modifiedDate;
+    @Column(name = "can_be_answered_multiple_times")
+    @Setter
+    private boolean canBeAnsweredMultipleTimes;
 
-    public SurveyEntity(UserEntity submitter, ChannelEntity channel, String question, boolean quizz, Date sendDate, Date modifiedDate) {
+    public SurveyEntity(UserEntity submitter, ChannelEntity channel, String question, boolean quizz, Date sendDate, Date modifiedDate, boolean canBeAnsweredMultipleTimes) {
         this.submitter = submitter;
         this.channel = channel;
         this.question = question;
         this.quizz = quizz;
         this.sendDate = sendDate;
         this.modifiedDate = modifiedDate;
+        this.canBeAnsweredMultipleTimes = canBeAnsweredMultipleTimes;
         answers = new ArrayList<>();
         votes = new ArrayList<>();
     }
