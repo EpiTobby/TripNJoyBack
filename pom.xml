@@ -136,6 +136,11 @@
 			<artifactId>simpleclient_pushgateway</artifactId>
 			<version>0.16.0</version>
 		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
