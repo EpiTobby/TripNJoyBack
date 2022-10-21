@@ -1,10 +1,12 @@
 package fr.tripnjoy.users.service;
 
+import fr.tripnjoy.users.auth.TokenManager;
 import fr.tripnjoy.users.entity.ConfirmationCodeEntity;
 import fr.tripnjoy.users.entity.UserEntity;
 import fr.tripnjoy.users.exception.*;
 import fr.tripnjoy.users.model.GoogleTokenVerificationModel;
 import fr.tripnjoy.users.model.UserModel;
+import fr.tripnjoy.users.model.UserRole;
 import fr.tripnjoy.users.model.request.*;
 import fr.tripnjoy.users.model.response.GoogleUserResponse;
 import fr.tripnjoy.users.model.response.UserIdResponse;
@@ -14,6 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +44,10 @@ public class AuthService {
     private final ConfirmationCodeRepository confirmationCodeRepository;
     private final UserRoleRepository userRoleRepository;
     private final LanguageRepository languageRepository;
+    private final UserService userService;
+
+    private final TokenManager tokenManager;
+    private final UserDetailsService userDetailsService;
 
     @Value("${google.secret}")
     private String googleSecret;
@@ -46,7 +57,9 @@ public class AuthService {
     public AuthService(final UserRepository userRepository, final PasswordEncoder encoder,
                        final GenderRepository genderRepository,
                        final CityService cityService, final ConfirmationCodeRepository confirmationCodeRepository,
-                       final UserRoleRepository userRoleRepository, LanguageRepository languageRepository)
+                       final UserRoleRepository userRoleRepository, LanguageRepository languageRepository,
+                       final UserService userService, final TokenManager tokenManager,
+                       final UserDetailsService userDetailsService)
     {
         this.userRepository = userRepository;
         this.encoder = encoder;
@@ -55,6 +68,9 @@ public class AuthService {
         this.confirmationCodeRepository = confirmationCodeRepository;
         this.userRoleRepository = userRoleRepository;
         this.languageRepository = languageRepository;
+        this.userService = userService;
+        this.tokenManager = tokenManager;
+        this.userDetailsService = userDetailsService;
     }
 
     @Transactional
@@ -153,6 +169,25 @@ public class AuthService {
         //        promStats.getUserCount().set(userRepository.count());
         logger.debug("Created new user {}", userModel);
         return new GoogleUserResponse(userModel, true);
+    }
+
+    public String login(@NonNull String username, @NonNull String password) throws AuthenticationException
+    {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UserModel userModel = userService.findByEmail(username).orElseThrow();
+        String token = tokenManager.generateFor(userDetails, userModel.getId());
+        logger.debug("User {} logged in. jwt = {}", username, token);
+        return token;
+    }
+
+    public String loginAdmin(@NonNull String username, @NonNull String password) throws AuthenticationException {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UserModel userModel = userService.findByEmail(username).orElseThrow();
+        if (!userModel.getRoles().contains(UserRole.ADMIN))
+            throw new ForbiddenOperationException("You cannot perform this operation.");
+        String token = tokenManager.generateFor(userDetails, userModel.getId());
+        logger.debug("Admin {} logged in. jwt = {}", username, token);
+        return token;
     }
 
     private ConfirmationCodeEntity generateConfirmationCode(UserModel userModel)
@@ -267,5 +302,25 @@ public class AuthService {
         }
         else
             throw new UpdatePasswordException("Bad Password");
+    }
+
+    @Transactional
+    public String updateEmail(long userId, UpdateEmailRequest updateEmailRequest) {
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        if (!encoder.matches(updateEmailRequest.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Bad Password");
+        }
+        // FIXME: mail service
+//        if (!userMailUtils.userEmailIsValid(updateEmailRequest.getNewEmail())) {
+//            throw new UpdateEmailException("Email is not valid");
+//        }
+        String newEmail = updateEmailRequest.getNewEmail().toLowerCase().trim();
+        if (userRepository.findByEmail(newEmail).isEmpty()) {
+            user.setEmail(newEmail);
+            // FIXME: mail service
+//            userMailUtils.sendUpdateMail(UserModel.of(user));
+            return tokenManager.generateFor(user.getEmail(), userId);
+        } else
+            throw new UpdateEmailException("Email already used");
     }
 }

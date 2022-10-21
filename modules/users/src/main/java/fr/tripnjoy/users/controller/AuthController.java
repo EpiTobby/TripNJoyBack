@@ -1,11 +1,10 @@
 package fr.tripnjoy.users.controller;
 
+import fr.tripnjoy.users.auth.TokenManager;
 import fr.tripnjoy.users.exception.*;
 import fr.tripnjoy.users.model.UserModel;
 import fr.tripnjoy.users.model.request.*;
-import fr.tripnjoy.users.model.response.GoogleAuthResponse;
-import fr.tripnjoy.users.model.response.GoogleUserResponse;
-import fr.tripnjoy.users.model.response.UserIdResponse;
+import fr.tripnjoy.users.model.response.*;
 import fr.tripnjoy.users.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,10 +23,21 @@ public class AuthController {
     public static final String ERROR_RESPONSE_MSG = "Error on request";
 
     private final AuthService authService;
+    private final TokenManager tokenManager;
 
-    public AuthController(final AuthService authService)
+    public AuthController(final AuthService authService, final TokenManager tokenManager)
     {
         this.authService = authService;
+        this.tokenManager = tokenManager;
+    }
+
+    @PostMapping("register")
+    @Operation(summary = "Create a new account. Will send a confirmation mail to the given address")
+    @ApiResponse(responseCode = "200", description = "User is created")
+    @ApiResponse(responseCode = "422", description = "If the email is already in use by another user")
+    public AuthTokenResponse createAccount(@RequestBody UserCreationRequest model) {
+        UserModel user = authService.createUser(model);
+        return new AuthTokenResponse(tokenManager.generateFor(user.getEmail(), user.getId()));
     }
 
     @PostMapping("register/admin")
@@ -47,6 +57,24 @@ public class AuthController {
     public void resendConfirmationCode(@PathVariable("id") final long userId)
     {
         authService.resendConfirmationCode(userId);
+    }
+
+    @PostMapping("login")
+    @Operation(summary = "Log a user, to allow authenticated endpoints")
+    @ApiResponse(responseCode = "401", description = "Authentication failed. Wrong username or password")
+    @ApiResponse(responseCode = "200", description = "Authentication Succeeded. Use the given jwt in following requests")
+    public LoginResponse login(@RequestBody LoginRequest loginRequest) {
+        String token = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
+        return new LoginResponse(loginRequest.getUsername(), token);
+    }
+
+    @PostMapping("login/admin")
+    @Operation(summary = "Log a user, to allow authenticated endpoints")
+    @ApiResponse(responseCode = "401", description = "Authentication failed. Wrong username or password")
+    @ApiResponse(responseCode = "200", description = "Authentication Succeeded. Use the given jwt in following requests")
+    public LoginResponse loginAdmin(@RequestBody LoginRequest loginRequest) {
+        String token = authService.loginAdmin(loginRequest.getUsername(), loginRequest.getPassword());
+        return new LoginResponse(loginRequest.getUsername(), token);
     }
 
     @PostMapping("google")
@@ -97,6 +125,17 @@ public class AuthController {
     public void updatePassword(@PathVariable("id") final long userId, @RequestBody UpdatePasswordRequest updatePasswordRequest)
     {
         authService.updatePassword(userId, updatePasswordRequest);
+    }
+
+    @PatchMapping("{id}/email")
+    @Operation(summary = "Used to ask update the user email. Returns a new jwt")
+    @ApiResponse(responseCode = "200", description = "If the email has been updated")
+    @ApiResponse(responseCode = "403", description = "If the given password is not valid")
+    @ApiResponse(responseCode = "422", description = "If the new email does not exist or is already in use")
+    public LoginResponse updateEmail(@PathVariable("id") final long userId, @RequestBody UpdateEmailRequest updateEmailRequest) {
+        String token = authService.updateEmail(userId, updateEmailRequest);
+
+        return new LoginResponse(updateEmailRequest.getNewEmail(), token);
     }
 
     @ExceptionHandler(AuthenticationException.class)
@@ -167,6 +206,22 @@ public class AuthController {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String userAlreadyConfirmedException(UserAlreadyConfirmedException exception)
     {
+        logger.debug(ERROR_RESPONSE_MSG, exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(ForbiddenOperationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String creationError(ForbiddenOperationException exception) {
+        logger.debug(ERROR_RESPONSE_MSG, exception);
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(UpdateEmailException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(UpdateEmailException exception) {
         logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
