@@ -39,8 +39,13 @@ public class SurveyService {
         this.channelRepository = channelRepository;
     }
 
-    public List<SurveyModel> getByChannelId(long channelId) {
-        return surveyRepository.findByChannelId(channelId).stream().map(SurveyModel::of).toList();
+    public List<SurveyModel> getSurveysByChannelId(long channelId) {
+        return surveyRepository.findByChannelId(channelId).stream().filter(s -> !s.isQuizz()).map(SurveyModel::of).toList();
+    }
+
+    public List<SurveyModel> getQuizz(long channelId, long userId) {
+        return surveyRepository.findByChannelId(channelId).stream()
+                .filter(s -> s.isQuizz() && s.getSubmitter().getId() != userId).map(SurveyModel::of).toList();
     }
 
     @Transactional
@@ -60,8 +65,10 @@ public class SurveyService {
     }
 
     @Transactional
-    public SurveyModel updateSurvey(long surveyId, UpdateSurveyRequest updateSurveyRequest) {
+    public SurveyModel updateSurvey(long surveyId, long userId, UpdateSurveyRequest updateSurveyRequest) {
         SurveyEntity surveyEntity = surveyRepository.findById(surveyId).orElseThrow(() -> new SurveyNotFoundException(surveyId));
+        if (surveyEntity.getSubmitter().getId() != userId)
+            throw new ForbiddenOperationException("You cannot perform this operation!");
         surveyEntity.setQuestion(updateSurveyRequest.getQuestion());
         surveyEntity.setCanBeAnsweredMultipleTimes(updateSurveyRequest.isCanBeAnsweredMultipleTimes());
         surveyEntity.setModifiedDate(Date.from(Instant.now()));
@@ -95,8 +102,10 @@ public class SurveyService {
     }
 
     @Transactional
-    public void deleteSurvey(long surveyId) {
+    public void deleteSurvey(long surveyId, long userId) {
         SurveyEntity surveyEntity = surveyRepository.findById(surveyId).orElseThrow(() -> new SurveyNotFoundException(surveyId));
+        if (surveyEntity.getSubmitter().getId() != userId)
+            throw new ForbiddenOperationException("You cannot perform this operation!");
         surveyRepository.delete(surveyEntity);
     }
 }

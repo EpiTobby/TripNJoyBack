@@ -35,7 +35,7 @@ public class PlanningController {
     @ApiResponse(responseCode = "404", description = "The group does not exist")
     public ActivityModel createActivity(@PathVariable(name = "groupId") final long groupId, @RequestBody final CreateActivityRequest request)
     {
-        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+        if (!idCheckerService.userIsInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
         ActivityModel activity = this.service.createActivity(groupId, request);
         this.service.joinActivity(activity.id(), idCheckerService.getCurrentUserId());
@@ -49,7 +49,7 @@ public class PlanningController {
     @ApiResponse(responseCode = "404", description = "The group does not exist")
     public List<ActivityModel> getActivities(@PathVariable(name = "groupId") final long groupId)
     {
-        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+        if (!idCheckerService.userIsInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
         return this.service.getGroupActivities(groupId);
     }
@@ -64,9 +64,9 @@ public class PlanningController {
                              @PathVariable(name = "activityId") final long activityId,
                              @RequestParam(name = "userId") final long userId)
     {
-        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+        if (!idCheckerService.userIsInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
-        if (!idCheckerService.isUserInGroup(userId, groupId))
+        if (!idCheckerService.userIsInGroup(userId, groupId))
             throw new ForbiddenOperationException();
         this.service.joinActivity(activityId, userId);
     }
@@ -81,9 +81,9 @@ public class PlanningController {
                               @PathVariable(name = "activityId") final long activityId,
                               @RequestParam(name = "userId") final long userId)
     {
-        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+        if (!idCheckerService.userIsInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
-        if (!idCheckerService.isUserInGroup(userId, groupId))
+        if (!idCheckerService.userIsInGroup(userId, groupId))
             throw new ForbiddenOperationException();
         this.service.leaveActivity(activityId, userId);
     }
@@ -97,7 +97,7 @@ public class PlanningController {
     public void deleteActivity(@PathVariable(name = "groupId") final long groupId,
                                @PathVariable(name = "activityId") final long activityId)
     {
-        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+        if (!idCheckerService.userIsInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
         this.service.deleteActivity(activityId);
     }
@@ -111,7 +111,7 @@ public class PlanningController {
                                         @PathVariable(name = "activityId") final long activityId,
                                         @NotNull @RequestBody final UpdateActivityRequest updateActivityRequest)
     {
-        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+        if (!idCheckerService.userIsInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
         return this.service.updateActivity(activityId, updateActivityRequest);
     }

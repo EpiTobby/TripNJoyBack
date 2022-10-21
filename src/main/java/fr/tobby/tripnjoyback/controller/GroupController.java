@@ -179,7 +179,7 @@ public class GroupController {
     @ApiResponse(responseCode = "403", description = "User is not in the group, or the group is already public")
     @PatchMapping("private/{groupId}/public")
     public void setGroupPublic(@PathVariable("groupId") final long groupId, @RequestBody ProfileCreationRequest profile) {
-        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+        if (!idCheckerService.userIsInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
         try {
             groupService.setGroupPublic(groupId, profile);
@@ -208,7 +208,7 @@ public class GroupController {
     @Operation(summary = "Get the QR code to join a private group")
     @ApiResponse(responseCode = "200", description = "Returns the encoded qr code")
     public String getQRCode(@PathVariable("group") final long groupId) {
-        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
+        if (!idCheckerService.userIsInGroup(idCheckerService.getCurrentUserId(), groupId))
             throw new ForbiddenOperationException();
         return groupService.getQRCode(groupId);
     }
