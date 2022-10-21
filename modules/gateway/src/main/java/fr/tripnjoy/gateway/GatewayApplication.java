@@ -20,7 +20,7 @@ public class GatewayApplication {
     @Bean
     public RouteLocator routeLocator(RouteLocatorBuilder builder, @Value("${server.port}") String port)
     {
-        final String[] services = new String[] {};
+        final String[] services = new String[] {"users"};
         RouteLocatorBuilder.Builder routes = builder.routes();
 
         for (final String service : services)
