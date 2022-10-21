@@ -1,4 +1,4 @@
-package com.example.gateway;
+package fr.tripnjoy.gateway;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
