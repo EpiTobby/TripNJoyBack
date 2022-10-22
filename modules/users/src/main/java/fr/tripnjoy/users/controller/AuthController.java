@@ -1,5 +1,8 @@
 package fr.tripnjoy.users.controller;
 
+import fr.tripnjoy.users.api.request.CheckJwtRequest;
+import fr.tripnjoy.users.api.response.CheckJwtResponse;
+import fr.tripnjoy.users.api.response.JwtUserDetails;
 import fr.tripnjoy.users.auth.TokenManager;
 import fr.tripnjoy.users.exception.*;
 import fr.tripnjoy.users.model.UserModel;

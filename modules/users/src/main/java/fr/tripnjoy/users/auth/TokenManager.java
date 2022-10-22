@@ -1,13 +1,14 @@
 package fr.tripnjoy.users.auth;
 
+import fr.tripnjoy.users.api.response.JwtUserDetails;
 import fr.tripnjoy.users.exception.TokenExpiredException;
 import fr.tripnjoy.users.exception.TokenParsingException;
 import fr.tripnjoy.users.exception.TokenVerificationException;
-import fr.tripnjoy.users.model.response.JwtUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -68,6 +69,15 @@ public class TokenManager {
             throw new TokenExpiredException();
         long userId = claims.get("userId", Long.class);
         String username = claims.getSubject();
-        return JwtUserDetails.fromUserDetails(userId, userDetailsService.loadUserByUsername(username));
+        return fromUserDetails(userId, userDetailsService.loadUserByUsername(username));
+    }
+
+    public JwtUserDetails fromUserDetails(final long userId, final UserDetails userDetails)
+    {
+        return new JwtUserDetails(
+                userId,
+                userDetails.getUsername(),
+                userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList()
+        );
     }
 }
