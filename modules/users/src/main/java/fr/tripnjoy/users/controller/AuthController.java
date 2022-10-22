@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,6 +30,20 @@ public class AuthController {
     {
         this.authService = authService;
         this.tokenManager = tokenManager;
+    }
+
+    @PostMapping("jwtcheck")
+    public CheckJwtResponse checkJwt(@RequestBody CheckJwtRequest request)
+    {
+        try
+        {
+            JwtUserDetails jwtUserDetails = tokenManager.verifyToken(request.getJwt());
+            return new CheckJwtResponse(true, jwtUserDetails);
+        }
+        catch (TokenVerificationException | UsernameNotFoundException e)
+        {
+            return new CheckJwtResponse(false, null);
+        }
     }
 
     @PostMapping("register")
@@ -84,9 +99,7 @@ public class AuthController {
     public GoogleAuthResponse signInUpGoogle(@RequestBody GoogleRequest googleRequest)
     {
         GoogleUserResponse res = authService.signInUpGoogle(googleRequest);
-        // FIXME: generate token
-        //        String token = tokenManager.generateFor(res.user().getEmail(), res.user().getId());
-        String token = "";
+        String token = tokenManager.generateFor(res.user().getEmail(), res.user().getId());
         return new GoogleAuthResponse(res.user().getEmail(), token, res.newUser());
     }
 

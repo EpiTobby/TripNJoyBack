@@ -3,6 +3,7 @@ package fr.tripnjoy.users.auth;
 import fr.tripnjoy.users.exception.TokenExpiredException;
 import fr.tripnjoy.users.exception.TokenParsingException;
 import fr.tripnjoy.users.exception.TokenVerificationException;
+import fr.tripnjoy.users.model.response.JwtUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -11,9 +12,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
-import java.sql.Date;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.HashMap;
 
 @Component
@@ -48,7 +49,7 @@ public class TokenManager {
                    .compact();
     }
 
-    public UserDetails verifyToken(final String tokenString) throws TokenVerificationException
+    public JwtUserDetails verifyToken(final String tokenString) throws TokenVerificationException
     {
         Claims claims;
         try
@@ -65,7 +66,8 @@ public class TokenManager {
 
         if (claims.getExpiration().before(Date.from(Instant.now())))
             throw new TokenExpiredException();
+        long userId = claims.get("userId", Long.class);
         String username = claims.getSubject();
-        return userDetailsService.loadUserByUsername(username);
+        return JwtUserDetails.fromUserDetails(userId, userDetailsService.loadUserByUsername(username));
     }
 }
