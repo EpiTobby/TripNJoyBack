@@ -18,7 +18,7 @@ public class GatewayApplication {
     }
 
     @Bean
-    public RouteLocator routeLocator(RouteLocatorBuilder builder, @Value("${server.port}") String port)
+    public RouteLocator routeLocator(RouteLocatorBuilder builder, @Value("${server.port}") String port, JwtAuthFilter authFilter)
     {
         final String[] services = new String[] {"users"};
         RouteLocatorBuilder.Builder routes = builder.routes();
@@ -28,7 +28,7 @@ public class GatewayApplication {
             String path = String.format("/%s/**", service);
             String serviceUri = "lb://SERVICE-" + service.toUpperCase() + "/";
             routes = routes.route(r -> r.path(path)
-                                        .filters(f -> f.rewritePath("/" + service + "/(?<path>.*)", "/${path}"))
+                                        .filters(f -> f.filter(authFilter).rewritePath("/" + service + "/(?<path>.*)", "/${path}"))
                                         .uri(serviceUri));
         }
         return routes.route(r -> r.path("/v3/api-docs/**")
