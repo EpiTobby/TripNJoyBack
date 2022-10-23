@@ -1,5 +1,6 @@
 package fr.tripnjoy.users.controller;
 
+import fr.tripnjoy.common.exception.UnauthorizedException;
 import fr.tripnjoy.users.entity.UserEntity;
 import fr.tripnjoy.users.exception.BadConfirmationCodeException;
 import fr.tripnjoy.users.exception.ExpiredCodeException;
@@ -16,10 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -38,26 +36,27 @@ public class UserController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasAuthority('admin')")
-    public List<UserEntity> getAll()
+    public List<UserEntity> getAll(@RequestHeader("roles") List<String> roles) throws UnauthorizedException
     {
+        if (!roles.contains("admin"))
+            throw new UnauthorizedException();
         List<UserEntity> userEntities = new ArrayList<>();
         userService.getAll().forEach(userEntities::add);
         return userEntities;
     }
 
     @GetMapping("{id}")
-    @PreAuthorize("hasAuthority('admin')")
-    public UserModel getUserById(@PathVariable("id") final long userId)
+    public UserModel getUserById(@RequestHeader("roles") List<String> roles, @PathVariable("id") final long userId) throws UnauthorizedException
     {
+        if (!roles.contains("admin"))
+            throw new UnauthorizedException();
         return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
     }
 
     @GetMapping("me")
-    public UserModel getCurrentUser()
+    public UserModel getCurrentUser(@RequestHeader("username") String username)
     {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return userService.findByEmail(authentication.getName()).orElseThrow(() -> new UserNotFoundException("Current user is not associated to a registered user"));
+        return userService.findByEmail(username).orElseThrow(() -> new UserNotFoundException("Current user is not associated to a registered user"));
     }
 
     @PatchMapping("/update")

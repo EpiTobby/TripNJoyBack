@@ -1,5 +1,6 @@
 package fr.tripnjoy.users.controller;
 
+import fr.tripnjoy.common.exception.UnauthorizedException;
 import fr.tripnjoy.users.api.request.CheckJwtRequest;
 import fr.tripnjoy.users.api.response.CheckJwtResponse;
 import fr.tripnjoy.users.api.response.JwtUserDetails;
@@ -14,11 +15,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -59,12 +61,14 @@ public class AuthController {
     }
 
     @PostMapping("register/admin")
-    @PreAuthorize("hasAuthority('admin')")
     @Operation(summary = "Create a new admin account. Will send a confirmation mail to the given address")
     @ApiResponse(responseCode = "200", description = "Admin is created")
     @ApiResponse(responseCode = "422", description = "If the email is already in use by another user")
-    public UserModel createAdminAccount(@RequestBody UserCreationRequest model)
+    public UserModel createAdminAccount(@RequestHeader("roles") List<String> roles,
+                                        @RequestBody UserCreationRequest model) throws UnauthorizedException
     {
+        if (!roles.contains("admin"))
+            throw new UnauthorizedException();
         return authService.createAdmin(model);
     }
 
