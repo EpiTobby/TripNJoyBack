@@ -32,7 +32,7 @@ public class SurveyEntity {
     private Date sendDate;
     @Setter
     private Date modifiedDate;
-    @Column(name = "can_be_answered_multiple_times")
+    @Column(name = "can_be_answered_multiples_times")
     @Setter
     private boolean canBeAnsweredMultipleTimes;
 
