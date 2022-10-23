@@ -73,6 +73,7 @@ public class SurveyService {
         surveyEntity.setCanBeAnsweredMultipleTimes(updateSurveyRequest.isCanBeAnsweredMultipleTimes());
         surveyEntity.setModifiedDate(Date.from(Instant.now()));
         voteRepository.findBySurveyId(surveyId).forEach(voteRepository::delete);
+        surveyEntity.getAnswers().clear();
         if (!updateSurveyRequest.getPossibleAnswers().isEmpty()) {
             surveyAnswerRepository.findBySurveyId(surveyId).forEach(surveyAnswerRepository::delete);
             updateSurveyRequest.getPossibleAnswers().forEach(possibleAnswer -> {
@@ -99,6 +100,14 @@ public class SurveyService {
             surveyEntity.getVotes().add(voteRepository.save(new VoteEntity(surveyEntity, surveyAnswerEntity, userEntity)));
         }
         return SurveyModel.of(surveyEntity);
+    }
+
+    @Transactional
+    public void deleteVote(long voteId, long userId) {
+        VoteEntity voteEntity = voteRepository.findById(voteId).orElseThrow(() -> new VoteNotFoundException(voteId));
+        if (userId != voteEntity.getVoter().getId())
+            throw new ForbiddenOperationException("You cannot perform this operation!");
+        voteRepository.delete(voteEntity);
     }
 
     @Transactional

@@ -14,11 +14,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class VoteModel {
+    private long id;
     private GroupMemberModel voter;
     private PossibleAnswerModel answer;
 
     public static VoteModel of(VoteEntity voteEntity){
         return VoteModel.builder()
+                .id(voteEntity.getId())
                 .answer(PossibleAnswerModel.of(voteEntity.getAnswer()))
                 .voter(GroupMemberModel.of(voteEntity.getVoter())).build();
     }

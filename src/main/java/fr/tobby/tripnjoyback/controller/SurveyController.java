@@ -69,6 +69,13 @@ public class SurveyController {
         return surveyService.submitVote(surveyId, voteSurveyRequest);
     }
 
+    @DeleteMapping("vote/{id}")
+    @Operation(summary = "Deletes a vote for a survey")
+    @ApiResponse(responseCode = "200", description = "The vote has been submitted")
+    public void deleteVote(@PathVariable("id") long voteId) {
+        surveyService.deleteVote(voteId, idCheckerService.getCurrentUserId());
+    }
+
     @PatchMapping("{id}")
     @Operation(summary = "Update a survey in a channel")
     @ApiResponse(responseCode = "200", description = "The survey has been updated")
