@@ -2,8 +2,6 @@ package fr.tripnjoy.users.controller;
 
 import fr.tripnjoy.common.exception.UnauthorizedException;
 import fr.tripnjoy.users.entity.UserEntity;
-import fr.tripnjoy.users.exception.BadConfirmationCodeException;
-import fr.tripnjoy.users.exception.ExpiredCodeException;
 import fr.tripnjoy.users.exception.ForbiddenOperationException;
 import fr.tripnjoy.users.exception.UserNotFoundException;
 import fr.tripnjoy.users.model.UserModel;
@@ -14,10 +12,6 @@ import fr.tripnjoy.users.model.response.FirebaseTokenResponse;
 import fr.tripnjoy.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -26,7 +20,6 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/users")
 public class UserController {
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
 
@@ -35,11 +28,16 @@ public class UserController {
         this.userService = userService;
     }
 
+    private void checkIsAdmin(List<String> roles) throws UnauthorizedException
+    {
+        if (!roles.contains("admin"))
+            throw new UnauthorizedException("This resource is accessible only to administrators");
+    }
+
     @GetMapping("")
     public List<UserEntity> getAll(@RequestHeader("roles") List<String> roles) throws UnauthorizedException
     {
-        if (!roles.contains("admin"))
-            throw new UnauthorizedException();
+        checkIsAdmin(roles);
         List<UserEntity> userEntities = new ArrayList<>();
         userService.getAll().forEach(userEntities::add);
         return userEntities;
@@ -48,8 +46,7 @@ public class UserController {
     @GetMapping("{id}")
     public UserModel getUserById(@RequestHeader("roles") List<String> roles, @PathVariable("id") final long userId) throws UnauthorizedException
     {
-        if (!roles.contains("admin"))
-            throw new UnauthorizedException();
+        checkIsAdmin(roles);
         return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
     }
 
@@ -99,49 +96,5 @@ public class UserController {
     public void setFirebaseToken(@PathVariable("id") final long userId, @RequestParam(name = "token", required = false) String token)
     {
         userService.setFirebaseToken(userId, token);
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(UserNotFoundException exception)
-    {
-        logger.debug("Error on request", exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(BadConfirmationCodeException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(BadConfirmationCodeException exception)
-    {
-        logger.debug("Error on request", exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(ExpiredCodeException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public String getError(ExpiredCodeException exception)
-    {
-        logger.debug("Error on request", exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String getError(BadCredentialsException exception)
-    {
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(ForbiddenOperationException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String getError(ForbiddenOperationException exception)
-    {
-        logger.debug("Error on request", exception);
-        return exception.getMessage();
     }
 }

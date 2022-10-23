@@ -5,18 +5,13 @@ import fr.tripnjoy.users.api.request.CheckJwtRequest;
 import fr.tripnjoy.users.api.response.CheckJwtResponse;
 import fr.tripnjoy.users.api.response.JwtUserDetails;
 import fr.tripnjoy.users.auth.TokenManager;
-import fr.tripnjoy.users.exception.*;
+import fr.tripnjoy.users.exception.TokenVerificationException;
 import fr.tripnjoy.users.model.UserModel;
 import fr.tripnjoy.users.model.request.*;
 import fr.tripnjoy.users.model.response.*;
 import fr.tripnjoy.users.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +20,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    public static final String ERROR_RESPONSE_MSG = "Error on request";
 
     private final AuthService authService;
     private final TokenManager tokenManager;
@@ -35,6 +28,12 @@ public class AuthController {
     {
         this.authService = authService;
         this.tokenManager = tokenManager;
+    }
+
+    private void checkIsAdmin(List<String> roles) throws UnauthorizedException
+    {
+        if (!roles.contains("admin"))
+            throw new UnauthorizedException("This resource is accessible only to administrators");
     }
 
     @PostMapping("jwtcheck")
@@ -67,8 +66,7 @@ public class AuthController {
     public UserModel createAdminAccount(@RequestHeader("roles") List<String> roles,
                                         @RequestBody UserCreationRequest model) throws UnauthorizedException
     {
-        if (!roles.contains("admin"))
-            throw new UnauthorizedException();
+        checkIsAdmin(roles);
         return authService.createAdmin(model);
     }
 
@@ -156,93 +154,5 @@ public class AuthController {
         String token = authService.updateEmail(userId, updateEmailRequest);
 
         return new LoginResponse(updateEmailRequest.getNewEmail(), token);
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public String loginFailed(AuthenticationException exception)
-    {
-        logger.debug(ERROR_RESPONSE_MSG, exception);
-        return "Invalid username or password";
-    }
-
-    @ExceptionHandler(UserCreationException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String creationError(UserCreationException exception)
-    {
-        logger.debug(ERROR_RESPONSE_MSG, exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(UpdatePasswordException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String getError(UpdatePasswordException exception)
-    {
-        logger.debug(ERROR_RESPONSE_MSG, exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(ExpiredCodeException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String expiredConfirmationCode(ExpiredCodeException exception)
-    {
-        logger.debug(ERROR_RESPONSE_MSG, exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String badCredentials(BadCredentialsException exception)
-    {
-        logger.debug(ERROR_RESPONSE_MSG, exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(BadConfirmationCodeException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String badConfirmationCode(BadConfirmationCodeException exception)
-    {
-        logger.debug(ERROR_RESPONSE_MSG, exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String userNotFoundException(UserNotFoundException exception)
-    {
-        logger.debug(ERROR_RESPONSE_MSG, exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(UserAlreadyConfirmedException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public String userAlreadyConfirmedException(UserAlreadyConfirmedException exception)
-    {
-        logger.debug(ERROR_RESPONSE_MSG, exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(ForbiddenOperationException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String creationError(ForbiddenOperationException exception) {
-        logger.debug(ERROR_RESPONSE_MSG, exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(UpdateEmailException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(UpdateEmailException exception) {
-        logger.debug(ERROR_RESPONSE_MSG, exception);
-        return exception.getMessage();
     }
 }
