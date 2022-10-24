@@ -46,7 +46,7 @@ public class SurveyController {
     @Operation(summary = "Get all the surveys in a channel")
     @ApiResponse(responseCode = "200", description = "The data have been successfully retrieved")
     public List<SurveyModel> getSurveysByChannelId(@PathVariable("id") long channelId) {
-        channelService.checkUserHasAccessToChannel(idCheckerService.getCurrentUserId());
+        channelService.checkUserHasAccessToChannel(channelId);
         return surveyService.getSurveysByChannelId(channelId);
     }
 
@@ -55,7 +55,7 @@ public class SurveyController {
     @ApiResponse(responseCode = "200", description = "The data have been successfully retrieved")
     public List<SurveyModel> getQuizz(@PathVariable("id") long channelId) {
         long userId = idCheckerService.getCurrentUserId();
-        channelService.checkUserHasAccessToChannel(userId);
+        channelService.checkUserHasAccessToChannel(channelId);
         return surveyService.getQuizz(channelId, userId);
     }
 
@@ -64,7 +64,7 @@ public class SurveyController {
     @ApiResponse(responseCode = "200", description = "The survey has been created")
     public SurveyModel createSurvey(@PathVariable("id") long channelId, @RequestBody PostSurveyRequest postSurveyRequest) {
         idCheckerService.checkId(postSurveyRequest.getUserId());
-        channelService.checkUserHasAccessToChannel(postSurveyRequest.getUserId());
+        channelService.checkUserHasAccessToChannel(channelId);
         return surveyService.createSurvey(channelId, postSurveyRequest);
     }
 
