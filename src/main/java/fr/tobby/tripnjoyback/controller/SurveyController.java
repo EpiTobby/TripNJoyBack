@@ -38,7 +38,7 @@ public class SurveyController {
     @Operation(summary = "Get a survey by id")
     @ApiResponse(responseCode = "200", description = "The data have been successfully retrieved")
     public SurveyModel getSurveyById(@PathVariable("id") long channelId) {
-        channelService.checkUserHasAccessToChannel(idCheckerService.getCurrentUserId());
+        channelService.checkUserHasAccessToChannel(channelId);
         return surveyService.getSurveyById(channelId);
     }
 
