@@ -1,4 +1,4 @@
-package fr.tripnjoy.users.exception;
+package fr.tripnjoy.users.api.exception;
 
 import fr.tripnjoy.common.exception.EntityNotFoundException;
 

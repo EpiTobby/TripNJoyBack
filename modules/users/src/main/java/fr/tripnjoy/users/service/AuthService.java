@@ -1,5 +1,7 @@
 package fr.tripnjoy.users.service;
 
+import fr.tripnjoy.common.exception.ForbiddenOperationException;
+import fr.tripnjoy.users.api.exception.UserNotFoundException;
 import fr.tripnjoy.users.auth.TokenManager;
 import fr.tripnjoy.users.entity.ConfirmationCodeEntity;
 import fr.tripnjoy.users.entity.UserEntity;

@@ -1,6 +1,7 @@
 package fr.tripnjoy.users.controller;
 
 import fr.tripnjoy.common.exception.EntityNotFoundException;
+import fr.tripnjoy.common.exception.ForbiddenOperationException;
 import fr.tripnjoy.common.exception.UnauthorizedException;
 import fr.tripnjoy.users.exception.*;
 import org.springframework.http.HttpStatus;

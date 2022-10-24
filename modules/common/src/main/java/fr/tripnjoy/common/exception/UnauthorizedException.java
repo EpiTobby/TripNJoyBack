@@ -1,6 +1,6 @@
 package fr.tripnjoy.common.exception;
 
-public class UnauthorizedException extends Exception {
+public class UnauthorizedException extends RuntimeException {
     public UnauthorizedException()
     {
     }

@@ -1,4 +1,4 @@
-package fr.tripnjoy.users.exception;
+package fr.tripnjoy.users.api.exception;
 
 public class UserNotConfirmedException extends RuntimeException{
     public UserNotConfirmedException() {

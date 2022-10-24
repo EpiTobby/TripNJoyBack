@@ -1,10 +1,11 @@
 package fr.tripnjoy.users.controller;
 
+import fr.tripnjoy.common.dto.BooleanResponse;
+import fr.tripnjoy.common.exception.ForbiddenOperationException;
 import fr.tripnjoy.common.exception.UnauthorizedException;
+import fr.tripnjoy.users.api.exception.UserNotFoundException;
+import fr.tripnjoy.users.api.response.UserResponse;
 import fr.tripnjoy.users.entity.UserEntity;
-import fr.tripnjoy.users.exception.ForbiddenOperationException;
-import fr.tripnjoy.users.exception.UserNotFoundException;
-import fr.tripnjoy.users.model.UserModel;
 import fr.tripnjoy.users.model.request.DeleteUserByAdminRequest;
 import fr.tripnjoy.users.model.request.DeleteUserRequest;
 import fr.tripnjoy.users.model.request.UserUpdateRequest;
@@ -44,16 +45,26 @@ public class UserController {
     }
 
     @GetMapping("{id}")
-    public UserModel getUserById(@RequestHeader("roles") List<String> roles, @PathVariable("id") final long userId) throws UnauthorizedException
+    public UserResponse getUserById(@RequestHeader("roles") List<String> roles, @PathVariable("id") final long userId) throws UnauthorizedException
     {
         checkIsAdmin(roles);
-        return userService.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        return userService.findById(userId)
+                          .orElseThrow(() -> new UserNotFoundException("No user with id " + userId))
+                          .toDto();
     }
 
     @GetMapping("me")
-    public UserModel getCurrentUser(@RequestHeader("username") String username)
+    public UserResponse getCurrentUser(@RequestHeader("username") String username)
     {
-        return userService.findByEmail(username).orElseThrow(() -> new UserNotFoundException("Current user is not associated to a registered user"));
+        return userService.findByEmail(username)
+                          .orElseThrow(() -> new UserNotFoundException("Current user is not associated to a registered user"))
+                          .toDto();
+    }
+
+    @GetMapping("/{id}/exists")
+    public BooleanResponse exists(@PathVariable("id") final long userId)
+    {
+        return new BooleanResponse(userService.findById(userId).isPresent());
     }
 
     @PatchMapping("/update")

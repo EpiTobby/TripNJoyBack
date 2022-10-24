@@ -1,9 +1,9 @@
 package fr.tripnjoy.users.service;
 
+import fr.tripnjoy.users.api.exception.UserNotFoundException;
 import fr.tripnjoy.users.entity.CityEntity;
 import fr.tripnjoy.users.entity.UserEntity;
 import fr.tripnjoy.users.exception.UserCreationException;
-import fr.tripnjoy.users.exception.UserNotFoundException;
 import fr.tripnjoy.users.model.UserModel;
 import fr.tripnjoy.users.model.request.DeleteUserByAdminRequest;
 import fr.tripnjoy.users.model.request.DeleteUserRequest;

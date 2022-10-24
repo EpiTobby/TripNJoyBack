@@ -1,4 +1,4 @@
-package fr.tripnjoy.users.exception;
+package fr.tripnjoy.common.exception;
 
 public class ForbiddenOperationException extends RuntimeException{
     public ForbiddenOperationException() {

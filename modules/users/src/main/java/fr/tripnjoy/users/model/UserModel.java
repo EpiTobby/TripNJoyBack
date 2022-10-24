@@ -1,5 +1,7 @@
 package fr.tripnjoy.users.model;
 
+import fr.tripnjoy.users.api.model.Gender;
+import fr.tripnjoy.users.api.response.UserResponse;
 import fr.tripnjoy.users.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,7 +40,7 @@ public class UserModel {
                 entity.getPassword(),
                 entity.getEmail(),
                 entity.getBirthDate(),
-                Gender.of(entity.getGender()),
+                entity.getGender().toModel(),
                 entity.getProfilePicture(),
                 CityModel.of(entity.getCity()),
                 entity.getCreatedDate(),
@@ -47,6 +49,23 @@ public class UserModel {
                 entity.getLanguage().getValue(),
                 roles
         );
+    }
+
+    public UserResponse toDto()
+    {
+        return new UserResponse(
+                this.id,
+                this.firstname,
+                lastname,
+                email,
+                birthDate,
+                gender,
+                profilePicture,
+                city.getName(),
+                createdDate,
+                phoneNumber,
+                confirmed,
+                language);
     }
 
     @Override
