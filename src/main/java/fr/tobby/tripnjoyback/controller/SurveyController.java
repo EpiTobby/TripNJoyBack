@@ -35,6 +35,14 @@ public class SurveyController {
     }
 
     @GetMapping("{id}")
+    @Operation(summary = "Get a survey by id")
+    @ApiResponse(responseCode = "200", description = "The data have been successfully retrieved")
+    public SurveyModel getSurveyById(@PathVariable("id") long channelId) {
+        channelService.checkUserHasAccessToChannel(idCheckerService.getCurrentUserId());
+        return surveyService.getSurveyById(channelId);
+    }
+
+    @GetMapping("channel/{id}")
     @Operation(summary = "Get all the surveys in a channel")
     @ApiResponse(responseCode = "200", description = "The data have been successfully retrieved")
     public List<SurveyModel> getSurveysByChannelId(@PathVariable("id") long channelId) {

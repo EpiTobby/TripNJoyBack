@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS "surveys" (
                            "quizz" boolean,
                            "send_date" timestamp,
                            "modified_date" timestamp,
-                           "can_be_answered_multiples_times" boolean
+                           "is_multiple_choice_survey" boolean
 );
 
 CREATE TABLE IF NOT EXISTS "survey_vote" (

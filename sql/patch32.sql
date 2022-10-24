@@ -46,4 +46,4 @@ alter table survey_vote alter column id set default nextval('public.survey_vote_
 alter sequence survey_vote_id_seq owned by survey_vote.id;
 
 alter table surveys
-    add can_be_answered_multiples_times boolean;
+    add is_multiple_choice_survey boolean;

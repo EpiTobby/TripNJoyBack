@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -14,7 +16,8 @@ import java.util.List;
 @JsonAutoDetect
 @NoArgsConstructor
 public class UpdateSurveyRequest {
+    @Nullable
     private String question;
     private List<PossibleAnswerRequest> possibleAnswers;
-    private boolean canBeAnsweredMultipleTimes;
+    private boolean multipleChoiceSurvey;
 }
