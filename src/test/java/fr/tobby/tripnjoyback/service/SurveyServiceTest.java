@@ -99,6 +99,14 @@ public class SurveyServiceTest {
         userRepository.deleteAll();
     }
 
+    @AfterAll
+    static void afterAll()
+    {
+        cityRepository.deleteAll();
+        stateRepository.deleteAll();
+        genderRepository.deleteAll();
+    }
+
     @NotNull
     private UserEntity anyUser(String email) throws ParseException {
         return userRepository.save(UserEntity.builder()
