@@ -81,7 +81,7 @@ public class SurveyService {
     public SurveyModel updateSurvey(long surveyId, long userId, UpdateSurveyRequest updateSurveyRequest) {
         SurveyEntity surveyEntity = surveyRepository.findById(surveyId).orElseThrow(() -> new SurveyNotFoundException(surveyId));
         if (surveyEntity.getSubmitter().getId() != userId)
-            throw new ForbiddenOperationException("You cannot perform this operation!");
+            throw new ForbiddenOperationException("You cannot update this survey!");
         if (updateSurveyRequest.getQuestion() != null)
             surveyEntity.setQuestion(updateSurveyRequest.getQuestion());
         surveyEntity.setMultipleChoiceSurvey(updateSurveyRequest.isMultipleChoiceSurvey());
@@ -120,7 +120,7 @@ public class SurveyService {
     public void deleteVote(long voteId, long userId) {
         VoteEntity voteEntity = voteRepository.findById(voteId).orElseThrow(() -> new VoteNotFoundException(voteId));
         if (userId != voteEntity.getVoter().getId())
-            throw new ForbiddenOperationException("You cannot perform this operation!");
+            throw new ForbiddenOperationException("You cannot delete this survey!");
         voteRepository.delete(voteEntity);
     }
 
@@ -128,7 +128,7 @@ public class SurveyService {
     public void deleteSurvey(long surveyId, long userId) {
         SurveyEntity surveyEntity = surveyRepository.findById(surveyId).orElseThrow(() -> new SurveyNotFoundException(surveyId));
         if (surveyEntity.getSubmitter().getId() != userId)
-            throw new ForbiddenOperationException("You cannot perform this operation!");
+            throw new ForbiddenOperationException("You cannot delete this survey!");
         surveyRepository.delete(surveyEntity);
     }
 }

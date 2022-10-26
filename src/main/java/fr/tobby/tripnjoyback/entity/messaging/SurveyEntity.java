@@ -3,7 +3,6 @@ package fr.tobby.tripnjoyback.entity.messaging;
 import fr.tobby.tripnjoyback.entity.SurveyAnswerEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.entity.VoteEntity;
-import fr.tobby.tripnjoyback.entity.messaging.ChannelEntity;
 import lombok.*;
 
 import javax.persistence.*;

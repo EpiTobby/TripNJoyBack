@@ -16,7 +16,6 @@ import fr.tobby.tripnjoyback.repository.*;
 import fr.tobby.tripnjoyback.repository.messaging.ChannelRepository;
 import fr.tobby.tripnjoyback.repository.messaging.MessageRepository;
 import fr.tobby.tripnjoyback.repository.messaging.MessageTypeRepository;
-import io.prometheus.client.Gauge;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +27,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-
-import static org.mockito.Mockito.*;
 
 @DataJpaTest
 public class SurveyServiceTest {
@@ -136,7 +132,7 @@ public class SurveyServiceTest {
     }
 
     @Test
-    public void createSurveyTest() throws ParseException {
+    void createSurveyTest() throws ParseException {
         String question = "Where would you like to go?";
         GroupEntity groupEntity = anyGroup();
         UserEntity user1 = anyUser("user1@gmail.com");
@@ -156,12 +152,12 @@ public class SurveyServiceTest {
         long surveyId = surveyService.createSurvey(channelId, postSurveyRequest).getId();
 
         SurveyModel surveyModel = surveyService.getSurveyById(surveyId);
-        Assertions.assertEquals(surveyModel.getQuestion(), question);
-        Assertions.assertEquals(surveyModel.getPossibleAnswers().size(), 2);
+        Assertions.assertEquals(question, surveyModel.getQuestion());
+        Assertions.assertEquals(2, surveyModel.getPossibleAnswers().size());
     }
 
     @Test
-    public void createVoteTest() throws ParseException {
+    void createVoteTest() throws ParseException {
         String question = "Where would you like to go?";
         GroupEntity groupEntity = anyGroup();
         UserEntity user1 = anyUser("user1@gmail.com");
@@ -183,11 +179,11 @@ public class SurveyServiceTest {
                 .answerId(survey.getPossibleAnswers().get(0).getId())
                 .voterId(user2.getId()).build());
         SurveyModel surveyModel = surveyService.getSurveysByChannelId(channelId).get(0);
-        Assertions.assertEquals(surveyModel.getVotes().size(), 1);
+        Assertions.assertEquals(1,surveyModel.getVotes().size());
     }
 
     @Test
-    public void createVotesWithoutMultipleAnswersTest() throws ParseException {
+    void createVotesWithoutMultipleAnswersTest() throws ParseException {
         String question = "Where would you like to go?";
         GroupEntity groupEntity = anyGroup();
         UserEntity user1 = anyUser("user1@gmail.com");
@@ -212,11 +208,11 @@ public class SurveyServiceTest {
                 .answerId(survey.getPossibleAnswers().get(1).getId())
                 .voterId(user2.getId()).build());
         SurveyModel surveyModel = surveyService.getSurveysByChannelId(channelId).get(0);
-        Assertions.assertEquals(surveyModel.getVotes().size(), 1);
+        Assertions.assertEquals(1, surveyModel.getVotes().size());
     }
 
     @Test
-    public void createVotesWithMultipleAnswersTest() throws ParseException {
+    void createVotesWithMultipleAnswersTest() throws ParseException {
         String question = "Where would you like to go?";
         GroupEntity groupEntity = anyGroup();
         UserEntity user1 = anyUser("user1@gmail.com");
@@ -241,11 +237,11 @@ public class SurveyServiceTest {
                 .answerId(survey.getPossibleAnswers().get(1).getId())
                 .voterId(user2.getId()).build());
         SurveyModel surveyModel = surveyService.getSurveysByChannelId(channelId).get(0);
-        Assertions.assertEquals(surveyModel.getVotes().size(), 2);
+        Assertions.assertEquals(2,surveyModel.getVotes().size());
     }
 
     @Test
-    public void deleteSurveyTest() throws ParseException {
+    void deleteSurveyTest() throws ParseException {
         String question = "Where would you like to go?";
         GroupEntity groupEntity = anyGroup();
         UserEntity user1 = anyUser("user1@gmail.com");
@@ -268,7 +264,7 @@ public class SurveyServiceTest {
     }
 
     @Test
-    public void deleteVoteTest() throws ParseException {
+     void deleteVoteTest() throws ParseException {
         String question = "Where would you like to go?";
         GroupEntity groupEntity = anyGroup();
         UserEntity user1 = anyUser("user1@gmail.com");
@@ -294,7 +290,7 @@ public class SurveyServiceTest {
     }
 
     @Test
-    public void updateSurveyTest() throws ParseException {
+    void updateSurveyTest() throws ParseException {
         String question = "Where would you like to go?";
         GroupEntity groupEntity = anyGroup();
         UserEntity user1 = anyUser("user1@gmail.com");
@@ -327,11 +323,11 @@ public class SurveyServiceTest {
                 .multipleChoiceSurvey(true)
                 .possibleAnswers(possibleAnswerRequests).build());
         Assertions.assertTrue(survey.isMultipleChoiceSurvey());
-        Assertions.assertEquals(survey.getPossibleAnswers().size(), 3);
+        Assertions.assertEquals(3, survey.getPossibleAnswers().size());
     }
 
     @Test
-    public void deleteSurveyNotBySubmitterTest() throws ParseException {
+    void deleteSurveyNotBySubmitterTest() throws ParseException {
         String question = "Where would you like to go?";
         GroupEntity groupEntity = anyGroup();
         UserEntity user1 = anyUser("user1@gmail.com");
@@ -351,6 +347,6 @@ public class SurveyServiceTest {
         SurveyModel survey = surveyService.createSurvey(channelId, postSurveyRequest);
         List<SurveyModel> surveys = surveyService.getSurveysByChannelId(channelId);
         Assertions.assertThrows(ForbiddenOperationException.class, () -> surveyService.deleteSurvey(survey.getId(), user2.getId()));
-        Assertions.assertEquals(surveys.size(), 1);
+        Assertions.assertEquals(1,surveys.size());
     }
 }
