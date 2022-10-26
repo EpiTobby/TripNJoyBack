@@ -10,8 +10,6 @@ import fr.tripnjoy.users.repository.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Instant;
@@ -28,12 +26,12 @@ class AuthServiceTest {
     ConfirmationCodeRepository confirmationCodeRepository;
     AuthenticationManager authenticationManager;
     TokenManager tokenManager;
-    UserDetailsService userDetailsService;
     UserService userService;
     UserRoleRepository userRoleRepository;
     LanguageRepository languageRepository;
 
     AuthService service;
+    private AuthenticationManager authenticationManager1;
 
     @BeforeEach
     public void setup()
@@ -44,7 +42,6 @@ class AuthServiceTest {
         confirmationCodeRepository = mock(ConfirmationCodeRepository.class);
         authenticationManager = mock(AuthenticationManager.class);
         tokenManager = mock(TokenManager.class);
-        userDetailsService = mock(UserDetailsService.class);
         userService = mock(UserService.class);
         userRoleRepository = mock(UserRoleRepository.class);
         languageRepository = mock(LanguageRepository.class);
@@ -62,7 +59,7 @@ class AuthServiceTest {
                 languageRepository,
                 userService,
                 tokenManager,
-                userDetailsService);
+                authenticationManager);
     }
 
     @Test

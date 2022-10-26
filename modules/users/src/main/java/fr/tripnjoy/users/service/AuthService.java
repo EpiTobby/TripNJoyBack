@@ -1,6 +1,7 @@
 package fr.tripnjoy.users.service;
 
 import fr.tripnjoy.common.exception.ForbiddenOperationException;
+import fr.tripnjoy.users.api.exception.BadCredentialsException;
 import fr.tripnjoy.users.api.exception.UserNotFoundException;
 import fr.tripnjoy.users.auth.TokenManager;
 import fr.tripnjoy.users.entity.ConfirmationCodeEntity;
@@ -19,10 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +46,7 @@ public class AuthService {
     private final UserService userService;
 
     private final TokenManager tokenManager;
-    private final UserDetailsService userDetailsService;
+    private final AuthenticationManager authenticationManager;
 
     @Value("${google.secret}")
     private String googleSecret;
@@ -61,7 +58,7 @@ public class AuthService {
                        final CityService cityService, final ConfirmationCodeRepository confirmationCodeRepository,
                        final UserRoleRepository userRoleRepository, LanguageRepository languageRepository,
                        final UserService userService, final TokenManager tokenManager,
-                       final UserDetailsService userDetailsService)
+                       final AuthenticationManager authenticationManager)
     {
         this.userRepository = userRepository;
         this.encoder = encoder;
@@ -72,7 +69,7 @@ public class AuthService {
         this.languageRepository = languageRepository;
         this.userService = userService;
         this.tokenManager = tokenManager;
-        this.userDetailsService = userDetailsService;
+        this.authenticationManager = authenticationManager;
     }
 
     @Transactional
@@ -173,21 +170,23 @@ public class AuthService {
         return new GoogleUserResponse(userModel, true);
     }
 
-    public String login(@NonNull String username, @NonNull String password) throws AuthenticationException
+    public String login(@NonNull String username, @NonNull String password)
     {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        if (!authenticationManager.authenticate(username, password))
+            throw new BadCredentialsException("Invalid username or password");
         UserModel userModel = userService.findByEmail(username).orElseThrow();
-        String token = tokenManager.generateFor(userDetails, userModel.getId());
+        String token = tokenManager.generateFor(username, userModel.getId());
         logger.debug("User {} logged in. jwt = {}", username, token);
         return token;
     }
 
-    public String loginAdmin(@NonNull String username, @NonNull String password) throws AuthenticationException {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    public String loginAdmin(@NonNull String username, @NonNull String password) {
+        if (!authenticationManager.authenticate(username, password))
+            throw new BadCredentialsException("Invalid username or password");
         UserModel userModel = userService.findByEmail(username).orElseThrow();
         if (!userModel.getRoles().contains(UserRole.ADMIN))
             throw new ForbiddenOperationException("You cannot perform this operation.");
-        String token = tokenManager.generateFor(userDetails, userModel.getId());
+        String token = tokenManager.generateFor(username, userModel.getId());
         logger.debug("Admin {} logged in. jwt = {}", username, token);
         return token;
     }

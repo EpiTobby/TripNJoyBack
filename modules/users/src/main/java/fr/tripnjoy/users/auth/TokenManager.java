@@ -1,16 +1,17 @@
 package fr.tripnjoy.users.auth;
 
+import fr.tripnjoy.users.api.exception.UserNotConfirmedException;
 import fr.tripnjoy.users.api.response.JwtUserDetails;
 import fr.tripnjoy.users.exception.TokenExpiredException;
 import fr.tripnjoy.users.exception.TokenParsingException;
 import fr.tripnjoy.users.exception.TokenVerificationException;
+import fr.tripnjoy.users.model.UserModel;
+import fr.tripnjoy.users.model.UserRole;
+import fr.tripnjoy.users.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -22,18 +23,12 @@ import java.util.HashMap;
 public class TokenManager {
 
     private final String jwtSecret;
-    private final UserDetailsService userDetailsService;
+    private final UserService userService;
 
-    public TokenManager(@Value("${jwt.secret}") final String jwtSecret,
-                        final UserDetailsService userDetailsService)
+    public TokenManager(@Value("${jwt.secret}") final String jwtSecret, final UserService userService)
     {
         this.jwtSecret = jwtSecret;
-        this.userDetailsService = userDetailsService;
-    }
-
-    public String generateFor(UserDetails userDetails, final long userId)
-    {
-        return generateFor(userDetails.getUsername(), userId);
+        this.userService = userService;
     }
 
     public String generateFor(String username, final long userId)
@@ -68,16 +63,14 @@ public class TokenManager {
         if (claims.getExpiration().before(Date.from(Instant.now())))
             throw new TokenExpiredException();
         long userId = claims.get("userId", Long.class);
-        String username = claims.getSubject();
-        return fromUserDetails(userId, userDetailsService.loadUserByUsername(username));
+        return getUserDetails(userId);
     }
 
-    public JwtUserDetails fromUserDetails(final long userId, final UserDetails userDetails)
+    private JwtUserDetails getUserDetails(long userId)
     {
-        return new JwtUserDetails(
-                userId,
-                userDetails.getUsername(),
-                userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList()
-        );
+        UserModel user = userService.findById(userId).orElseThrow(UserNotConfirmedException::new);
+        return new JwtUserDetails(userId,
+                user.getEmail(),
+                user.getRoles().stream().map(UserRole::getAuthority).toList());
     }
 }

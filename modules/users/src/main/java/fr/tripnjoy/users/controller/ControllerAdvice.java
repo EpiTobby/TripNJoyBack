@@ -3,10 +3,9 @@ package fr.tripnjoy.users.controller;
 import fr.tripnjoy.common.exception.EntityNotFoundException;
 import fr.tripnjoy.common.exception.ForbiddenOperationException;
 import fr.tripnjoy.common.exception.UnauthorizedException;
+import fr.tripnjoy.users.api.exception.BadCredentialsException;
 import fr.tripnjoy.users.exception.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -26,14 +25,6 @@ public class ControllerAdvice {
     public String getError(UnauthorizedException exception)
     {
         return exception.getMessage();
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public String loginFailed(AuthenticationException exception)
-    {
-        return "Invalid username or password";
     }
 
     @ExceptionHandler({

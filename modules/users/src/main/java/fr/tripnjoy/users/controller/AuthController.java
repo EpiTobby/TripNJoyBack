@@ -12,7 +12,6 @@ import fr.tripnjoy.users.model.response.*;
 import fr.tripnjoy.users.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,7 +43,7 @@ public class AuthController {
             JwtUserDetails jwtUserDetails = tokenManager.verifyToken(request.getJwt());
             return new CheckJwtResponse(true, jwtUserDetails);
         }
-        catch (TokenVerificationException | UsernameNotFoundException e)
+        catch (TokenVerificationException e)
         {
             return new CheckJwtResponse(false, null);
         }

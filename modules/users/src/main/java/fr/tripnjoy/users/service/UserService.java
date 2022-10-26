@@ -1,5 +1,6 @@
 package fr.tripnjoy.users.service;
 
+import fr.tripnjoy.users.api.exception.BadCredentialsException;
 import fr.tripnjoy.users.api.exception.UserNotFoundException;
 import fr.tripnjoy.users.entity.CityEntity;
 import fr.tripnjoy.users.entity.UserEntity;
@@ -12,7 +13,6 @@ import fr.tripnjoy.users.repository.GenderRepository;
 import fr.tripnjoy.users.repository.LanguageRepository;
 import fr.tripnjoy.users.repository.UserRepository;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

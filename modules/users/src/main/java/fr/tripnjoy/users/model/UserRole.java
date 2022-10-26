@@ -1,8 +1,6 @@
 package fr.tripnjoy.users.model;
 
-import org.springframework.security.core.GrantedAuthority;
-
-public enum UserRole implements GrantedAuthority {
+public enum UserRole {
     DEFAULT("default"),
     ADMIN("admin"),
     ;
@@ -14,7 +12,6 @@ public enum UserRole implements GrantedAuthority {
         this.name = name;
     }
 
-    @Override
     public String getAuthority()
     {
         return this.name;
