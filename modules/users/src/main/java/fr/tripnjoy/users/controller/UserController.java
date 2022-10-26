@@ -5,7 +5,7 @@ import fr.tripnjoy.common.exception.ForbiddenOperationException;
 import fr.tripnjoy.common.exception.UnauthorizedException;
 import fr.tripnjoy.users.api.exception.UserNotFoundException;
 import fr.tripnjoy.users.api.response.UserResponse;
-import fr.tripnjoy.users.entity.UserEntity;
+import fr.tripnjoy.users.model.UserModel;
 import fr.tripnjoy.users.model.request.DeleteUserByAdminRequest;
 import fr.tripnjoy.users.model.request.DeleteUserRequest;
 import fr.tripnjoy.users.model.request.UserUpdateRequest;
@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -36,12 +35,13 @@ public class UserController {
     }
 
     @GetMapping("")
-    public List<UserEntity> getAll(@RequestHeader("roles") List<String> roles) throws UnauthorizedException
+    public List<UserResponse> getAll(@RequestHeader("roles") List<String> roles) throws UnauthorizedException
     {
         checkIsAdmin(roles);
-        List<UserEntity> userEntities = new ArrayList<>();
-        userService.getAll().forEach(userEntities::add);
-        return userEntities;
+        return userService.getAll()
+                          .stream()
+                          .map(UserModel::toDto)
+                          .toList();
     }
 
     @GetMapping("{id}")

@@ -13,4 +13,7 @@ public interface UserRepository extends CrudRepository<UserEntity, Long> {
     Collection<UserEntity> findAllByWaitingForGroupIsTrue();
 
     UserEntity getById(long userId);
+
+    @Override
+    Collection<UserEntity> findAll();
 }
