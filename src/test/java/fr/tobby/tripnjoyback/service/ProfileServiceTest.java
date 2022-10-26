@@ -37,7 +37,7 @@ class ProfileServiceTest {
     private LanguageRepository languageRepository;
     @Autowired
     private ProfileRepository profileRepository;
-    private AnswersRepository answersRepository = mock(AnswersRepository.class);
+    private ProfileAnswersRepository profileAnswersRepository = mock(ProfileAnswersRepository.class);
     @Autowired
     private UserRepository userRepository;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
@@ -53,7 +53,7 @@ class ProfileServiceTest {
     void initProfileService(){
         PromStats promStats = mock(PromStats.class);
         when(promStats.getProfileCount()).thenReturn(mock(Gauge.class));
-        profileService = new ProfileService(profileRepository, answersRepository, userRepository, promStats);
+        profileService = new ProfileService(profileRepository, profileAnswersRepository, userRepository, promStats);
     }
 
     private ProfileEntity anyProfile(){
@@ -98,7 +98,7 @@ class ProfileServiceTest {
     @Test
     void testUpdateActiveWhenNewProfileAdded() throws ParseException {
         UserEntity user = anyUserWithProfile();
-        when(answersRepository.save(any())).thenReturn(AnswersEntity.builder()
+        when(profileAnswersRepository.save(any())).thenReturn(ProfileAnswersEntity.builder()
                 .id("2")
                 .availabilities(List.of(new AvailabiltyEntity("01-07-2023", "16-07-2023")))
                 .durationMin(4)
@@ -144,7 +144,7 @@ class ProfileServiceTest {
     @Test
     void testDeleteProfile() throws ParseException {
         UserEntity user = anyUserWithProfile();
-        AnswersEntity entity = AnswersEntity.builder()
+        ProfileAnswersEntity entity = ProfileAnswersEntity.builder()
                 .id("2")
                 .availabilities(List.of(new AvailabiltyEntity("01-07-2023", "16-07-2023")))
                 .durationMin(4)
@@ -165,8 +165,8 @@ class ProfileServiceTest {
                 .chillOrVisit("CHILL")
                 .sport(true)
                 .build();
-        when(answersRepository.save(any())).thenReturn(entity);
-        when(answersRepository.findByProfileId(anyLong())).thenReturn(entity);
+        when(profileAnswersRepository.save(any())).thenReturn(entity);
+        when(profileAnswersRepository.findByProfileId(anyLong())).thenReturn(entity);
         ProfileEntity profile = user.getProfiles().stream().findFirst().get();
         profile.setActive(false);
 
@@ -178,7 +178,7 @@ class ProfileServiceTest {
     @Test
     void testDeleteActiveProfileShouldThrow() throws ParseException {
         UserEntity user = anyUserWithProfile();
-        AnswersEntity entity = AnswersEntity.builder()
+        ProfileAnswersEntity entity = ProfileAnswersEntity.builder()
                 .id("2")
                 .availabilities(List.of(new AvailabiltyEntity("01-07-2023", "16-07-2023")))
                 .durationMin(4)
@@ -199,8 +199,8 @@ class ProfileServiceTest {
                 .chillOrVisit("CHILL")
                 .sport(true)
                 .build();
-        when(answersRepository.save(any())).thenReturn(entity);
-        when(answersRepository.findByProfileId(anyLong())).thenReturn(entity);
+        when(profileAnswersRepository.save(any())).thenReturn(entity);
+        when(profileAnswersRepository.findByProfileId(anyLong())).thenReturn(entity);
         ProfileEntity profile = user.getProfiles().stream().findFirst().get();
         profile.setActive(true);
 

@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "Profiles")
-public class AnswersEntity {
+public class ProfileAnswersEntity {
     @Id
     private String id;
     private long profileId;
@@ -57,9 +57,9 @@ public class AnswersEntity {
     @Setter
     private Boolean sport;
 
-    public static AnswersEntity of(ProfileModel profileModel){
+    public static ProfileAnswersEntity of(ProfileModel profileModel){
         DateFormat dateFormat = new SimpleDateFormat(AvailabilityAnswerModel.DATE_FORMAT);
-        return AnswersEntity.builder()
+        return ProfileAnswersEntity.builder()
                             .availabilities(profileModel.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()),dateFormat.format(a.getEndDate()))).toList())
                             .durationMin(profileModel.getDuration().getMinValue())
                             .durationMax(profileModel.getDuration().getMaxValue())
