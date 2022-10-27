@@ -16,4 +16,7 @@ public interface ProfileRepository extends CrudRepository<ProfileEntity, Long> {
     List<ProfileEntity> findByActiveIsTrue();
 
     ProfileEntity getById(long id);
+
+    @Query("SELECT u.ids.profile FROM GroupProfileEntity u WHERE u.ids.groupId = ?1")
+    Optional<ProfileEntity> findByGroupId(long groupId);
 }

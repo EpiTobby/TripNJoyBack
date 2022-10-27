@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 
+import java.util.Collection;
 import java.util.List;
 
 @FeignClient(value = "SERVICE-USERS", path = "/users", contextId = "SERVICE-USERS-USERS")
@@ -21,4 +22,7 @@ public interface UserFeignClient {
 
     @GetMapping("/{id}/exists")
     BooleanResponse exists(@PathVariable("id") final long userId);
+
+    @GetMapping("/waiting")
+    Collection<UserResponse> getUsersWaitingForGroup();
 }

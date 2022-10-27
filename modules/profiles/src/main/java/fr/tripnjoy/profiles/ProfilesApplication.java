@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "fr.tripnjoy.users")
+@EnableFeignClients(basePackages = {"fr.tripnjoy.users", "fr.tripnjoy.groups"})
 public class ProfilesApplication {
     private static final Logger logger = LoggerFactory.getLogger(ProfilesApplication.class);
 

@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -89,6 +90,12 @@ public class UserController {
         if (!role.equals("admin"))
             throw new ForbiddenOperationException();
         userService.deleteUserByAdmin(userId, deleteUserByAdminRequest);
+    }
+
+    @GetMapping("/waiting")
+    public Collection<UserResponse> getUsersWaitingForGroup()
+    {
+        return userService.getUsersWaitingForGroup().stream().map(UserModel::toDto).toList();
     }
 
     @GetMapping("{id}/firebase")
