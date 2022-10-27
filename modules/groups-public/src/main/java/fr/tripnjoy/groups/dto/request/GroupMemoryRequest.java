@@ -1,4 +1,4 @@
-package fr.tripnjoy.groups.model.request;
+package fr.tripnjoy.groups.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.AllArgsConstructor;

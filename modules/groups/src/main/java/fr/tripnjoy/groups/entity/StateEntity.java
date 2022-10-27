@@ -1,5 +1,8 @@
 package fr.tripnjoy.groups.entity;
 
+import fr.tripnjoy.groups.SpringContext;
+import fr.tripnjoy.groups.model.State;
+import fr.tripnjoy.groups.repository.StateRepository;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,5 +22,17 @@ public class StateEntity {
     {
         id = null;
         this.value = value;
+    }
+
+    public State toModel()
+    {
+        return State.valueOf(this.value);
+    }
+
+    public static StateEntity ofModel(State state)
+    {
+        return SpringContext.getBean(StateRepository.class)
+                            .findByValue(state.toString())
+                            .orElseThrow(() -> new IllegalStateException("State value " + state + " not present in database"));
     }
 }

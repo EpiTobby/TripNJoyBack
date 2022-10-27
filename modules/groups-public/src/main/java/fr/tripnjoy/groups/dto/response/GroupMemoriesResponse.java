@@ -1,4 +1,4 @@
-package fr.tripnjoy.groups.model.response;
+package fr.tripnjoy.groups.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

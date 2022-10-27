@@ -2,6 +2,7 @@ package fr.tripnjoy.groups.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import fr.tripnjoy.groups.dto.response.GroupResponse;
 import fr.tripnjoy.groups.entity.GroupEntity;
 import fr.tripnjoy.groups.entity.GroupMemberEntity;
 import lombok.AllArgsConstructor;
@@ -59,5 +60,14 @@ public class GroupModel {
                          .destination(groupEntity.getDestination())
                          .members(groupEntity.members.stream().filter(m -> !m.isPending()).map(GroupMemberEntity::getUserId).toList())
                          .build();
+    }
+
+    public GroupResponse toDto()
+    {
+        return new GroupResponse(
+                id, name, description, state, ownerId,
+                maxSize, startOfTrip, endOfTrip, createdDate, picture,
+                destination, members
+        );
     }
 }

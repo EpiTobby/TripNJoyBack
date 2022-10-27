@@ -2,12 +2,13 @@ package fr.tripnjoy.groups.controller;
 
 import fr.tripnjoy.common.dto.ModelWithEmail;
 import fr.tripnjoy.common.exception.ForbiddenOperationException;
+import fr.tripnjoy.groups.dto.request.*;
+import fr.tripnjoy.groups.dto.response.GroupInfoModel;
+import fr.tripnjoy.groups.dto.response.GroupMemberModel;
+import fr.tripnjoy.groups.dto.response.GroupMemoriesResponse;
+import fr.tripnjoy.groups.dto.response.GroupResponse;
 import fr.tripnjoy.groups.exception.*;
 import fr.tripnjoy.groups.model.GroupModel;
-import fr.tripnjoy.groups.model.request.*;
-import fr.tripnjoy.groups.model.response.GroupInfoModel;
-import fr.tripnjoy.groups.model.response.GroupMemberModel;
-import fr.tripnjoy.groups.model.response.GroupMemoriesResponse;
 import fr.tripnjoy.groups.service.GroupService;
 import fr.tripnjoy.users.api.exception.UserNotConfirmedException;
 import fr.tripnjoy.users.api.exception.UserNotFoundException;
@@ -30,18 +31,23 @@ public class GroupController {
         this.groupService = groupService;
     }
 
+    private Collection<GroupResponse> toDto(Collection<GroupModel> models)
+    {
+        return models.stream().map(GroupModel::toDto).toList();
+    }
+
     @GetMapping("{id}")
     @Operation(summary = "Get all the group of the user")
     @ApiResponse(responseCode = "200", description = "Return the list of groups the user is in")
-    public Collection<GroupModel> getUserGroups(@PathVariable("id") final long userId) {
-        return groupService.getUserGroups(userId);
+    public Collection<GroupResponse> getUserGroups(@PathVariable("id") final long userId) {
+        return toDto(groupService.getUserGroups(userId));
     }
 
     @GetMapping("invites/{id}")
     @Operation(summary = "Get all the group invitation of the user")
     @ApiResponse(responseCode = "200", description = "Return the list of groups the user is invited to")
-    public Collection<GroupModel> getUserInvites(@PathVariable("id") final long userId) {
-        return groupService.getUserInvites(userId);
+    public Collection<GroupResponse> getUserInvites(@PathVariable("id") final long userId) {
+        return toDto(groupService.getUserInvites(userId));
     }
 
     @GetMapping("info/{id}")
@@ -81,8 +87,8 @@ public class GroupController {
     @Operation(summary = "Create a private group")
     @ApiResponse(responseCode = "200", description = "Returns the created group")
     @ApiResponse(responseCode = "422", description = "User or Group does not exist")
-    public GroupModel createPrivateGroup(@RequestHeader("userId") final long userId, @RequestBody CreatePrivateGroupRequest createPrivateGroupRequest) {
-        return groupService.createPrivateGroup(userId, createPrivateGroupRequest);
+    public GroupResponse createPrivateGroup(@RequestHeader("userId") final long userId, @RequestBody CreatePrivateGroupRequest createPrivateGroupRequest) {
+        return groupService.createPrivateGroup(userId, createPrivateGroupRequest).toDto();
     }
 
     @PostMapping("private/{group}/user")
