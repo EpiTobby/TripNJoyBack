@@ -5,7 +5,6 @@ import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.entity.VoteEntity;
 import fr.tobby.tripnjoyback.entity.messaging.ChannelEntity;
 import fr.tobby.tripnjoyback.entity.messaging.MessageEntity;
-import fr.tobby.tripnjoyback.entity.messaging.MessageTypeEntity;
 import fr.tobby.tripnjoyback.entity.messaging.SurveyEntity;
 import fr.tobby.tripnjoyback.exception.*;
 import fr.tobby.tripnjoyback.model.MessageType;
@@ -101,9 +100,9 @@ public class SurveyService {
     }
 
     @Transactional
-    public SurveyModel submitVote(long surveyId, VoteSurveyRequest voteSurveyRequest) {
+    public SurveyModel submitVote(long surveyId, long voterId, VoteSurveyRequest voteSurveyRequest) {
         SurveyEntity surveyEntity = surveyRepository.findById(surveyId).orElseThrow(() -> new SurveyNotFoundException(surveyId));
-        UserEntity userEntity = userRepository.findById(voteSurveyRequest.getVoterId()).orElseThrow(() -> new UserNotFoundException(voteSurveyRequest.getVoterId()));
+        UserEntity userEntity = userRepository.findById(voterId).orElseThrow(() -> new UserNotFoundException(voterId));
         SurveyAnswerEntity surveyAnswerEntity = surveyAnswerRepository.findById(voteSurveyRequest.getAnswerId()).orElseThrow(() -> new SurveyAnswerNotFoundException(surveyId));
         if (!surveyAnswerEntity.getSurvey().getId().equals(surveyEntity.getId()))
             throw new SurveyVoteException("Cannot submit this vote for the survey!");

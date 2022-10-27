@@ -175,9 +175,8 @@ public class SurveyServiceTest {
         PostSurveyRequest postSurveyRequest = new PostSurveyRequest(user1.getId(),
                 question, false, possibleAnswerRequests, false);
         SurveyModel survey = surveyService.createSurvey(channelId, postSurveyRequest);
-        surveyService.submitVote(survey.getId(), VoteSurveyRequest.builder()
-                .answerId(survey.getPossibleAnswers().get(0).getId())
-                .voterId(user2.getId()).build());
+        surveyService.submitVote(survey.getId(), user2.getId(), VoteSurveyRequest.builder()
+                .answerId(survey.getPossibleAnswers().get(0).getId()).build());
         SurveyModel surveyModel = surveyService.getSurveysByChannelId(channelId).get(0);
         Assertions.assertEquals(1,surveyModel.getVotes().size());
     }
@@ -201,12 +200,10 @@ public class SurveyServiceTest {
         PostSurveyRequest postSurveyRequest = new PostSurveyRequest(user1.getId(),
                 question, false, possibleAnswerRequests, false);
         SurveyModel survey = surveyService.createSurvey(channelId, postSurveyRequest);
-        surveyService.submitVote(survey.getId(), VoteSurveyRequest.builder()
-                .answerId(survey.getPossibleAnswers().get(0).getId())
-                .voterId(user2.getId()).build());
-        surveyService.submitVote(survey.getId(), VoteSurveyRequest.builder()
-                .answerId(survey.getPossibleAnswers().get(1).getId())
-                .voterId(user2.getId()).build());
+        surveyService.submitVote(survey.getId(), user2.getId(),VoteSurveyRequest.builder()
+                .answerId(survey.getPossibleAnswers().get(0).getId()).build());
+        surveyService.submitVote(survey.getId(), user2.getId(), VoteSurveyRequest.builder()
+                .answerId(survey.getPossibleAnswers().get(1).getId()).build());
         SurveyModel surveyModel = surveyService.getSurveysByChannelId(channelId).get(0);
         Assertions.assertEquals(1, surveyModel.getVotes().size());
     }
@@ -230,12 +227,10 @@ public class SurveyServiceTest {
         PostSurveyRequest postSurveyRequest = new PostSurveyRequest(user1.getId(),
                 question, false, possibleAnswerRequests, true);
         SurveyModel survey = surveyService.createSurvey(channelId, postSurveyRequest);
-        surveyService.submitVote(survey.getId(), VoteSurveyRequest.builder()
-                .answerId(survey.getPossibleAnswers().get(0).getId())
-                .voterId(user2.getId()).build());
-        surveyService.submitVote(survey.getId(), VoteSurveyRequest.builder()
-                .answerId(survey.getPossibleAnswers().get(1).getId())
-                .voterId(user2.getId()).build());
+        surveyService.submitVote(survey.getId(), user2.getId(), VoteSurveyRequest.builder()
+                .answerId(survey.getPossibleAnswers().get(0).getId()).build());
+        surveyService.submitVote(survey.getId(), user2.getId(), VoteSurveyRequest.builder()
+                .answerId(survey.getPossibleAnswers().get(1).getId()).build());
         SurveyModel surveyModel = surveyService.getSurveysByChannelId(channelId).get(0);
         Assertions.assertEquals(2,surveyModel.getVotes().size());
     }
@@ -282,9 +277,8 @@ public class SurveyServiceTest {
         PostSurveyRequest postSurveyRequest = new PostSurveyRequest(user1.getId(),
                 question, false, possibleAnswerRequests, false);
         SurveyModel survey = surveyService.createSurvey(channelId, postSurveyRequest);
-        long voteId = surveyService.submitVote(survey.getId(), VoteSurveyRequest.builder()
-                .answerId(survey.getPossibleAnswers().get(0).getId())
-                .voterId(user2.getId()).build()).getVotes().stream().findFirst().get().getId();
+        long voteId = surveyService.submitVote(survey.getId(), user2.getId(), VoteSurveyRequest.builder()
+                .answerId(survey.getPossibleAnswers().get(0).getId()).build()).getVotes().stream().findFirst().get().getId();
         surveyService.deleteVote(voteId, user2.getId());
         Assertions.assertTrue(voteRepository.findById(voteId).isEmpty());
     }

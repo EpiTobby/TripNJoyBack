@@ -12,6 +12,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class VoteSurveyRequest {
-    private long voterId;
     private long answerId;
 }

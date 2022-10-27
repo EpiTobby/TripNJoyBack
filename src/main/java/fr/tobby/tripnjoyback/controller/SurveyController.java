@@ -72,9 +72,9 @@ public class SurveyController {
     @Operation(summary = "Vote for a survey")
     @ApiResponse(responseCode = "200", description = "The vote has been submitted")
     public SurveyModel submitVote(@PathVariable("id") long surveyId, @RequestBody VoteSurveyRequest voteSurveyRequest) {
-        idCheckerService.checkId(voteSurveyRequest.getVoterId());
-        channelService.checkUserHasAccessToChannel(voteSurveyRequest.getVoterId());
-        return surveyService.submitVote(surveyId, voteSurveyRequest);
+        long userId = idCheckerService.getCurrentUserId();
+        channelService.checkUserHasAccessToChannel(userId);
+        return surveyService.submitVote(surveyId, userId, voteSurveyRequest);
     }
 
     @DeleteMapping("vote/{id}")
