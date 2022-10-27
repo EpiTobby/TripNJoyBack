@@ -16,6 +16,9 @@ public interface GroupFeignClient {
     @GetMapping("{id}")
     Collection<GroupResponse> getUserGroups(@PathVariable("id") final long userId);
 
+    @GetMapping("open")
+    Collection<Long> getOpenGroups();
+
     @GetMapping("invites/{id}")
     Collection<GroupResponse> getUserInvites(@PathVariable("id") final long userId);
 

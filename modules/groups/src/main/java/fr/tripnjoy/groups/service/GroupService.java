@@ -14,6 +14,7 @@ import fr.tripnjoy.groups.dto.response.GroupMemoriesResponse;
 import fr.tripnjoy.groups.entity.GroupEntity;
 import fr.tripnjoy.groups.entity.GroupMemberEntity;
 import fr.tripnjoy.groups.entity.GroupMemoryEntity;
+import fr.tripnjoy.groups.entity.StateEntity;
 import fr.tripnjoy.groups.exception.*;
 import fr.tripnjoy.groups.model.GroupModel;
 import fr.tripnjoy.groups.model.State;
@@ -70,6 +71,13 @@ public class GroupService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
+    public Collection<Long> getOpenGroups()
+    {
+        return groupRepository.findAvailableGroups().stream()
+                              .map(GroupEntity::getId)
+                              .toList();
+    }
+
     public Collection<GroupModel> getUserGroups(long userId) {
         List<GroupEntity> groups = groupRepository.findAll();
         return groups.stream().filter(g -> g.members.stream().anyMatch(m -> m.getUserId() == userId && !m.isPending())).map(GroupModel::of).toList();
@@ -122,8 +130,8 @@ public class GroupService {
                 .maxSize(maxSize)
                 .createdDate(Date.from(Instant.now()))
                 .stateEntity(maxSize > 2
-                        ? State.OPEN.getEntity()
-                        : State.CLOSED.getEntity())
+                        ? StateEntity.ofModel(State.OPEN)
+                        : StateEntity.ofModel(State.CLOSED))
                 .members(List.of())
                 .build();
         groupRepository.save(groupEntity);
@@ -145,7 +153,7 @@ public class GroupService {
                 .maxSize(createPrivateGroupRequest.getMaxSize())
                 .createdDate(Date.from(Instant.now()))
                 .owner(userId)
-                .stateEntity(State.CLOSED.getEntity())
+                .stateEntity(StateEntity.ofModel(State.CLOSED))
                 .members(new ArrayList<>())
                 .build());
         GroupMemberEntity groupMemberEntity = new GroupMemberEntity(groupEntity, userId, null, false);
@@ -198,7 +206,7 @@ public class GroupService {
         if (updatePrivateGroupRequest.getState() != null) {
             if (updatePrivateGroupRequest.getState() == State.CLOSED)
                 groupEntity.members.stream().filter(GroupMemberEntity::isPending).forEach(groupMemberRepository::delete);
-            groupEntity.setStateEntity(updatePrivateGroupRequest.getState().getEntity());
+            groupEntity.setStateEntity(StateEntity.ofModel(updatePrivateGroupRequest.getState()));
         }
         if (updatePrivateGroupRequest.getPicture() != null) {
             groupEntity.setPicture(updatePrivateGroupRequest.getPicture());
@@ -238,7 +246,7 @@ public class GroupService {
         if (request.getDestination() != null)
             groupEntity.setDestination(request.getDestination());
 
-        if (groupEntity.getStateEntity().equals(State.CLOSED.getEntity())) {
+        if (groupEntity.getStateEntity().equals(StateEntity.ofModel(State.CLOSED))) {
             if (request.getStartOfTrip() != null)
                 groupEntity.setStartOfTrip(request.getStartOfTrip());
             if (request.getEndOfTrip() != null)
@@ -259,7 +267,7 @@ public class GroupService {
         if (groupEntity.getMaxSize() == groupEntity.getNumberOfNonPendingUsers()) {
             groupEntity.members.stream().filter(GroupMemberEntity::isPending).forEach(groupMemberRepository::delete);
             groupEntity.members.removeIf(GroupMemberEntity::isPending);
-            groupEntity.setStateEntity(State.CLOSED.getEntity());
+            groupEntity.setStateEntity(StateEntity.ofModel(State.CLOSED));
         }
     }
 

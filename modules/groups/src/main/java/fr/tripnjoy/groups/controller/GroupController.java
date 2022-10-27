@@ -36,6 +36,14 @@ public class GroupController {
         return models.stream().map(GroupModel::toDto).toList();
     }
 
+    @GetMapping("open")
+    @Operation(summary = "Get all open groups")
+    @ApiResponse(responseCode = "200", description = "Return the list of open groups")
+    public Collection<Long> getOpenGroups()
+    {
+        return groupService.getOpenGroups();
+    }
+
     @GetMapping("{id}")
     @Operation(summary = "Get all the group of the user")
     @ApiResponse(responseCode = "200", description = "Return the list of groups the user is in")
