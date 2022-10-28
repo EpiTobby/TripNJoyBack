@@ -16,7 +16,7 @@ public class PostSurveyRequest extends PostMessageRequest{
                              @JsonProperty("content") final String content,
                              @JsonProperty("quizz") final boolean quizz,
                              @JsonProperty("possibleAnswers") List<PossibleAnswerRequest> possibleAnswers,
-                             boolean isMultipleChoiceSurvey) {
+                             @JsonProperty("isMultipleChoiceSurvey") boolean isMultipleChoiceSurvey) {
         super(userId, content, MessageType.SURVEY);
         this.possibleAnswers = possibleAnswers;
         this.quizz = quizz;

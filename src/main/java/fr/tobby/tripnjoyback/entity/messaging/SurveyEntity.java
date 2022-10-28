@@ -47,11 +47,11 @@ public class SurveyEntity {
         votes = new ArrayList<>();
     }
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "survey_id")
     private Collection<SurveyAnswerEntity> answers;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "survey_id")
     private Collection<VoteEntity> votes;
 }

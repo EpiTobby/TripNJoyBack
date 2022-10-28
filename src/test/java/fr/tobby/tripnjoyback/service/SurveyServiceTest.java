@@ -78,6 +78,9 @@ public class SurveyServiceTest {
 
     @BeforeEach
     void setUp() {
+        messageTypeRepository.save(new MessageTypeEntity("TEXT"));
+        messageTypeRepository.save(new MessageTypeEntity("IMAGE"));
+        messageTypeRepository.save(new MessageTypeEntity("FILE"));
         messageTypeRepository.save(new MessageTypeEntity("SURVEY"));
         surveyService = new SurveyService(surveyRepository, surveyAnswerRepository, voteRepository, messageRepository, userRepository, channelRepository);
     }

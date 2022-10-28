@@ -47,10 +47,3 @@ alter sequence survey_vote_id_seq owned by survey_vote.id;
 
 alter table surveys
     add is_multiple_choice_survey boolean;
-
-alter table answers drop constraint answers_survey_id_fkey;
-
-alter table answers
-    add constraint answers_survey_id_fkey
-        foreign key (survey_id) references surveys
-            on delete cascade;
