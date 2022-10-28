@@ -37,9 +37,10 @@ public class SurveyController {
     @GetMapping("{id}")
     @Operation(summary = "Get a survey by id")
     @ApiResponse(responseCode = "200", description = "The data have been successfully retrieved")
-    public SurveyModel getSurveyById(@PathVariable("id") long channelId) {
-        channelService.checkUserHasAccessToChannel(channelId);
-        return surveyService.getSurveyById(channelId);
+    public SurveyModel getSurveyById(@PathVariable("id") long surveyId) {
+        SurveyModel surveyModel = surveyService.getSurveyById(surveyId);
+        channelService.checkUserHasAccessToChannel(surveyModel.getChannelId());
+        return surveyModel;
     }
 
     @GetMapping("channel/{id}")
@@ -73,7 +74,7 @@ public class SurveyController {
     @ApiResponse(responseCode = "200", description = "The vote has been submitted")
     public SurveyModel submitVote(@PathVariable("id") long surveyId, @RequestBody VoteSurveyRequest voteSurveyRequest) {
         long userId = idCheckerService.getCurrentUserId();
-        channelService.checkUserHasAccessToChannel(userId);
+        channelService.checkUserHasAccessToChannel(surveyService.getSurveyById(surveyId).getChannelId());
         return surveyService.submitVote(surveyId, userId, voteSurveyRequest);
     }
 
