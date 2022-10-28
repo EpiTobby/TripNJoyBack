@@ -60,7 +60,7 @@ public class SurveyController {
     }
 
     @PostMapping("{id}")
-    @Operation(summary = "Create a survey in a challenge")
+    @Operation(summary = "Create a survey in a channel")
     @ApiResponse(responseCode = "200", description = "The survey has been created")
     public SurveyModel createSurvey(@PathVariable("id") long channelId, @RequestBody PostSurveyRequest postSurveyRequest) {
         idCheckerService.checkId(postSurveyRequest.getUserId());

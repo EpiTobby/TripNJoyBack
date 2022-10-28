@@ -128,6 +128,8 @@ public class SurveyService {
         SurveyEntity surveyEntity = surveyRepository.findById(surveyId).orElseThrow(() -> new SurveyNotFoundException(surveyId));
         if (surveyEntity.getSubmitter().getId() != userId)
             throw new ForbiddenOperationException("You cannot delete this survey!");
+        MessageEntity messageEntity = messageRepository.findByTypeAndContent(MessageType.SURVEY.getEntity(), String.valueOf(surveyId)).orElseThrow(MessageNotFoundException::new);
+        messageRepository.delete(messageEntity);
         surveyRepository.delete(surveyEntity);
     }
 }
