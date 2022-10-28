@@ -66,7 +66,6 @@ public class SurveyService {
                 new SurveyEntity(userEntity, channelEntity, postSurveyRequest.getContent(), postSurveyRequest.isQuizz(), Date.from(Instant.now()),
                         null, postSurveyRequest.isMultipleChoiceSurvey())
         );
-        messageRepository.save(new MessageEntity(userEntity,channelEntity,surveyEntity.getId().toString(), MessageType.SURVEY.getEntity(),Date.from(Instant.now())));
         postSurveyRequest.getPossibleAnswers().forEach(possibleAnswer -> {
             SurveyAnswerEntity surveyAnswerEntity = surveyAnswerRepository.save(
                     new SurveyAnswerEntity(possibleAnswer.getContent(), surveyEntity, possibleAnswer.isRightAnswer())
