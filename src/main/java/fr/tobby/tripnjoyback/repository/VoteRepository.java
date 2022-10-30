@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface VoteRepository extends CrudRepository<VoteEntity, Long> {
+
+    Optional<VoteEntity> findByVoterIdAndSurveyIdAndAnswerId(long voterId, long surveyId, long answerId);
+
     Optional<VoteEntity> findByVoterIdAndSurveyId(long voterId, long surveyId);
 
     List<VoteEntity> findBySurveyId(long surveyId);

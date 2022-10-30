@@ -108,9 +108,8 @@ public class SurveyService {
         Optional<VoteEntity> voteEntity = voteRepository.findByVoterIdAndSurveyId(userEntity.getId(), surveyId);
         if (voteEntity.isPresent() && !surveyEntity.isMultipleChoiceSurvey()) {
             voteEntity.get().setAnswer(surveyAnswerEntity);
-        } else {
-            surveyEntity.getVotes().add(voteRepository.save(new VoteEntity(surveyEntity, surveyAnswerEntity, userEntity)));
-        }
+        } else if (voteRepository.findByVoterIdAndSurveyIdAndAnswerId(userEntity.getId(), surveyId, voteSurveyRequest.getAnswerId()).isEmpty())
+                surveyEntity.getVotes().add(voteRepository.save(new VoteEntity(surveyEntity, surveyAnswerEntity, userEntity)));
         return SurveyModel.of(surveyEntity);
     }
 

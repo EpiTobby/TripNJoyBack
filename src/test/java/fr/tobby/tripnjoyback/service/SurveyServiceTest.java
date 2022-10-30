@@ -3,9 +3,11 @@ package fr.tobby.tripnjoyback.service;
 import fr.tobby.tripnjoyback.SpringContext;
 import fr.tobby.tripnjoyback.entity.*;
 import fr.tobby.tripnjoyback.entity.messaging.ChannelEntity;
+import fr.tobby.tripnjoyback.entity.messaging.MessageEntity;
 import fr.tobby.tripnjoyback.entity.messaging.MessageTypeEntity;
 import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.SurveyNotFoundException;
+import fr.tobby.tripnjoyback.model.MessageType;
 import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.SurveyModel;
 import fr.tobby.tripnjoyback.model.request.VoteSurveyRequest;
@@ -24,6 +26,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -239,6 +242,33 @@ public class SurveyServiceTest {
     }
 
     @Test
+    void voteAnswerTwiceTest() throws ParseException {
+        String question = "Where would you like to go?";
+        GroupEntity groupEntity = anyGroup();
+        UserEntity user1 = anyUser("user1@gmail.com");
+        UserEntity user2 = anyUser("user2@gmail.com");
+        groupEntity.getMembers().add(memberRepository.save(new GroupMemberEntity(groupEntity, user1, null, false)));
+        groupEntity.getMembers().add(memberRepository.save(new GroupMemberEntity(groupEntity, user2, null, false)));
+        long channelId = groupEntity.channels.stream().findFirst().get().getId();
+        ArrayList<PossibleAnswerRequest> possibleAnswerRequests = new ArrayList<>();
+        possibleAnswerRequests.add(PossibleAnswerRequest.builder()
+                .rightAnswer(false)
+                .content("Spain").build());
+        possibleAnswerRequests.add(PossibleAnswerRequest.builder()
+                .rightAnswer(false)
+                .content("Portugal").build());
+        PostSurveyRequest postSurveyRequest = new PostSurveyRequest(user1.getId(),
+                question, false, possibleAnswerRequests, true);
+        SurveyModel survey = surveyService.createSurvey(channelId, postSurveyRequest);
+        surveyService.submitVote(survey.getId(), user2.getId(), VoteSurveyRequest.builder()
+                .answerId(survey.getPossibleAnswers().get(0).getId()).build());
+        surveyService.submitVote(survey.getId(), user2.getId(), VoteSurveyRequest.builder()
+                .answerId(survey.getPossibleAnswers().get(0).getId()).build());
+        SurveyModel surveyModel = surveyService.getSurveysByChannelId(channelId).get(0);
+        Assertions.assertEquals(1,surveyModel.getVotes().size());
+    }
+
+    @Test
     void deleteSurveyTest() throws ParseException {
         String question = "Where would you like to go?";
         GroupEntity groupEntity = anyGroup();
@@ -257,6 +287,7 @@ public class SurveyServiceTest {
         PostSurveyRequest postSurveyRequest = new PostSurveyRequest(user1.getId(),
                 question, false, possibleAnswerRequests, false);
         long surveyId = surveyService.createSurvey(channelId, postSurveyRequest).getId();
+        messageRepository.save(new MessageEntity(user1, groupEntity.channels.stream().findFirst().get(), String.valueOf(surveyId), MessageType.SURVEY.getEntity(), Date.from(Instant.now())));
         surveyService.deleteSurvey(surveyId, user1.getId());
         Assertions.assertThrows(SurveyNotFoundException.class, () -> surveyService.getSurveyById(surveyId));
     }
