@@ -15,6 +15,7 @@ import java.util.List;
 public class UserMailUtils {
 
     public static final String USER_FIRST_NAME_PLACEHOLDER = "{userFirstName}";
+    public static final List<String> ADMIN_CREDS = List.of("admin");
     private final MailConfigRecord config;
     private final MailSender mailSender;
     private final UserFeignClient userFeignClient;
@@ -40,7 +41,7 @@ public class UserMailUtils {
     }
 
     public void sendConfirmationSuccessMail(long userId) {
-        UserResponse user = userFeignClient.getUserById(List.of("admin"), userId);
+        UserResponse user = userFeignClient.getUserById(ADMIN_CREDS, userId);
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getConfirmationSuccessMailSubject(user.getLanguage()))
@@ -50,7 +51,7 @@ public class UserMailUtils {
     }
 
     public void sendConfirmationCodeMail(long userId, String code) {
-        UserResponse user = userFeignClient.getUserById(List.of("admin"), userId);
+        UserResponse user = userFeignClient.getUserById(ADMIN_CREDS, userId);
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getConfirmationCodeSubject(user.getLanguage()))
@@ -60,7 +61,7 @@ public class UserMailUtils {
     }
 
     public void sendForgottenPasswordCodeMail(long userId, String code) {
-        UserResponse user = userFeignClient.getUserById(List.of("admin"), userId);
+        UserResponse user = userFeignClient.getUserById(ADMIN_CREDS, userId);
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getForgotPasswordSubject(user.getLanguage()))
@@ -70,7 +71,7 @@ public class UserMailUtils {
     }
 
     public void sendUpdatePasswordMail(long userId) {
-        UserResponse user = userFeignClient.getUserById(List.of("admin"), userId);
+        UserResponse user = userFeignClient.getUserById(ADMIN_CREDS, userId);
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getUpdatePasswordSuccessSubject(user.getLanguage()))
@@ -80,7 +81,7 @@ public class UserMailUtils {
     }
 
     public void sendDeleteAccountMail(long userId) {
-        UserResponse user = userFeignClient.getUserById(List.of("admin"), userId);
+        UserResponse user = userFeignClient.getUserById(ADMIN_CREDS, userId);
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getAccountDeletedSubject(user.getLanguage()))
@@ -90,7 +91,7 @@ public class UserMailUtils {
     }
 
     public void sendDeleteAccountByAdminMail(long userId, String reason) {
-        UserResponse user = userFeignClient.getUserById(List.of("admin"), userId);
+        UserResponse user = userFeignClient.getUserById(ADMIN_CREDS, userId);
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getAccountDeletedByAdminSubject(user.getLanguage()))
@@ -100,7 +101,7 @@ public class UserMailUtils {
     }
 
     public void sendUpdateMail(long userId) {
-        UserResponse user = userFeignClient.getUserById(List.of("admin"), userId);
+        UserResponse user = userFeignClient.getUserById(ADMIN_CREDS, userId);
         SimpleMailMessage mail = new MailBuilder(config)
                 .toAddr(user.getEmail())
                 .setSubject(messagesProperties.getEmailUpdateSubject(user.getLanguage()))
