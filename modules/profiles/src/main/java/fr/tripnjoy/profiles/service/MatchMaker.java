@@ -3,14 +3,20 @@ package fr.tripnjoy.profiles.service;
 import fr.tripnjoy.common.broker.RabbitMQConfiguration;
 import fr.tripnjoy.common.utils.Pair;
 import fr.tripnjoy.groups.api.client.GroupFeignClient;
+import fr.tripnjoy.groups.dto.request.CreatePublicGroupRequest;
+import fr.tripnjoy.groups.dto.response.GroupResponse;
 import fr.tripnjoy.profiles.dto.response.MatchMakingResult;
+import fr.tripnjoy.profiles.entity.GroupProfileEntity;
 import fr.tripnjoy.profiles.entity.ProfileEntity;
+import fr.tripnjoy.profiles.entity.UserMatchTaskEntity;
 import fr.tripnjoy.profiles.exception.ProfileNotFoundException;
 import fr.tripnjoy.profiles.model.MatchMakingUserModel;
 import fr.tripnjoy.profiles.model.ProfileModel;
 import fr.tripnjoy.profiles.model.answer.AvailabilityAnswerModel;
 import fr.tripnjoy.profiles.model.answer.RangeAnswerModel;
+import fr.tripnjoy.profiles.repository.GroupProfileRepository;
 import fr.tripnjoy.profiles.repository.ProfileRepository;
+import fr.tripnjoy.profiles.repository.UserMatchTaskRepository;
 import fr.tripnjoy.users.api.client.UserFeignClient;
 import fr.tripnjoy.users.api.response.UserResponse;
 import org.jetbrains.annotations.NotNull;
@@ -39,13 +45,16 @@ public class MatchMaker {
     private final UserFeignClient userFeignClient;
     private final GroupFeignClient groupFeignClient;
     private final RabbitTemplate rabbitTemplate;
+    private final UserMatchTaskRepository userMatchTaskRepository;
+    private final GroupProfileRepository groupProfileRepository;
 
     private long taskIndex = 1L;
     private final Map<Long, CompletableFuture<MatchMakingResult>> tasks = new HashMap<>();
 
     public MatchMaker(final ProfileRepository profileRepository, final MatchMakerScoreComputer scoreComputer, final ProfileService profileService,
                       final UserFeignClient userFeignClient, final GroupFeignClient groupFeignClient,
-                      final RabbitTemplate rabbitTemplate)
+                      final RabbitTemplate rabbitTemplate, final UserMatchTaskRepository userMatchTaskRepository,
+                      final GroupProfileRepository groupProfileRepository)
     {
         this.profileRepository = profileRepository;
         this.scoreComputer = scoreComputer;
@@ -53,6 +62,8 @@ public class MatchMaker {
         this.userFeignClient = userFeignClient;
         this.groupFeignClient = groupFeignClient;
         this.rabbitTemplate = rabbitTemplate;
+        this.userMatchTaskRepository = userMatchTaskRepository;
+        this.groupProfileRepository = groupProfileRepository;
     }
 
     /**
@@ -119,20 +130,15 @@ public class MatchMaker {
             RangeAnswerModel sizeRange = scoreComputer.computeCommonRange(user.getProfile().getGroupSize(), matched.getProfile().getGroupSize()).orElseThrow();
             int maxSize = (sizeRange.getMaxValue() + sizeRange.getMinValue()) / 2;
 
-//            UserEntity userEntity = userRepository.getById(user.getUserId());
-//            UserEntity matchedEntity = userRepository.getById(matched.getUserId());
-
-
             ProfileEntity groupProfile = this.computeGroupProfile(user.getProfile(), matched.getProfile());
-            // FIXME: rabbitMQ
-//            GroupModel created = groupService.createPublicGroup(userEntity,
-//                    profileRepository.getById(user.getProfile().getId()),
-//                    matchedEntity,
-//                    profileRepository.getById(matched.getProfile().getId()),
-//                    maxSize,
-//                    groupProfile);
+            GroupResponse created = groupFeignClient.createPublicGroup(List.of("admin"), new CreatePublicGroupRequest(user.getUserId(),
+                    matched.getUserId(),
+                    user.getProfile().getId(),
+                    matched.getProfile().getId(),
+                    maxSize));
+            groupProfileRepository.save(new GroupProfileEntity(new GroupProfileEntity.Ids(created.getId(), groupProfile)));
 
-//            matchedEntity.setWaitingForGroup(false);
+            setUserAsWaiting(matched.getUserId(), false);
             profileService.setActiveProfile(matched.getProfile().getId(), false);
             profileService.setActiveProfile(user.getProfile().getId(), false);
 //            if (matchedEntity.getFirebaseToken() != null)
@@ -143,13 +149,12 @@ public class MatchMaker {
 //                        "Un nouveau groupe de voyage a été créé",
 //                        Map.of("groupId", String.valueOf(created.getId())));
 //            }
-            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.CREATED, 0, user.getUserId(), user.getProfile().getId())); // FIXME: replace 0 with created id
+            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.CREATED, created.getId(), user.getUserId(), user.getProfile().getId()));
         }
         else
         {
             logger.info("No match found for user {}. Set as waiting for match", user.getUserId());
-            // FIXME: rabbit MQ
-//            userRepository.getById(user.getUserId()).setWaitingForGroup(true);
+            setUserAsWaiting(user.getUserId(), true);
             return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.WAITING, 0, user.getUserId(), user.getProfile().getId()));
         }
     }
@@ -182,9 +187,10 @@ public class MatchMaker {
 
     private Optional<MatchMakingUserModel> findMatchingUser(@NotNull MatchMakingUserModel user)
     {
-        Collection<UserResponse> waitingUsers = userFeignClient.getUsersWaitingForGroup();
+        Collection<Long> waitingUsers = userMatchTaskRepository.findAllWaitingUserIds();
         Collection<MatchMakingUserModel> others = waitingUsers
                 .stream()
+                .map(waitingUser -> userFeignClient.getUserById(List.of("admin"), waitingUser))
                 .map(waitingUser -> {
                     ProfileModel profileModel = profileService.getActiveProfileModel(waitingUser.getId()).orElseThrow();
                     return MatchMakingUserModel.from(waitingUser, Instant.now(), profileModel);
@@ -214,5 +220,13 @@ public class MatchMaker {
                                               .availabilities(commonAvailabilities)
                                               .build();
         return profileService.createProfile(groupModel);
+    }
+
+    private void setUserAsWaiting(long userId, boolean isWaiting)
+    {
+        if (isWaiting)
+            userMatchTaskRepository.save(new UserMatchTaskEntity(userId));
+        else
+            userMatchTaskRepository.deleteById(userId);
     }
 }

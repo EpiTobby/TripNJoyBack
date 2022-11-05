@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "groups")
@@ -214,6 +215,15 @@ public class GroupController {
         return groupService.getQRCode(groupId);
     }
 
+    @PostMapping("/")
+    public GroupResponse createPublicGroup(@RequestHeader("roles") List<String> roles, @RequestBody CreatePublicGroupRequest request)
+    {
+        if (!roles.contains("admin"))
+            throw new ForbiddenOperationException();
+        return groupService.createPublicGroup(request.getUser1(), request.getProfile1(), request.getUser2(), request.getProfile2(), request.getMaxSize())
+                           .toDto();
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -277,5 +287,4 @@ public class GroupController {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }
-
 }

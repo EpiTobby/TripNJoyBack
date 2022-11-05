@@ -133,10 +133,4 @@ public class UserService {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
         user.setFirebaseToken(token);
     }
-
-    public Collection<UserModel> getUsersWaitingForGroup()
-    {
-        return userRepository.findAllByWaitingForGroupIsTrue().stream()
-                             .map(UserModel::of).toList();
-    }
 }

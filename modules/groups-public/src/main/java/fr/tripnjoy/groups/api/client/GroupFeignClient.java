@@ -10,6 +10,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.List;
 
 @FeignClient(value = "SERVICE-GROUPS", contextId = "SERVICE-GROUPS-GROUPS", path = "/groups")
 public interface GroupFeignClient {
@@ -67,4 +68,7 @@ public interface GroupFeignClient {
 
     @GetMapping("private/{group}/qrcode")
     String getQRCode(@PathVariable("group") final long groupId, @RequestHeader("userId") long userId);
+
+    @PostMapping("/")
+    GroupResponse createPublicGroup(@RequestHeader("roles") List<String> roles, @RequestBody CreatePublicGroupRequest request);
 }
