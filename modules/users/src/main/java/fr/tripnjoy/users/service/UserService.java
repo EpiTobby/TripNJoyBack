@@ -1,5 +1,6 @@
 package fr.tripnjoy.users.service;
 
+import fr.tripnjoy.mails.api.client.MailFeignClient;
 import fr.tripnjoy.users.api.exception.BadCredentialsException;
 import fr.tripnjoy.users.api.exception.UserNotFoundException;
 import fr.tripnjoy.users.entity.CityEntity;
@@ -28,15 +29,18 @@ public class UserService {
     private final LanguageRepository languageRepository;
     private final CityService cityService;
     private final PasswordEncoder encoder;
+    private final MailFeignClient mailFeignClient;
 
     public UserService(UserRepository userRepository, GenderRepository genderRepository,
-                       LanguageRepository languageRepository, final CityService cityService, PasswordEncoder encoder)
+                       LanguageRepository languageRepository, final CityService cityService, PasswordEncoder encoder,
+                       final MailFeignClient mailFeignClient)
     {
         this.userRepository = userRepository;
         this.genderRepository = genderRepository;
         this.languageRepository = languageRepository;
         this.cityService = cityService;
         this.encoder = encoder;
+        this.mailFeignClient = mailFeignClient;
     }
 
     public Collection<UserModel> getAll()
@@ -97,8 +101,7 @@ public class UserService {
         // FIXME: delete profile via profile service
         //        profileService.deleteProfilesByUserId(userId);
         deleteUserEntity(userEntity);
-        // FIXME: send mail via mail service
-        //        userMailUtils.sendDeleteAccountMail(UserModel.of(userEntity));
+        mailFeignClient.sendDeleteAccountMail(userEntity.getId());
     }
 
     @Transactional
@@ -108,8 +111,7 @@ public class UserService {
         // FIXME: delete profile via profile service
         //        profileService.deleteProfilesByUserId(userId);
         deleteUserEntity(userEntity);
-        // FIXME: send mail via mail service
-        //        userMailUtils.sendDeleteAccountByAdminMail(UserModel.of(userEntity), deleteUserByAdminRequest.getReason());
+        mailFeignClient.sendDeleteAccountByAdminMail(userEntity.getId(), deleteUserByAdminRequest.getReason());
     }
 
     @Transactional
