@@ -1,5 +1,6 @@
 package fr.tripnjoy.users.service;
 
+import fr.tripnjoy.mails.api.client.MailFeignClient;
 import fr.tripnjoy.users.auth.TokenManager;
 import fr.tripnjoy.users.entity.CityEntity;
 import fr.tripnjoy.users.entity.GenderEntity;
@@ -32,6 +33,7 @@ class AuthServiceTest {
 
     AuthService service;
     private AuthenticationManager authenticationManager1;
+    private MailFeignClient mailFeignClient;
 
     @BeforeEach
     public void setup()
@@ -46,8 +48,9 @@ class AuthServiceTest {
         userRoleRepository = mock(UserRoleRepository.class);
         languageRepository = mock(LanguageRepository.class);
         cityService = mock(CityService.class);
+        mailFeignClient = mock(MailFeignClient.class);
 
-//        PromStats promStats = mock(PromStats.class);
+        //        PromStats promStats = mock(PromStats.class);
 //        when(promStats.getUserCount()).thenReturn(mock(Gauge.class));
 
         service = new AuthService(userRepository,
@@ -59,7 +62,7 @@ class AuthServiceTest {
                 languageRepository,
                 userService,
                 tokenManager,
-                authenticationManager);
+                authenticationManager, mailFeignClient);
     }
 
     @Test

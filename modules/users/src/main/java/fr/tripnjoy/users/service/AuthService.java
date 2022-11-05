@@ -1,6 +1,7 @@
 package fr.tripnjoy.users.service;
 
 import fr.tripnjoy.common.exception.ForbiddenOperationException;
+import fr.tripnjoy.mails.api.client.MailFeignClient;
 import fr.tripnjoy.users.api.exception.BadCredentialsException;
 import fr.tripnjoy.users.api.exception.UserNotFoundException;
 import fr.tripnjoy.users.auth.TokenManager;
@@ -48,6 +49,8 @@ public class AuthService {
     private final TokenManager tokenManager;
     private final AuthenticationManager authenticationManager;
 
+    private final MailFeignClient mailFeignClient;
+
     @Value("${google.secret}")
     private String googleSecret;
 
@@ -58,7 +61,7 @@ public class AuthService {
                        final CityService cityService, final ConfirmationCodeRepository confirmationCodeRepository,
                        final UserRoleRepository userRoleRepository, LanguageRepository languageRepository,
                        final UserService userService, final TokenManager tokenManager,
-                       final AuthenticationManager authenticationManager)
+                       final AuthenticationManager authenticationManager, final MailFeignClient mailFeignClient)
     {
         this.userRepository = userRepository;
         this.encoder = encoder;
@@ -70,6 +73,7 @@ public class AuthService {
         this.userService = userService;
         this.tokenManager = tokenManager;
         this.authenticationManager = authenticationManager;
+        this.mailFeignClient = mailFeignClient;
     }
 
     @Transactional
@@ -111,9 +115,8 @@ public class AuthService {
     {
         if (userRepository.findByEmail(entity.getEmail()).isPresent())
             throw new UserCreationException("Email is already in use");
-        // FIXME: mail service
-        //        if (!userMailUtils.userEmailIsValid(entity.getEmail()))
-        //            throw new UserCreationException("Email is not valid");
+        if (!mailFeignClient.userEmailIsValid(entity.getEmail()).value())
+            throw new UserCreationException("Email is not valid");
         return userRepository.save(entity);
     }
 
@@ -195,8 +198,7 @@ public class AuthService {
     {
         ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userModel.getId());
         confirmationCodeRepository.save(confirmationCodeEntity);
-        // FIXME: send mail via mail service
-        // userMailUtils.sendConfirmationCodeMail(userModel, confirmationCodeEntity.getValue());
+        mailFeignClient.sendConfirmationCodeMail(userModel.getId(), confirmationCodeEntity.getValue());
         logger.debug("Generated account confirmation code {}", confirmationCodeEntity);
         return confirmationCodeEntity;
     }
@@ -205,8 +207,7 @@ public class AuthService {
     {
         ConfirmationCodeEntity confirmationCodeEntity = new ConfirmationCodeEntity(userModel.getId());
         confirmationCodeRepository.save(confirmationCodeEntity);
-        // FIXME: send mail via mail service
-        // userMailUtils.sendForgottenPasswordCodeMail(userModel, confirmationCodeEntity.getValue());
+        mailFeignClient.sendForgottenPasswordCodeMail(userModel.getId(), confirmationCodeEntity.getValue());
         logger.debug("Generated forgotten password code {}", confirmationCodeEntity);
         return confirmationCodeEntity;
     }
@@ -251,8 +252,7 @@ public class AuthService {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         user.setConfirmed(true);
         UserModel userModel = UserModel.of(user);
-        // FIXME: send mail via mail service
-        //        userMailUtils.sendConfirmationSuccessMail(userModel);
+        mailFeignClient.sendConfirmationSuccessMail(userModel.getId());
         return userModel;
     }
 
@@ -281,8 +281,7 @@ public class AuthService {
             else
             {
                 userEntity.setPassword(encoder.encode(validateCodePasswordRequest.getNewPassword()));
-                // FIXME: send mail via mail service
-                //                userMailUtils.sendUpdatePasswordMail(UserModel.of(userEntity));
+                mailFeignClient.sendUpdatePasswordMail(userEntity.getId());
                 logger.debug("New password set for user {}", validateCodePasswordRequest.getEmail());
                 return UserIdResponse.builder().userId(userEntity.getId()).build();
             }
@@ -298,8 +297,7 @@ public class AuthService {
         if (encoder.matches(updatePasswordRequest.getOldPassword(), user.getPassword()))
         {
             user.setPassword(encoder.encode(updatePasswordRequest.getNewPassword()));
-            // FIXME: send mail via mail service
-            //            userMailUtils.sendUpdatePasswordMail(UserModel.of(user));
+            mailFeignClient.sendUpdatePasswordMail(user.getId());
         }
         else
             throw new UpdatePasswordException("Bad Password");
@@ -311,15 +309,13 @@ public class AuthService {
         if (!encoder.matches(updateEmailRequest.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Bad Password");
         }
-        // FIXME: mail service
-//        if (!userMailUtils.userEmailIsValid(updateEmailRequest.getNewEmail())) {
-//            throw new UpdateEmailException("Email is not valid");
-//        }
+        if (!mailFeignClient.userEmailIsValid(updateEmailRequest.getNewEmail()).value()) {
+            throw new UpdateEmailException("Email is not valid");
+        }
         String newEmail = updateEmailRequest.getNewEmail().toLowerCase().trim();
         if (userRepository.findByEmail(newEmail).isEmpty()) {
             user.setEmail(newEmail);
-            // FIXME: mail service
-//            userMailUtils.sendUpdateMail(UserModel.of(user));
+            mailFeignClient.sendUpdateMail(user.getId());
             return tokenManager.generateFor(user.getEmail(), userId);
         } else
             throw new UpdateEmailException("Email already used");
