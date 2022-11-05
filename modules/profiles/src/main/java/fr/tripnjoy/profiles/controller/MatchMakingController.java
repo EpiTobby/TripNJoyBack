@@ -1,7 +1,7 @@
 package fr.tripnjoy.profiles.controller;
 
 import fr.tripnjoy.profiles.dto.response.MatchMakingResponse;
-import fr.tripnjoy.profiles.model.MatchMakingResult;
+import fr.tripnjoy.profiles.dto.response.MatchMakingResult;
 import fr.tripnjoy.profiles.model.ProfileModel;
 import fr.tripnjoy.profiles.model.request.ProfileCreationRequest;
 import fr.tripnjoy.profiles.service.MatchMaker;

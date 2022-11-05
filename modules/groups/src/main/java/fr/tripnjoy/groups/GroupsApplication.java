@@ -1,7 +1,9 @@
 package fr.tripnjoy.groups;
 
+import fr.tripnjoy.common.broker.RabbitMQConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -31,6 +33,12 @@ public class GroupsApplication {
     public CommandLineRunner startup(@Value("${spring.profiles.active}") String profiles)
     {
         return args -> logger.info("Application started with profiles {}", profiles);
+    }
+
+    @Bean
+    public RabbitTemplate rabbitTemplate()
+    {
+        return new RabbitMQConfiguration().rabbitTemplate();
     }
 
 }

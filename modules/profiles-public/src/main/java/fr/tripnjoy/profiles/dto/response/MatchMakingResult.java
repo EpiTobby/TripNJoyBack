@@ -1,7 +1,9 @@
-package fr.tripnjoy.profiles.model;
+package fr.tripnjoy.profiles.dto.response;
 
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
+@Getter
 public class MatchMakingResult {
 
     public enum Type {
@@ -26,9 +28,13 @@ public class MatchMakingResult {
     @NotNull
     private final Type type;
     private final long groupId;
+    private final long userId;
+    private final long profileId;
 
-    public MatchMakingResult(@NotNull final Type type, final long groupId)
+    public MatchMakingResult(@NotNull final Type type, final long groupId, final long userId, final long profileId)
     {
+        this.userId = userId;
+        this.profileId = profileId;
         if ((type != Type.WAITING && type != Type.SEARCHING) && groupId == 0)
             throw new IllegalArgumentException("Group cannot be null for type " + type);
         this.type = type;

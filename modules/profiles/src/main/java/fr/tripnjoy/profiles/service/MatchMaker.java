@@ -1,10 +1,11 @@
 package fr.tripnjoy.profiles.service;
 
+import fr.tripnjoy.common.broker.RabbitMQConfiguration;
 import fr.tripnjoy.common.utils.Pair;
 import fr.tripnjoy.groups.api.client.GroupFeignClient;
+import fr.tripnjoy.profiles.dto.response.MatchMakingResult;
 import fr.tripnjoy.profiles.entity.ProfileEntity;
 import fr.tripnjoy.profiles.exception.ProfileNotFoundException;
-import fr.tripnjoy.profiles.model.MatchMakingResult;
 import fr.tripnjoy.profiles.model.MatchMakingUserModel;
 import fr.tripnjoy.profiles.model.ProfileModel;
 import fr.tripnjoy.profiles.model.answer.AvailabilityAnswerModel;
@@ -15,6 +16,7 @@ import fr.tripnjoy.users.api.response.UserResponse;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,18 +38,21 @@ public class MatchMaker {
     private final ProfileService profileService;
     private final UserFeignClient userFeignClient;
     private final GroupFeignClient groupFeignClient;
+    private final RabbitTemplate rabbitTemplate;
 
     private long taskIndex = 1L;
     private final Map<Long, CompletableFuture<MatchMakingResult>> tasks = new HashMap<>();
 
     public MatchMaker(final ProfileRepository profileRepository, final MatchMakerScoreComputer scoreComputer, final ProfileService profileService,
-                      final UserFeignClient userFeignClient, final GroupFeignClient groupFeignClient)
+                      final UserFeignClient userFeignClient, final GroupFeignClient groupFeignClient,
+                      final RabbitTemplate rabbitTemplate)
     {
         this.profileRepository = profileRepository;
         this.scoreComputer = scoreComputer;
         this.profileService = profileService;
         this.userFeignClient = userFeignClient;
         this.groupFeignClient = groupFeignClient;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     /**
@@ -77,7 +82,7 @@ public class MatchMaker {
         CompletableFuture<MatchMakingResult> task = tasks.get(taskId);
         if (task == null)
             throw new NoSuchElementException();
-        return task.isDone() ? task.get() : new MatchMakingResult(MatchMakingResult.Type.SEARCHING, 0);
+        return task.isDone() ? task.get() : new MatchMakingResult(MatchMakingResult.Type.SEARCHING, 0, 0, 0);
     }
 
     @Transactional
@@ -92,15 +97,18 @@ public class MatchMaker {
             long groupId = matchedGroup.get();
             logger.info("User {} joining group {}", user.getUserId(), groupId);
             profileService.setActiveProfile(user.getProfile().getId(), false);
-            // FIXME: use rabbitMQ
-//            groupService.addUserToPublicGroup(groupId, user.getUserId(), user.getProfile().getId());
+            MatchMakingResult result = new MatchMakingResult(MatchMakingResult.Type.JOINED, groupId, user.getUserId(), user.getProfile().getId());
+
+            // Group service will add the user to the group
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.TOPIC_EXCHANGE, "match", result);
+
             // FIXME: notification service
 //            notificationService.sendToGroup(groupId,
 //                    "Nouveau membre",
 //                    String.format("%s a rejoint l'aventure !", userRepository.findById(user.getUserId()).orElseThrow().getFirstname()),
 //                    Map.of("newMemberId", String.valueOf(user.getUserId()),
 //                            "groupId", String.valueOf(groupId)));
-            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.JOINED, groupId));
+            return CompletableFuture.completedFuture(result);
         }
 
         Optional<MatchMakingUserModel> matchingUser = findMatchingUser(user);
@@ -135,14 +143,14 @@ public class MatchMaker {
 //                        "Un nouveau groupe de voyage a été créé",
 //                        Map.of("groupId", String.valueOf(created.getId())));
 //            }
-            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.CREATED, 0)); // FIXME: replace 0 with created id
+            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.CREATED, 0, user.getUserId(), user.getProfile().getId())); // FIXME: replace 0 with created id
         }
         else
         {
             logger.info("No match found for user {}. Set as waiting for match", user.getUserId());
             // FIXME: rabbit MQ
 //            userRepository.getById(user.getUserId()).setWaitingForGroup(true);
-            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.WAITING, 0));
+            return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.WAITING, 0, user.getUserId(), user.getProfile().getId()));
         }
     }
 
