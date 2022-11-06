@@ -9,3 +9,12 @@ create table users_match_tasks
 );
 
 alter table users drop column waiting_for_group;
+
+
+alter table activities_members drop constraint activities_members_participant_id_fkey;
+
+alter table activities_members
+    add constraint activities_members_users_id_fk
+        foreign key (participant_id) references users
+            on update cascade on delete cascade;
+
