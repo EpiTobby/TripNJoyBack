@@ -151,8 +151,8 @@ public class GroupService {
 
     @Transactional
     public GroupModel createPrivateGroup(long userId, CreatePrivateGroupRequest createPrivateGroupRequest) {
-        // FIXME: check user exists
-//        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        if (!userClient.exists(userId).value())
+            throw new UserNotFoundException("No user with id " + userId);
         GroupEntity groupEntity = groupRepository.save(GroupEntity.builder()
                 .name(createPrivateGroupRequest.getName())
                 .description(createPrivateGroupRequest.getDescription())
@@ -174,10 +174,11 @@ public class GroupService {
     @Transactional
     public void addUserToPublicGroup(long groupId, long userId, long profileId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
-        // FIXME
-//        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with this id " + userId));
+        if (!userClient.exists(userId).value())
+            throw new UserNotFoundException("No user with id " + userId);
         if (groupEntity.members.stream().anyMatch(m -> m.getUserId() == userId))
             throw new UserAlreadyInGroupException("User already in group");
+        // FIXME check profile exists
 //        ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with id " + profileId));
         groupMemberRepository.save(new GroupMemberEntity(groupEntity, userId, profileId, true));
     }
@@ -264,7 +265,7 @@ public class GroupService {
     public void deletePrivateGroup(long groupId) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         deleteGroup(groupEntity);
-        // FIXME
+        // FIXME prom
 //        promStats.getGroupCount().set(groupRepository.count());
     }
 
