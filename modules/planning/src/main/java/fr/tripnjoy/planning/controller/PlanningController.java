@@ -47,7 +47,7 @@ public class PlanningController {
     public ActivityResponse createActivity(@RequestHeader("userId") long userId, @PathVariable(name = "groupId") final long groupId,
                                            @RequestBody final CreateActivityRequest request)
     {
-        checkUserIsInGroup(groupId, userId);
+        checkUserIsInGroup(userId, groupId);
         ActivityResponse activity = this.service.createActivity(groupId, request);
         this.service.joinActivity(activity.id(), userId);
         return activity;
@@ -60,7 +60,7 @@ public class PlanningController {
     @ApiResponse(responseCode = "404", description = "The group does not exist")
     public List<ActivityResponse> getActivities(@RequestHeader("userId") long userId, @PathVariable(name = "groupId") final long groupId)
     {
-        checkUserIsInGroup(groupId, userId);
+        checkUserIsInGroup(userId, groupId);
         return this.service.getGroupActivities(groupId);
     }
 
@@ -74,7 +74,7 @@ public class PlanningController {
                              @PathVariable(name = "activityId") final long activityId,
                              @RequestParam(name = "userId") final long userId)
     {
-        checkUserIsInGroup(groupId, userId);
+        checkUserIsInGroup(userId, groupId);
         this.service.joinActivity(activityId, userId);
     }
 
@@ -88,7 +88,7 @@ public class PlanningController {
                               @PathVariable(name = "activityId") final long activityId,
                               @RequestParam(name = "userId") final long userId)
     {
-        checkUserIsInGroup(groupId, userId);
+        checkUserIsInGroup(userId, groupId);
         this.service.leaveActivity(activityId, userId);
     }
 
@@ -102,7 +102,7 @@ public class PlanningController {
                                @PathVariable(name = "groupId") final long groupId,
                                @PathVariable(name = "activityId") final long activityId)
     {
-        checkUserIsInGroup(groupId, userId);
+        checkUserIsInGroup(userId, groupId);
         this.service.deleteActivity(activityId);
     }
 
@@ -116,7 +116,7 @@ public class PlanningController {
                                            @PathVariable(name = "activityId") final long activityId,
                                            @NotNull @RequestBody final UpdateActivityRequest updateActivityRequest)
     {
-        checkUserIsInGroup(groupId, userId);
+        checkUserIsInGroup(userId, groupId);
         return this.service.updateActivity(activityId, updateActivityRequest);
     }
 
