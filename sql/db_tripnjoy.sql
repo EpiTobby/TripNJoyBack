@@ -73,9 +73,9 @@ CREATE TABLE IF NOT EXISTS "users_groups"
     "pending"    bool
 );
 
-CREATE TABLE IF NOT EXISTS "recommandations" (
+CREATE TABLE IF NOT EXISTS "recommendations" (
                            "id" SERIAL PRIMARY KEY,
-                           "recommanded_user_id" int
+                           "recommended_user_id" int
                                references users (id),
                            "reviewer_id" int
                                references users (id),
