@@ -23,6 +23,7 @@ import fr.tripnjoy.groups.repository.GroupMemoryRepository;
 import fr.tripnjoy.groups.repository.GroupRepository;
 import fr.tripnjoy.profiles.api.client.ProfileFeignClient;
 import fr.tripnjoy.profiles.dto.request.ProfileCreationRequest;
+import fr.tripnjoy.profiles.exception.ProfileNotFoundException;
 import fr.tripnjoy.profiles.model.ProfileModel;
 import fr.tripnjoy.users.api.client.UserFeignClient;
 import fr.tripnjoy.users.api.exception.UserNotConfirmedException;
@@ -178,8 +179,8 @@ public class GroupService {
             throw new UserNotFoundException("No user with id " + userId);
         if (groupEntity.members.stream().anyMatch(m -> m.getUserId() == userId))
             throw new UserAlreadyInGroupException("User already in group");
-        // FIXME check profile exists
-//        ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with id " + profileId));
+        if (profileFeignClient.checkExists(profileId).value())
+            throw new ProfileNotFoundException("No profile with id " + profileId);
         groupMemberRepository.save(new GroupMemberEntity(groupEntity, userId, profileId, true));
     }
 

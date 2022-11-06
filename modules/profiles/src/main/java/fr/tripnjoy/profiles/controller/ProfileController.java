@@ -1,5 +1,6 @@
 package fr.tripnjoy.profiles.controller;
 
+import fr.tripnjoy.common.dto.BooleanResponse;
 import fr.tripnjoy.common.exception.ForbiddenOperationException;
 import fr.tripnjoy.common.exception.UnauthorizedException;
 import fr.tripnjoy.profiles.dto.request.ProfileCreationRequest;
@@ -75,6 +76,14 @@ public class ProfileController {
     @ApiResponse(responseCode = "422", description = "No profile has been found")
     public void deleteProfile(@RequestHeader("userId") final long userId, @PathVariable("profile") final long profileId) {
         profileService.deleteProfile(userId, profileId);
+    }
+
+    @GetMapping("exists/{profileId}")
+    @Operation(summary = "Check if a profile exists")
+    @ApiResponse(responseCode = "200", description = "")
+    public BooleanResponse checkExists(@PathVariable("profileId") final long profileId)
+    {
+        return new BooleanResponse(profileService.exists(profileId));
     }
 
     @ExceptionHandler(ProfileNotFoundException.class)

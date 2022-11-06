@@ -260,4 +260,9 @@ public class ProfileService {
         }
         answersRepository.save(answersEntity);
     }
+
+    public boolean exists(final long profileId)
+    {
+        return profileRepository.existsById(profileId);
+    }
 }
