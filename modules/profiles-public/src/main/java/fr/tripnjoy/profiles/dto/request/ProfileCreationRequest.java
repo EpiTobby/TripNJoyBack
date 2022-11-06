@@ -1,4 +1,4 @@
-package fr.tripnjoy.profiles.model.request;
+package fr.tripnjoy.profiles.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,8 +7,8 @@ import fr.tripnjoy.profiles.model.answer.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 

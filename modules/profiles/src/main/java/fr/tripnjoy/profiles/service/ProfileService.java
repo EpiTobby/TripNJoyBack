@@ -1,5 +1,6 @@
 package fr.tripnjoy.profiles.service;
 
+import fr.tripnjoy.profiles.dto.request.ProfileCreationRequest;
 import fr.tripnjoy.profiles.entity.AnswersEntity;
 import fr.tripnjoy.profiles.entity.AvailabiltyEntity;
 import fr.tripnjoy.profiles.entity.ProfileEntity;
@@ -8,7 +9,6 @@ import fr.tripnjoy.profiles.exception.ProfileNotFoundException;
 import fr.tripnjoy.profiles.model.IProfile;
 import fr.tripnjoy.profiles.model.ProfileModel;
 import fr.tripnjoy.profiles.model.answer.DestinationTypeAnswer;
-import fr.tripnjoy.profiles.model.request.ProfileCreationRequest;
 import fr.tripnjoy.profiles.model.request.ProfileUpdateRequest;
 import fr.tripnjoy.profiles.repository.AnswersRepository;
 import fr.tripnjoy.profiles.repository.ProfileRepository;

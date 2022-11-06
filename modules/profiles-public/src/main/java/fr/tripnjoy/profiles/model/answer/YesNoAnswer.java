@@ -1,6 +1,6 @@
 package fr.tripnjoy.profiles.model.answer;
 
-import com.mongodb.lang.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public enum YesNoAnswer implements StaticAnswerModel {
     YES,
