@@ -1,16 +1,14 @@
 package fr.tripnjoy.profiles.service;
 
 import fr.tripnjoy.profiles.dto.request.ProfileCreationRequest;
-import fr.tripnjoy.profiles.entity.AnswersEntity;
-import fr.tripnjoy.profiles.entity.AvailabiltyEntity;
-import fr.tripnjoy.profiles.entity.ProfileEntity;
-import fr.tripnjoy.profiles.entity.UserProfileEntity;
+import fr.tripnjoy.profiles.entity.*;
 import fr.tripnjoy.profiles.exception.ProfileNotFoundException;
 import fr.tripnjoy.profiles.model.IProfile;
 import fr.tripnjoy.profiles.model.ProfileModel;
 import fr.tripnjoy.profiles.model.answer.DestinationTypeAnswer;
 import fr.tripnjoy.profiles.model.request.ProfileUpdateRequest;
 import fr.tripnjoy.profiles.repository.AnswersRepository;
+import fr.tripnjoy.profiles.repository.GroupProfileRepository;
 import fr.tripnjoy.profiles.repository.ProfileRepository;
 import fr.tripnjoy.profiles.repository.UserProfileRepository;
 import fr.tripnjoy.users.api.client.UserFeignClient;
@@ -29,14 +27,17 @@ public class ProfileService {
     private final ProfileRepository profileRepository;
     private final AnswersRepository answersRepository;
     private final UserProfileRepository userProfileRepository;
+    private final GroupProfileRepository groupProfileRepository;
     private final UserFeignClient userFeignClient;
     private final DateFormat dateFormat;
 
     public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository,
-                          final UserProfileRepository userProfileRepository, final UserFeignClient userFeignClient) {
+                          final UserProfileRepository userProfileRepository,
+                          final GroupProfileRepository groupProfileRepository, final UserFeignClient userFeignClient) {
         this.profileRepository = profileRepository;
         this.answersRepository = answersRepository;
         this.userProfileRepository = userProfileRepository;
+        this.groupProfileRepository = groupProfileRepository;
         this.userFeignClient = userFeignClient;
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     }
@@ -64,7 +65,17 @@ public class ProfileService {
         // FIXME: prom
 //        promStats.getProfileCount().set(profileRepository.count());
         AnswersEntity answersEntity = createAnswersEntity(profileCreationRequest, profileEntity.getId());
-        return ProfileModel.of(profileEntity, answersEntity);
+        return profileEntity.toModel(answersEntity);
+    }
+
+    @Transactional
+    public ProfileModel createGroupProfile(final long groupId, ProfileCreationRequest profileCreationRequest)
+    {
+        ProfileModel profile = createProfile(profileCreationRequest);
+        ProfileEntity entity = profileRepository.getById(profile.getId());
+
+        groupProfileRepository.save(new GroupProfileEntity(new GroupProfileEntity.Ids(groupId, entity)));
+        return profile;
     }
 
     AnswersEntity createAnswersEntity(final IProfile profile, final long profileId)
@@ -114,13 +125,13 @@ public class ProfileService {
     ProfileModel getProfile(ProfileEntity entity)
     {
         AnswersEntity answersEntity = answersRepository.findByProfileId(entity.getId());
-        return ProfileModel.of(entity, answersEntity);
+        return entity.toModel(answersEntity);
     }
 
     public List<ProfileModel> getUserProfiles(long userId)
     {
         List<ProfileEntity> profileEntities = profileRepository.findByUserId(userId);
-        return profileEntities.stream().map(e -> ProfileModel.of(e, answersRepository.findByProfileId(e.getId()))).toList();
+        return profileEntities.stream().map(e -> e.toModel(answersRepository.findByProfileId(e.getId()))).toList();
     }
 
     @Transactional
@@ -137,7 +148,7 @@ public class ProfileService {
     public List<ProfileModel> getActiveProfiles()
     {
         List<ProfileEntity> profileEntities = profileRepository.findByActiveIsTrue();
-        return profileEntities.stream().map(e -> ProfileModel.of(e, answersRepository.findByProfileId(e.getId()))).toList();
+        return profileEntities.stream().map(e -> e.toModel(answersRepository.findByProfileId(e.getId()))).toList();
     }
 
     @Transactional

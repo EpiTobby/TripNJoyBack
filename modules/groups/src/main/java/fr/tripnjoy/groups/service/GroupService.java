@@ -21,6 +21,9 @@ import fr.tripnjoy.groups.model.State;
 import fr.tripnjoy.groups.repository.GroupMemberRepository;
 import fr.tripnjoy.groups.repository.GroupMemoryRepository;
 import fr.tripnjoy.groups.repository.GroupRepository;
+import fr.tripnjoy.profiles.api.client.ProfileFeignClient;
+import fr.tripnjoy.profiles.dto.request.ProfileCreationRequest;
+import fr.tripnjoy.profiles.model.ProfileModel;
 import fr.tripnjoy.users.api.client.UserFeignClient;
 import fr.tripnjoy.users.api.exception.UserNotConfirmedException;
 import fr.tripnjoy.users.api.exception.UserNotFoundException;
@@ -45,9 +48,11 @@ public class GroupService {
     private final QRCodeGenerator qrCodeGenerator;
     private final String qrCodeSecret;
     private final UserFeignClient userClient;
+    private final ProfileFeignClient profileFeignClient;
 
     public GroupService(GroupRepository groupRepository, GroupMemberRepository groupMemberRepository, GroupMemoryRepository groupMemoryRepository,
-                        QRCodeGenerator qrCodeGenerator, @Value("${qrcode.secret}") final String qrCodeSecret, UserFeignClient userClient)
+                        QRCodeGenerator qrCodeGenerator, @Value("${qrcode.secret}") final String qrCodeSecret, UserFeignClient userClient,
+                        final ProfileFeignClient profileFeignClient)
     {
         this.groupRepository = groupRepository;
         this.groupMemberRepository = groupMemberRepository;
@@ -55,6 +60,7 @@ public class GroupService {
         this.qrCodeGenerator = qrCodeGenerator;
         this.qrCodeSecret = qrCodeSecret;
         this.userClient = userClient;
+        this.profileFeignClient = profileFeignClient;
     }
 
     public boolean isInGroup(final long groupId, final long userId) {
@@ -327,18 +333,14 @@ public class GroupService {
 //        promStats.getGroupCount().set(groupRepository.count());
     }
 
-    /*
-    FIXME: profile service
     @Transactional
     public void setGroupPublic(long groupId, ProfileCreationRequest profileRequest) throws GroupNotFoundException, IllegalArgumentException {
         GroupEntity group = groupRepository.findById(groupId).orElseThrow(GroupNotFoundException::new);
         if (group.getOwner() == null)
             throw new IllegalArgumentException("This group is already public");
-        ProfileModel profile = profileService.createProfile(profileRequest);
-        group.setProfile(profileRepository.getById(profile.getId()));
+        ProfileModel profile = profileFeignClient.createGroupProfile(List.of("admin"), groupId, profileRequest);
         group.setOwner(null);
     }
-     */
 
     public GroupMemoriesResponse getAllMemories(long groupId) {
         var group = groupRepository.findById(groupId);

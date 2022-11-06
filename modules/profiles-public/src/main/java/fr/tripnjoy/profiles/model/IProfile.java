@@ -1,8 +1,6 @@
 package fr.tripnjoy.profiles.model;
 
-import fr.tripnjoy.profiles.model.answer.AvailabilityAnswerModel;
-import fr.tripnjoy.profiles.model.answer.GenderAnswer;
-import fr.tripnjoy.profiles.model.answer.YesNoAnswer;
+import fr.tripnjoy.profiles.model.answer.*;
 
 import java.util.List;
 

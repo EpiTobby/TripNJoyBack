@@ -10,6 +10,7 @@ import fr.tripnjoy.groups.dto.response.GroupResponse;
 import fr.tripnjoy.groups.exception.*;
 import fr.tripnjoy.groups.model.GroupModel;
 import fr.tripnjoy.groups.service.GroupService;
+import fr.tripnjoy.profiles.dto.request.ProfileCreationRequest;
 import fr.tripnjoy.users.api.exception.UserNotConfirmedException;
 import fr.tripnjoy.users.api.exception.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -172,23 +173,19 @@ public class GroupController {
         groupService.declineGroupInvite(groupId, userId);
     }
 
-    /*
-    FIXME: profile service
     @Operation(summary = "Make a private group public")
     @ApiResponse(responseCode = "200", description = "The group is now public")
     @ApiResponse(responseCode = "422", description = "Group does not exist")
     @ApiResponse(responseCode = "403", description = "User is not in the group, or the group is already public")
     @PatchMapping("private/{groupId}/public")
-    public void setGroupPublic(@PathVariable("groupId") final long groupId, @RequestBody ProfileCreationRequest profile) {
-        if (!idCheckerService.isUserInGroup(idCheckerService.getCurrentUserId(), groupId))
-            throw new ForbiddenOperationException();
+    public void setGroupPublic(@RequestHeader("username") String username, @PathVariable("groupId") final long groupId, @RequestBody ProfileCreationRequest profile) {
+        checkOwnership(groupId, username);
         try {
             groupService.setGroupPublic(groupId, profile);
         } catch (IllegalArgumentException e) {
             throw new ForbiddenOperationException("This group is already public");
         }
     }
-     */
 
     @Operation(summary = "Get all the memories from a group")
     @ApiResponse(responseCode = "200", description = "The memories are returned")

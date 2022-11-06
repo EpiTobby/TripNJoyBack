@@ -1,8 +1,6 @@
 package fr.tripnjoy.profiles.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import fr.tripnjoy.profiles.entity.AnswersEntity;
-import fr.tripnjoy.profiles.entity.ProfileEntity;
 import fr.tripnjoy.profiles.model.answer.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,29 +35,6 @@ public class ProfileModel implements IProfile {
     private YesNoAnswer sport;
     private boolean isActive;
     private Instant createdDate;
-
-    public static ProfileModel of(ProfileEntity profileEntity, AnswersEntity answersEntity){
-        return ProfileModel.builder()
-                           .id(profileEntity.getId())
-                           .availabilities(answersEntity.getAvailabilities().stream().map(a -> AvailabilityAnswerModel.of(a.getStartDate(), a.getEndDate())).toList())
-                           .duration(new RangeAnswerModel(answersEntity.getDurationMin(), answersEntity.getDurationMax()))
-                           .budget(new RangeAnswerModel(answersEntity.getBudgetMin(), answersEntity.getBudgetMax()))
-                           .destinationTypes(answersEntity.getDestinationTypes().stream().map(DestinationTypeAnswer::valueOf).toList())
-                           .ages(new RangeAnswerModel(answersEntity.getAgeMin(), answersEntity.getAgeMax()))
-                           .travelWithPersonFromSameCity(YesNoAnswer.of(answersEntity.getTravelWithPersonFromSameCity()))
-                           .travelWithPersonFromSameCountry(YesNoAnswer.of(answersEntity.getTravelWithPersonFromSameCountry()))
-                           .travelWithPersonSameLanguage(YesNoAnswer.of(answersEntity.getTravelWithPersonSameLanguage()))
-                           .gender(GenderAnswer.valueOf(answersEntity.getGender()))
-                           .groupSize(new RangeAnswerModel(answersEntity.getGroupSizeMin(), answersEntity.getGroupSizeMax()))
-                           .chillOrVisit(ChillOrVisitAnswer.valueOf(answersEntity.getChillOrVisit()))
-                           .aboutFood(AboutFoodAnswer.valueOf(answersEntity.getAboutFood()))
-                           .goOutAtNight(YesNoAnswer.of(answersEntity.getGoOutAtNight()))
-                           .sport(YesNoAnswer.of(answersEntity.getSport()))
-                           .isActive(profileEntity.isActive())
-                           .name(profileEntity.getName())
-                           .createdDate(profileEntity.getCreatedDate())
-                           .build();
-    }
 
     public static ProfileModelBuilder builderOf(@NotNull ProfileModel other)
     {

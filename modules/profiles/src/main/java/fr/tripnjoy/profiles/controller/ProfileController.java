@@ -50,6 +50,17 @@ public class ProfileController {
         return profileService.createUserProfile(userId, profileCreationRequest);
     }
 
+    @PostMapping("/group/{groupId}")
+    @Operation(summary = "Create a group profile")
+    @ApiResponse(responseCode = "200", description = "Returns the profile")
+    @ApiResponse(responseCode = "422", description = "")
+    public ProfileModel createGroupProfile(@RequestHeader("roles") final List<String> roles, @PathVariable("groupId") long groupId,
+                                           @RequestBody ProfileCreationRequest profileCreationRequest) {
+        if (!roles.contains("admin"))
+            throw new UnauthorizedException();
+        return profileService.createGroupProfile(groupId, profileCreationRequest);
+    }
+
     @PatchMapping("{profile}/update")
     @Operation(summary = "Update a profile")
     @ApiResponse(responseCode = "200", description = "The profile is updated")
