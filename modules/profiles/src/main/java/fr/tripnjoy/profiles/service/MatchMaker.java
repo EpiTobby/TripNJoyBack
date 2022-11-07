@@ -222,11 +222,16 @@ public class MatchMaker {
         return profileService.createProfile(groupModel);
     }
 
-    private void setUserAsWaiting(long userId, boolean isWaiting)
+    void setUserAsWaiting(long userId, boolean isWaiting)
     {
         if (isWaiting)
             userMatchTaskRepository.save(new UserMatchTaskEntity(userId));
         else
             userMatchTaskRepository.deleteById(userId);
+    }
+
+    boolean isUserWaitingForGroup(long userId)
+    {
+        return userMatchTaskRepository.findById(userId).isPresent();
     }
 }
