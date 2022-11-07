@@ -74,6 +74,14 @@ public class GroupController {
                            .orElseThrow(GroupNotFoundException::new);
     }
 
+    @GetMapping("{id}/members")
+    public List<Long> getMembers(@PathVariable("id") final long groupId)
+    {
+        return groupService.getGroup(groupId)
+                           .orElseThrow(GroupNotFoundException::new)
+                           .getMembers();
+    }
+
     private void checkOwnership(long groupId, String username) {
         String ownerEmail = groupService.getOwnerEmail(groupId);
         if (!ownerEmail.equals(username))

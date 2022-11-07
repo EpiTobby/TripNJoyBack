@@ -1,5 +1,6 @@
 package fr.tripnjoy.users.service;
 
+import fr.tripnjoy.common.dto.BooleanResponse;
 import fr.tripnjoy.mails.api.client.MailFeignClient;
 import fr.tripnjoy.users.auth.TokenManager;
 import fr.tripnjoy.users.entity.CityEntity;
@@ -68,7 +69,7 @@ class AuthServiceTest {
     @Test
     void createUserTest()
     {
-//        when(userMailUtils.userEmailIsValid(anyString())).thenReturn(true);
+        when(mailFeignClient.userEmailIsValid(anyString())).thenReturn(new BooleanResponse(true));
         UserEntity userEntity = new UserEntity("firstname",
                 "lastname",
                 "pswd",
@@ -89,7 +90,7 @@ class AuthServiceTest {
     @Test
     void createUserInvalidEmailTest()
     {
-//        when(userMailUtils.userEmailIsValid(anyString())).thenReturn(false);
+        when(mailFeignClient.userEmailIsValid(anyString())).thenReturn(new BooleanResponse(false));
         UserEntity userEntity = new UserEntity("firstname",
                 "lastname",
                 "pswd",

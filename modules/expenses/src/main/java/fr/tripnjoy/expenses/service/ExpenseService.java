@@ -13,7 +13,6 @@ import fr.tripnjoy.expenses.exception.ExpenseNotFoundException;
 import fr.tripnjoy.expenses.repository.ExpenseMemberRepository;
 import fr.tripnjoy.expenses.repository.ExpenseRepository;
 import fr.tripnjoy.groups.api.client.GroupFeignClient;
-import fr.tripnjoy.groups.dto.response.GroupMemberPublicInfoModel;
 import fr.tripnjoy.users.api.client.UserFeignClient;
 import fr.tripnjoy.users.api.exception.UserNotFoundException;
 import org.springframework.stereotype.Service;
@@ -64,7 +63,7 @@ public class ExpenseService {
                     Math.round(expenseRequest.getMoneyDueByEachUser().stream().mapToDouble(MoneyDueRequest::getMoney).sum() * 100) / 100 != Math.round(expenseRequest.getTotal() * 100) / 100)
                 throw new IllegalArgumentException();
         }
-        if (groupFeignClient.isUserInGroup(groupId, purchaserId).value())
+        if (!groupFeignClient.isUserInGroup(groupId, purchaserId).value())
             throw new ForbiddenOperationException("User is not in the group");
 
         ExpenseEntity entity = new ExpenseEntity(-1L, expenseRequest.getTotal(), expenseRequest.getDescription(), purchaserId, groupId, Date.from(Instant.now()), expenseRequest.getIcon());
@@ -80,12 +79,7 @@ public class ExpenseService {
         if (!userFeignClient.exists(userId).value())
             throw new UserNotFoundException();
         List<ExpenseMemberEntity> expenseMemberEntities = expenseMemberRepository.findByGroupId(groupId);
-        List<Long> members = groupFeignClient.getInfo(groupId)
-                                             .members()
-                                             .stream()
-                                             .map(GroupMemberPublicInfoModel::id)
-                                             .filter(id -> id != userId)
-                                             .toList();
+        List<Long> members = groupFeignClient.getMembers(groupId);
 
         List<MoneyDueResponse> response = new ArrayList<>();
         members.forEach(u -> {
@@ -103,12 +97,7 @@ public class ExpenseService {
             throw new UserNotFoundException();
         List<ExpenseMemberEntity> expenseMemberEntities = expenseMemberRepository.findByGroupId(groupId);
         List<MoneyDueResponse> response = new ArrayList<>();
-        List<Long> members = groupFeignClient.getInfo(groupId)
-                                             .members()
-                                             .stream()
-                                             .map(GroupMemberPublicInfoModel::id)
-                                             .filter(id -> id != userId)
-                                             .toList();
+        List<Long> members = groupFeignClient.getMembers(groupId);
         members.forEach(u -> {
             double sum = expenseMemberEntities.stream().filter(e -> e.getIds().getExpense().getPurchaserId() == userId && e.getIds().getUserId() == u).mapToDouble(ExpenseMemberEntity::getAmountToPay).sum();
             sum -= expenseMemberEntities.stream().filter(e -> e.getIds().getExpense().getPurchaserId() == u && e.getIds().getUserId() == userId).mapToDouble(ExpenseMemberEntity::getAmountToPay).sum();
@@ -129,12 +118,11 @@ public class ExpenseService {
 
     public List<BalanceResponse> computeBalances(long groupId)
     {
-        Collection<GroupMemberPublicInfoModel> members = groupFeignClient.getInfo(groupId).members();
+        Collection<Long> members = groupFeignClient.getMembers(groupId);
 
         List<ExpenseEntity> expenses = expenseRepository.findByGroupId(groupId);
 
         return members.stream()
-                      .map(GroupMemberPublicInfoModel::id)
                       .map(memberId -> {
                           List<ExpenseMemberEntity> debts = expenseMemberRepository.findByGroupIdAndUserId(groupId, memberId);
                           double balance = expenses.stream()

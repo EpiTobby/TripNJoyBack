@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ExpenseMemberRepository extends CrudRepository<ExpenseMemberEntity, Long> {
+    @Query("SELECT e FROM ExpenseMemberEntity e WHERE e.ids.expense.id = :expenseId")
     List<ExpenseMemberEntity> findByExpenseId(long expenseId);
 
     @Query("SELECT e from ExpenseMemberEntity e WHERE e.ids.expense.groupId = :groupId AND e.ids.userId = :userId")

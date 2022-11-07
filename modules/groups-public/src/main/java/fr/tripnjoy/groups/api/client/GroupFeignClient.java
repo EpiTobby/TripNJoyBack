@@ -30,6 +30,9 @@ public interface GroupFeignClient {
     @GetMapping("info/{id}")
     GroupInfoModel getInfo(@PathVariable("id") final long groupId);
 
+    @GetMapping("{id}/members")
+    List<Long> getMembers(@PathVariable("id") final long groupId);
+
     @DeleteMapping("{group}/user/")
     void leaveGroup(@PathVariable("group") final long groupId, @RequestHeader("userId") final long userId);
 
