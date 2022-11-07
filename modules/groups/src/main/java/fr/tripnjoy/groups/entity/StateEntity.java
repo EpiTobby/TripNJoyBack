@@ -9,24 +9,20 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "states", uniqueConstraints = @UniqueConstraint(name = "states_value_uindex", columnNames = "value"))
+@Table(name = "states", uniqueConstraints = @UniqueConstraint(name = "states_value_uindex", columnNames = "`value`"))
 @Getter
 @NoArgsConstructor
 public class StateEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "`value`")
     private String value;
 
     public StateEntity(String value)
     {
         id = null;
         this.value = value;
-    }
-
-    public State toModel()
-    {
-        return State.valueOf(this.value);
     }
 
     public static StateEntity ofModel(State state)
