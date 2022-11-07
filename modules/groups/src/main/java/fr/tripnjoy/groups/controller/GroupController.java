@@ -1,5 +1,6 @@
 package fr.tripnjoy.groups.controller;
 
+import fr.tripnjoy.common.dto.BooleanResponse;
 import fr.tripnjoy.common.dto.ModelWithEmail;
 import fr.tripnjoy.common.exception.ForbiddenOperationException;
 import fr.tripnjoy.groups.dto.request.*;
@@ -51,6 +52,12 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "Return the list of groups the user is in")
     public Collection<GroupResponse> getUserGroups(@PathVariable("id") final long userId) {
         return toDto(groupService.getUserGroups(userId));
+    }
+
+    @GetMapping("isInGroup")
+    public BooleanResponse isUserInGroup(@RequestParam("groupId") long groupId, @RequestParam("userId") long userId)
+    {
+        return new BooleanResponse(groupService.isInGroup(groupId, userId));
     }
 
     @GetMapping("invites/{id}")

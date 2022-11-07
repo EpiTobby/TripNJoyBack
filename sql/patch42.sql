@@ -18,3 +18,8 @@ alter table activities_members
         foreign key (participant_id) references users
             on update cascade on delete cascade;
 
+
+alter table expenses_members
+    add constraint expenses_members_pk
+        primary key (expense_id, user_id);
+

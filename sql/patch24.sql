@@ -10,7 +10,7 @@ alter table expenses_members
     add constraint expenses_members_pk
         primary key (id);
 
-alter table expenses_members rename column paid to amount_to_pay;
+alter table expenses_members rename column amount_to_pay to amount_to_pay;
 
 alter table expenses_members drop constraint expenses_members_expense_id_fkey;
 

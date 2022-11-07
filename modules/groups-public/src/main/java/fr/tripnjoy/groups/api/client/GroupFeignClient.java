@@ -1,5 +1,6 @@
 package fr.tripnjoy.groups.api.client;
 
+import fr.tripnjoy.common.dto.BooleanResponse;
 import fr.tripnjoy.common.dto.ModelWithEmail;
 import fr.tripnjoy.groups.dto.request.*;
 import fr.tripnjoy.groups.dto.response.GroupInfoModel;
@@ -22,6 +23,9 @@ public interface GroupFeignClient {
 
     @GetMapping("invites/{id}")
     Collection<GroupResponse> getUserInvites(@PathVariable("id") final long userId);
+
+    @GetMapping("isInGroup")
+    BooleanResponse isUserInGroup(@RequestParam("groupId") long groupId, @RequestParam("userId") long userId);
 
     @GetMapping("info/{id}")
     GroupInfoModel getInfo(@PathVariable("id") final long groupId);
