@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS "activities" (
 
 CREATE TABLE IF NOT EXISTS "activities_members" (
                                       "activity_id" int references activities,
-                                      "participant_id" int references users_groups
+                                      "participant_id" int references users on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS "channels" (
@@ -286,3 +286,18 @@ CREATE TABLE IF NOT EXISTS activities_info
     content text not null
 );
 
+create table users_match_tasks
+(
+    user_id int
+        constraint users_match_tasks_pk
+            primary key
+        constraint users_match_tasks_users_id_fk
+            references users
+            on update cascade on delete cascade
+);
+
+alter table users drop column waiting_for_group;
+
+alter table expenses_members
+    add constraint expenses_members_pk
+        primary key (expense_id, user_id);
