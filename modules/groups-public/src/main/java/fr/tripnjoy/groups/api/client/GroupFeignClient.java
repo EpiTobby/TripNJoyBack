@@ -78,4 +78,7 @@ public interface GroupFeignClient {
 
     @PostMapping("/")
     GroupResponse createPublicGroup(@RequestHeader("roles") List<String> roles, @RequestBody CreatePublicGroupRequest request);
+
+    @GetMapping("/{id}/exists")
+    BooleanResponse exists(@PathVariable("id") final long groupId);
 }

@@ -1,5 +1,7 @@
 package fr.tripnjoy.planning.service;
 
+import fr.tripnjoy.groups.api.client.GroupFeignClient;
+import fr.tripnjoy.groups.exception.GroupNotFoundException;
 import fr.tripnjoy.planning.dto.request.CreateActivityRequest;
 import fr.tripnjoy.planning.dto.request.UpdateActivityRequest;
 import fr.tripnjoy.planning.dto.response.ActivityResponse;
@@ -20,16 +22,21 @@ public class PlanningService {
 
     private final ActivityRepository activityRepository;
     private final ActivityMemberRepository activityMemberRepository;
+    private final GroupFeignClient groupFeignClient;
 
     public PlanningService(final ActivityRepository activityRepository,
-                           final ActivityMemberRepository activityMemberRepository)
+                           final ActivityMemberRepository activityMemberRepository,
+                           final GroupFeignClient groupFeignClient)
     {
         this.activityRepository = activityRepository;
         this.activityMemberRepository = activityMemberRepository;
+        this.groupFeignClient = groupFeignClient;
     }
 
     public ActivityResponse createActivity(final long groupId, final CreateActivityRequest request)
     {
+        if (!groupFeignClient.exists(groupId).value())
+            throw new GroupNotFoundException(groupId);
         ActivityEntity activity = new ActivityEntity(groupId,
                 request.getName(),
                 request.getDescription(),
@@ -59,6 +66,11 @@ public class PlanningService {
     public void joinActivity(final long activityId, final long userId)
     {
         ActivityEntity activity = activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+
+        // Check user is in group
+        if (!groupFeignClient.isUserInGroup(activity.getGroupId(), userId).value())
+            throw new IllegalArgumentException("User " + userId + " is not in group " + activity.getGroupId());
+
         ActivityMemberEntity member = new ActivityMemberEntity(new ActivityMemberEntity.Ids(activity, userId));
         member = activityMemberRepository.save(member);
         activity.getParticipants().add(member);

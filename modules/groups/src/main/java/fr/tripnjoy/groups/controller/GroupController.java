@@ -82,6 +82,12 @@ public class GroupController {
                            .getMembers();
     }
 
+    @GetMapping("/{id}/exists")
+    public BooleanResponse exists(@PathVariable("id") final long groupId)
+    {
+        return new BooleanResponse(groupService.getGroup(groupId).isPresent());
+    }
+
     private void checkOwnership(long groupId, String username) {
         String ownerEmail = groupService.getOwnerEmail(groupId);
         if (!ownerEmail.equals(username))
