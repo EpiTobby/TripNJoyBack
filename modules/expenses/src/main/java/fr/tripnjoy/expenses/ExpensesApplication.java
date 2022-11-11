@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "fr.tripnjoy.groups")
+@EnableFeignClients(basePackages = {"fr.tripnjoy.groups", "fr.tripnjoy.users"})
 public class ExpensesApplication {
 
     public static void main(String[] args)
