@@ -8,17 +8,12 @@ import fr.tripnjoy.groups.dto.response.GroupInfoModel;
 import fr.tripnjoy.groups.dto.response.GroupMemberModel;
 import fr.tripnjoy.groups.dto.response.GroupMemoriesResponse;
 import fr.tripnjoy.groups.dto.response.GroupResponse;
-import fr.tripnjoy.groups.exception.*;
+import fr.tripnjoy.groups.exception.GroupNotFoundException;
 import fr.tripnjoy.groups.model.GroupModel;
 import fr.tripnjoy.groups.service.GroupService;
 import fr.tripnjoy.profiles.dto.request.ProfileCreationRequest;
-import fr.tripnjoy.users.api.exception.UserNotConfirmedException;
-import fr.tripnjoy.users.api.exception.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
@@ -27,7 +22,6 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "groups")
 public class GroupController {
-    private static final Logger logger = LoggerFactory.getLogger(GroupController.class);
     private final GroupService groupService;
 
     public GroupController(GroupService groupService) {
@@ -240,69 +234,5 @@ public class GroupController {
             throw new ForbiddenOperationException();
         return groupService.createPublicGroup(request.getUser1(), request.getProfile1(), request.getUser2(), request.getProfile2(), request.getMaxSize())
                            .toDto();
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(UserNotFoundException exception) {
-        logger.debug("Error on request", exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(UserNotConfirmedException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(UserNotConfirmedException exception) {
-        logger.debug("Error on request", exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(ForbiddenOperationException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String getError(ForbiddenOperationException exception) {
-        logger.debug("Error on request", exception);
-        return exception.getMessage() != null ? exception.getMessage() : "You are not authorized to perform this operation";
-    }
-
-    @ExceptionHandler(UpdateGroupException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(UpdateGroupException exception) {
-        logger.debug("Error on request", exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(JoinGroupFailedException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(JoinGroupFailedException exception) {
-        logger.debug("Error on request", exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(GroupCreationException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(GroupCreationException exception) {
-        logger.debug("Error on request", exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(UserAlreadyInGroupException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(UserAlreadyInGroupException exception) {
-        logger.debug("Error on request", exception);
-        return exception.getMessage();
-    }
-
-    @ExceptionHandler(GroupNotFoundException.class)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public String getError(GroupNotFoundException exception) {
-        logger.debug("Error on request", exception);
-        return exception.getMessage();
     }
 }
