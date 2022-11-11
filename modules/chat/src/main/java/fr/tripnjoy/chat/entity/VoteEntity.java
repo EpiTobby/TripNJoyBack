@@ -25,9 +25,8 @@ public class VoteEntity {
     @JoinColumn(name = "answer_id")
     private SurveyAnswerEntity answer;
 
-    @ManyToOne
     @Setter
-    @JoinColumn(name = "voter_id")
+    @Column(name = "voter_id")
     private long voter;
 
     public VoteEntity(SurveyEntity survey, SurveyAnswerEntity answer, long voter) {
