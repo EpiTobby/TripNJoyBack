@@ -37,7 +37,7 @@ public class RecommendationService {
 
     public List<RecommendationModel> getByReviewedUserId(long reviewedUserId)
     {
-        return recommendationRepository.findByRecommendedUserId(reviewedUserId).stream().map(RecommendationModel::of).toList();
+        return recommendationRepository.findByRecommendedUser(reviewedUserId).stream().map(RecommendationModel::of).toList();
     }
 
     @Transactional

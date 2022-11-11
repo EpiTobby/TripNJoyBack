@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface RecommendationRepository extends CrudRepository<RecommendationEntity, Long> {
     Optional<RecommendationEntity> findById(long reportId);
 
-    List<RecommendationEntity> findByRecommendedUserId(long reportedUserId);
+    List<RecommendationEntity> findByRecommendedUser(long reportedUserId);
 }

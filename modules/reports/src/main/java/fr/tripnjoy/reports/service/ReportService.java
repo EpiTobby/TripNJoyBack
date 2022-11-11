@@ -42,12 +42,12 @@ public class ReportService {
 
     public List<ReportModel> getBySubmitterId(long submitterId)
     {
-        return reportRepository.findBySubmitterId(submitterId).stream().map(ReportModel::of).toList();
+        return reportRepository.findBySubmitter(submitterId).stream().map(ReportModel::of).toList();
     }
 
     public List<ReportModel> getByReportedUserId(long userId)
     {
-        return reportRepository.findByReportedUserId(userId).stream().map(ReportModel::of).toList();
+        return reportRepository.findByReportedUser(userId).stream().map(ReportModel::of).toList();
     }
 
     public int getReportCountForUser(long userId)
