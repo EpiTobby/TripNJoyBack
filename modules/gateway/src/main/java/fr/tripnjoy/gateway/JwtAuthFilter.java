@@ -21,7 +21,7 @@ import java.util.List;
 @Component
 public class JwtAuthFilter implements GatewayFilter {
 
-    private final List<String> permitAllPaths = List.of("/users/auth/login");
+    private final List<String> permitAllPaths = List.of("/users/auth/login", "v3/api-docs");
 
     private final DiscoveryClient discoveryClient;
 
@@ -34,7 +34,7 @@ public class JwtAuthFilter implements GatewayFilter {
     public Mono<Void> filter(final ServerWebExchange exchange, final GatewayFilterChain chain)
     {
         // Authorize some specific endpoints
-        if (permitAllPaths.contains(exchange.getRequest().getPath().toString()))
+        if (permitAllPaths.stream().anyMatch(path -> exchange.getRequest().getPath().toString().contains(path)))
             return chain.filter(exchange);
 
         // Get jwt

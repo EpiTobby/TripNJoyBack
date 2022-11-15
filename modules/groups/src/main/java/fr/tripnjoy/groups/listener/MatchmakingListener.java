@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @RabbitListener(
         bindings = @QueueBinding(
-                exchange = @Exchange("amq.topic"),
+                exchange = @Exchange(value = "amq.topic", type = "topic"),
                 key = "match",
                 value = @Queue("match")))
 @Component
