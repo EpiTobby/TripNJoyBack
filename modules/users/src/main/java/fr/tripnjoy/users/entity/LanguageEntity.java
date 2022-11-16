@@ -14,6 +14,7 @@ public class LanguageEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "`value`")
     private String value;
 
     public LanguageEntity(String value) {

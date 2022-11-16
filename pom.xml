@@ -5,6 +5,26 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>modules/common</module>
+		<module>modules/users-public</module>
+		<module>modules/mails-public</module>
+		<module>modules/users</module>
+		<module>modules/chat</module>
+		<module>modules/configserver</module>
+		<module>modules/eureka</module>
+		<module>modules/expenses</module>
+		<module>modules/expenses-public</module>
+		<module>modules/gateway</module>
+		<module>modules/groups</module>
+		<module>modules/groups-public</module>
+		<module>modules/mails</module>
+		<module>modules/places</module>
+		<module>modules/places-public</module>
+		<module>modules/planning</module>
+		<module>modules/planning-public</module>
+		<module>modules/profiles</module>
+		<module>modules/profiles-public</module>
+		<module>modules/reports</module>
+		<module>modules/reports-public</module>
 	</modules>
 
 	<groupId>fr.tobby</groupId>

@@ -24,9 +24,10 @@ public class ConfirmationCodeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "user_id")
+    @Column(name = "user_id")
     private long userId;
 
+    @Column(name = "`value`")
     private String value;
 
     private Instant expirationDate;
