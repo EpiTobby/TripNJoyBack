@@ -8,13 +8,17 @@ import fr.tripnjoy.chat.exception.MessageNotFoundException;
 import fr.tripnjoy.chat.model.MessageType;
 import fr.tripnjoy.chat.repository.ChannelRepository;
 import fr.tripnjoy.chat.repository.MessageRepository;
+import fr.tripnjoy.common.broker.RabbitMQConfiguration;
 import fr.tripnjoy.common.exception.ForbiddenOperationException;
 import fr.tripnjoy.groups.api.client.GroupFeignClient;
+import fr.tripnjoy.groups.dto.response.GroupInfoModel;
+import fr.tripnjoy.notifications.dto.request.ToTopicNotificationRequest;
 import fr.tripnjoy.users.api.client.UserFeignClient;
 import fr.tripnjoy.users.api.exception.UserNotFoundException;
 import fr.tripnjoy.users.api.response.UserResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +26,7 @@ import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MessageService {
@@ -31,15 +36,17 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final UserFeignClient userFeignClient;
     private final GroupFeignClient groupFeignClient;
+    private final RabbitTemplate rabbitTemplate;
 
     public MessageService(final ChannelRepository channelRepository,
                           final MessageRepository messageRepository, final UserFeignClient userFeignClient,
-                          final GroupFeignClient groupFeignClient)
+                          final GroupFeignClient groupFeignClient, final RabbitTemplate rabbitTemplate)
     {
         this.channelRepository = channelRepository;
         this.messageRepository = messageRepository;
         this.userFeignClient = userFeignClient;
         this.groupFeignClient = groupFeignClient;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     public MessageEntity postMessage(final long channelId, final PostMessageRequest message)
@@ -48,16 +55,20 @@ public class MessageService {
                                                  .orElseThrow(() -> new ChannelNotFoundException(channelId));
         if (!userFeignClient.exists(message.getUserId()).value())
             throw new UserNotFoundException(message.getUserId());
+        UserResponse sender = userFeignClient.getUserById(List.of("admin"), message.getUserId());
+        GroupInfoModel groupInfo = groupFeignClient.getInfo(channel.getGroup());
 
         MessageEntity created = messageRepository.save(new MessageEntity(message.getUserId(), channel, message.getContent(), message.getType().getEntity(), new Date()));
         logger.debug("Posted message in channel {} by user {}, content: {}", channel.getName(), message.getUserId(), message.getContent());
-        // FIXME notifications
-        //        notificationService.sendToTopic("chat_" + channel.getGroup().getId(),
-        //                String.format("%s : %s#%s", sender.getFirstname(), channel.getGroup().getName(), channel.getName()),
-        //                message.getContent(),
-        //                Map.of("channel", String.valueOf(channelId),
-        //                        "sender", String.valueOf(sender.getId()),
-        //                        "content", message.getContent()));
+        rabbitTemplate.convertAndSend(RabbitMQConfiguration.TOPIC_EXCHANGE, "notif", new ToTopicNotificationRequest(
+                String.format("%s : %s#%s", sender.getFirstname(), groupInfo.name(), channel.getName()),
+                message.getContent(),
+                Map.of("channel", String.valueOf(channelId),
+                        "sender", String.valueOf(sender.getId()),
+                        "content", message.getContent()),
+                "chat_" + channel.getGroup(),
+                false
+        ));
         return created;
     }
 

@@ -5,6 +5,8 @@ import fr.tripnjoy.common.utils.Pair;
 import fr.tripnjoy.groups.api.client.GroupFeignClient;
 import fr.tripnjoy.groups.dto.request.CreatePublicGroupRequest;
 import fr.tripnjoy.groups.dto.response.GroupResponse;
+import fr.tripnjoy.notifications.dto.request.ToGroupNotificationRequest;
+import fr.tripnjoy.notifications.dto.request.ToUserNotificationRequest;
 import fr.tripnjoy.profiles.dto.response.MatchMakingResult;
 import fr.tripnjoy.profiles.entity.GroupProfileEntity;
 import fr.tripnjoy.profiles.entity.ProfileEntity;
@@ -18,6 +20,7 @@ import fr.tripnjoy.profiles.repository.GroupProfileRepository;
 import fr.tripnjoy.profiles.repository.ProfileRepository;
 import fr.tripnjoy.profiles.repository.UserMatchTaskRepository;
 import fr.tripnjoy.users.api.client.UserFeignClient;
+import fr.tripnjoy.users.api.response.FirebaseTokenResponse;
 import fr.tripnjoy.users.api.response.UserResponse;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -113,12 +116,14 @@ public class MatchMaker {
             // Group service will add the user to the group
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.TOPIC_EXCHANGE, "match", result);
 
-            // FIXME: notification service
-//            notificationService.sendToGroup(groupId,
-//                    "Nouveau membre",
-//                    String.format("%s a rejoint l'aventure !", userRepository.findById(user.getUserId()).orElseThrow().getFirstname()),
-//                    Map.of("newMemberId", String.valueOf(user.getUserId()),
-//                            "groupId", String.valueOf(groupId)));
+            UserResponse userInfo = userFeignClient.getUserById(List.of("admin"), user.getUserId());
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.TOPIC_EXCHANGE, "notif", new ToGroupNotificationRequest(
+                    "Nouveau membre",
+                    String.format("%s a rejoint l'aventure !", userInfo.getFirstname()),
+                    Map.of("newMemberId", String.valueOf(user.getUserId())),
+                    groupId,
+                    true
+            ));
             return CompletableFuture.completedFuture(result);
         }
 
@@ -141,14 +146,18 @@ public class MatchMaker {
             setUserAsWaiting(matched.getUserId(), false);
             profileService.setActiveProfile(matched.getProfile().getId(), false);
             profileService.setActiveProfile(user.getProfile().getId(), false);
-//            if (matchedEntity.getFirebaseToken() != null)
-//            {
-                // FIXME: notification service
-//                notificationService.sendToUser(matchedEntity.getId(),
-//                        "Groupe trouvé",
-//                        "Un nouveau groupe de voyage a été créé",
-//                        Map.of("groupId", String.valueOf(created.getId())));
-//            }
+
+            FirebaseTokenResponse firebaseToken = userFeignClient.getFirebaseToken(matched.getUserId());
+            if (firebaseToken.getToken() != null)
+            {
+                rabbitTemplate.convertAndSend(RabbitMQConfiguration.TOPIC_EXCHANGE, "notif", new ToUserNotificationRequest(
+                        "Groupe trouvé",
+                        "Un nouveau groupe de voyage a été créé",
+                        Map.of("groupId", String.valueOf(created.getId())),
+                        matched.getUserId(),
+                        true
+                ));
+            }
             return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.CREATED, created.getId(), user.getUserId(), user.getProfile().getId()));
         }
         else
