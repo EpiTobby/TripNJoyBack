@@ -26,7 +26,7 @@ import java.util.*;
 @EnableWebFlux
 public class GatewayApplication {
 
-    public static final String[] SERVICES = {"users", "groups", "profiles", "reports", "mails", "chat", "expenses", "places", "planning"};
+    public static final String[] SERVICES = {"users", "groups", "profiles", "reports", "mails", "chat", "expenses", "places", "planning", "notifications"};
 
     public static void main(String[] args)
     {

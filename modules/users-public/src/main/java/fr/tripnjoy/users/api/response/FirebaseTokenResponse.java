@@ -1,4 +1,4 @@
-package fr.tripnjoy.users.model.response;
+package fr.tripnjoy.users.api.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

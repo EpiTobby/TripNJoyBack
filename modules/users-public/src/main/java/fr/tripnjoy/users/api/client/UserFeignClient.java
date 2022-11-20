@@ -2,6 +2,7 @@ package fr.tripnjoy.users.api.client;
 
 import fr.tripnjoy.common.dto.BooleanResponse;
 import fr.tripnjoy.common.exception.UnauthorizedException;
+import fr.tripnjoy.users.api.response.FirebaseTokenResponse;
 import fr.tripnjoy.users.api.response.UserResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,4 +22,7 @@ public interface UserFeignClient {
 
     @GetMapping("/{id}/exists")
     BooleanResponse exists(@PathVariable("id") final long userId);
+
+    @GetMapping("{id}/firebase")
+    FirebaseTokenResponse getFirebaseToken(@PathVariable("id") final long userId);
 }
