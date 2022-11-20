@@ -50,7 +50,7 @@ public class ReportController {
 
     @GetMapping("admin/{id}")
     @Operation(summary = "Get all the report of a user")
-    public List<ReportResponse> getByReportedUserId(@RequestHeader("userRoles") List<String> roles, @PathVariable("id") long reportedUserId)
+    public List<ReportResponse> getByReportedUserId(@RequestHeader("roles") List<String> roles, @PathVariable("id") long reportedUserId)
     {
         if (!roles.contains("admin"))
             throw new UnauthorizedException();
@@ -80,7 +80,7 @@ public class ReportController {
     @Operation(summary = "Delete a report")
     @ApiResponse(responseCode = "200", description = "The report has been deleted")
     @ApiResponse(responseCode = "404", description = "The report does not exist")
-    public void deleteReportAdmin(@RequestHeader("userRoles") List<String> roles, @PathVariable("id") long reportId)
+    public void deleteReportAdmin(@RequestHeader("roles") List<String> roles, @PathVariable("id") long reportId)
     {
         if (!roles.contains("admin"))
             throw new UnauthorizedException();

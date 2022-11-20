@@ -18,7 +18,7 @@ public interface ReportFeignClient {
     List<ReportResponse> getBySubmitterId(@PathVariable("id") long submitterId);
 
     @GetMapping("admin/{id}")
-    List<ReportResponse> getByReportedUserId(@RequestHeader("userRoles") List<String> roles, @PathVariable("id") long reportedUserId);
+    List<ReportResponse> getByReportedUserId(@RequestHeader("roles") List<String> roles, @PathVariable("id") long reportedUserId);
 
     @PatchMapping("{id}")
     ReportResponse updateReport(@RequestHeader("userId") long userId, @PathVariable("id") long reportId, @RequestBody UpdateReportRequest updateReportRequest);
@@ -27,5 +27,5 @@ public interface ReportFeignClient {
     void deleteReport(@RequestHeader("userId") long userId, @PathVariable("id") long reportId);
 
     @DeleteMapping("{id}/admin")
-    void deleteReportAdmin(@RequestHeader("userRoles") List<String> roles, @PathVariable("id") long reportId);
+    void deleteReportAdmin(@RequestHeader("roles") List<String> roles, @PathVariable("id") long reportId);
 }
