@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "groups")
+@RequestMapping(path = "/")
 public class GroupController {
     private final GroupService groupService;
 
@@ -96,12 +96,12 @@ public class GroupController {
         groupService.removeUserFromGroup(groupId, userId);
     }
 
-    @GetMapping("{groupId}/users/{userId}")
+    @GetMapping("{id}/users/{userId}")
     @Operation(summary = "Get the information related to the member")
     @ApiResponse(responseCode = "200", description = "User information")
     @ApiResponse(responseCode = "422", description = "User or group not found")
     @ApiResponse(responseCode = "403", description = "You are not allowed to view members of this group")
-    public GroupMemberModel getMember(@PathVariable("groupId") final long groupId, @PathVariable("userId") final long userId,
+    public GroupMemberModel getMember(@PathVariable("id") final long groupId, @PathVariable("userId") final long userId,
                                       @RequestHeader("userId") final long currentUserId) {
         if (!groupService.isInGroup(groupId, currentUserId))
             throw new ForbiddenOperationException("You are not a member of this group");
