@@ -9,7 +9,6 @@ import fr.tripnjoy.groups.dto.request.UpdatePrivateGroupRequest;
 import fr.tripnjoy.groups.dto.request.UpdatePublicGroupRequest;
 import fr.tripnjoy.groups.dto.response.GroupInfoModel;
 import fr.tripnjoy.groups.dto.response.GroupMemberModel;
-import fr.tripnjoy.groups.dto.response.GroupMemberPublicInfoModel;
 import fr.tripnjoy.groups.dto.response.GroupMemoriesResponse;
 import fr.tripnjoy.groups.entity.GroupEntity;
 import fr.tripnjoy.groups.entity.GroupMemberEntity;
@@ -104,7 +103,7 @@ public class GroupService {
                 .map(group -> {
                     var members = group.getMembers().stream()
                                        .map(member -> userClient.getUserById(List.of("admin"), member))
-                                       .map(memberModel -> new GroupMemberPublicInfoModel(memberModel.getId(), memberModel.getFirstname(), memberModel.getLastname()))
+                                       .map(memberModel -> new GroupMemberModel(memberModel.getId(), memberModel.getFirstname(), memberModel.getLastname(), memberModel.getProfilePicture()))
                                        .toList();
 
                     return new GroupInfoModel(groupId, group.getName(), members, group.getMaxSize(), group.getState(), group.getPicture());

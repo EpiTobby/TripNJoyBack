@@ -9,6 +9,6 @@ import java.util.Collection;
 
 @JsonSerialize
 @JsonAutoDetect
-public record GroupInfoModel(long id, @Nullable String name, Collection<GroupMemberPublicInfoModel> members, int maxSize, State state,
+public record GroupInfoModel(long id, @Nullable String name, Collection<GroupMemberModel> members, int maxSize, State state,
                              @Nullable String picture) {
 }
