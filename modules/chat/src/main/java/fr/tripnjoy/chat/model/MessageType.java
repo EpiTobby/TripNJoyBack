@@ -11,6 +11,7 @@ public enum MessageType {
     IMAGE(2),
     FILE(3),
     SURVEY(4),
+    CALL(5),
     ;
 
     public final int id;

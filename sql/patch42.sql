@@ -23,3 +23,5 @@ alter table expenses_members
     add constraint expenses_members_pk
         primary key (expense_id, user_id);
 
+
+INSERT INTO message_type (id, name) VALUES (5, 'CALL')
