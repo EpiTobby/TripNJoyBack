@@ -118,7 +118,7 @@ public class MessageService {
 
         UserResponse user = userFeignClient.getCurrentUser(username);
         boolean isInGroup = groupFeignClient.getInfo(channel.getGroup()).members().stream()
-                                            .anyMatch(member -> member.id() == user.getId());
+                                            .anyMatch(member -> member.userId() == user.getId());
 
         if (!isInGroup)
             throw new ForbiddenOperationException("User " + username + " does not belong to group id " + channel.getGroup());
