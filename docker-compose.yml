@@ -12,21 +12,24 @@ volumes:
   tripnjoy-grafana:
 
 services:
-  configserver:
+  config:
     build: modules/configserver/
+    depends_on:
+      - eureka
     networks:
       - internal
     ports:
       - "8888:8888"
     environment:
       - "spring.profiles.active=${PROFILE:-default}"
-      - "spring.cloud.config.server.git.username=GabRayz"
-      - "spring.cloud.config.server.git.password=LGU-WXH-GTX-X4q"
+      - "spring.cloud.config.server.git.username=${GH_USERNAME}"
+      - "spring.cloud.config.server.git.password=${GH_KEY}"
+      - "eureka.client.service-url.defaultZone=http://eureka:8761"
 
   chat:
     build: modules/chat/
     depends_on:
-      - configserver
+      - config
     networks:
       - internal
     ports:
@@ -36,7 +39,7 @@ services:
       - "spring.data.mongodb.host=mongo"
       - "spring.profiles.active=${PROFILE:-default}"
       - "spring.boot.admin.client.url=http://admin:8084"
-      - "spring.config.import=configserver:http://configserver:8888"
+      - "spring.config.import=configserver:http://config:8888"
       - "eureka.client.service-url.defaultZone=http://eureka:8761"
 
   eureka:
@@ -54,7 +57,7 @@ services:
   expenses:
     build: modules/expenses/
     depends_on:
-      - configserver
+      - config
     networks:
       - internal
     ports:
@@ -64,13 +67,13 @@ services:
       - "spring.data.mongodb.host=mongo"
       - "spring.profiles.active=${PROFILE:-default}"
       - "spring.boot.admin.client.url=http://admin:8084"
-      - "spring.config.import=configserver:http://configserver:8888"
+      - "spring.config.import=configserver:http://config:8888"
       - "eureka.client.service-url.defaultZone=http://eureka:8761"
 
   gateway:
     build: modules/gateway/
     depends_on:
-      - configserver
+      - config
     networks:
       - internal
       - external
@@ -81,13 +84,13 @@ services:
       - "spring.data.mongodb.host=mongo"
       - "spring.profiles.active=${PROFILE:-default}"
       - "spring.boot.admin.client.url=http://admin:8084"
-      - "spring.config.import=configserver:http://configserver:8888"
+      - "spring.config.import=configserver:http://config:8888"
       - "eureka.client.service-url.defaultZone=http://eureka:8761"
 
   groups:
     build: modules/groups/
     depends_on:
-      - configserver
+      - config
     networks:
       - internal
     ports:
@@ -97,13 +100,13 @@ services:
       - "spring.data.mongodb.host=mongo"
       - "spring.profiles.active=${PROFILE:-default}"
       - "spring.boot.admin.client.url=http://admin:8084"
-      - "spring.config.import=configserver:http://configserver:8888"
+      - "spring.config.import=configserver:http://config:8888"
       - "eureka.client.service-url.defaultZone=http://eureka:8761"
 
   mails:
     build: modules/mails/
     depends_on:
-      - configserver
+      - config
     networks:
       - internal
     ports:
@@ -113,13 +116,13 @@ services:
       - "spring.data.mongodb.host=mongo"
       - "spring.profiles.active=${PROFILE:-default}"
       - "spring.boot.admin.client.url=http://admin:8084"
-      - "spring.config.import=configserver:http://configserver:8888"
+      - "spring.config.import=configserver:http://config:8888"
       - "eureka.client.service-url.defaultZone=http://eureka:8761"
 
   places:
     build: modules/places/
     depends_on:
-      - configserver
+      - config
     networks:
       - internal
     ports:
@@ -129,13 +132,13 @@ services:
       - "spring.data.mongodb.host=mongo"
       - "spring.profiles.active=${PROFILE:-default}"
       - "spring.boot.admin.client.url=http://admin:8084"
-      - "spring.config.import=configserver:http://configserver:8888"
+      - "spring.config.import=configserver:http://config:8888"
       - "eureka.client.service-url.defaultZone=http://eureka:8761"
 
   planning:
     build: modules/planning/
     depends_on:
-      - configserver
+      - config
     networks:
       - internal
     ports:
@@ -145,13 +148,13 @@ services:
       - "spring.data.mongodb.host=mongo"
       - "spring.profiles.active=${PROFILE:-default}"
       - "spring.boot.admin.client.url=http://admin:8084"
-      - "spring.config.import=configserver:http://configserver:8888"
+      - "spring.config.import=configserver:http://config:8888"
       - "eureka.client.service-url.defaultZone=http://eureka:8761"
 
   profiles:
     build: modules/profiles/
     depends_on:
-      - configserver
+      - config
     networks:
       - internal
     ports:
@@ -161,13 +164,13 @@ services:
       - "spring.data.mongodb.host=mongo"
       - "spring.profiles.active=${PROFILE:-default}"
       - "spring.boot.admin.client.url=http://admin:8084"
-      - "spring.config.import=configserver:http://configserver:8888"
+      - "spring.config.import=configserver:http://config:8888"
       - "eureka.client.service-url.defaultZone=http://eureka:8761"
 
   users:
     build: modules/users/
     depends_on:
-      - configserver
+      - config
     networks:
       - internal
     ports:
@@ -177,7 +180,7 @@ services:
       - "spring.data.mongodb.host=mongo"
       - "spring.profiles.active=${PROFILE:-default}"
       - "spring.boot.admin.client.url=http://admin:8084"
-      - "spring.config.import=configserver:http://configserver:8888"
+      - "spring.config.import=configserver:http://config:8888"
       - "eureka.client.service-url.defaultZone=http://eureka:8761"
 
   db:
@@ -227,14 +230,14 @@ services:
       - "tripnjoy-grafana:/var/lib/grafana"
       - "./grafana.ini:/etc/grafana/grafana.ini"
 
-  prometheus:
-    image: "prom/prometheus"
-    networks:
-      - internal
-    ports:
-      - "9091:9090"
-    volumes:
-      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+#  prometheus:
+#    image: "prom/prometheus"
+#    networks:
+#      - internal
+#    ports:
+#      - "9091:9090"
+#    volumes:
+#      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
 
   admin:
     image: "gabray/tripnjoy_admin"
