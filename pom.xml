@@ -25,6 +25,8 @@
 		<module>modules/profiles-public</module>
 		<module>modules/reports</module>
 		<module>modules/reports-public</module>
+		<module>modules/notifications</module>
+		<module>modules/notifications-public</module>
 	</modules>
 
 	<groupId>fr.tobby</groupId>
