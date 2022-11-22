@@ -14,6 +14,7 @@ import fr.tripnjoy.profiles.repository.ProfileRepository;
 import fr.tripnjoy.profiles.repository.UserMatchTaskRepository;
 import fr.tripnjoy.users.api.client.UserFeignClient;
 import fr.tripnjoy.users.api.model.Gender;
+import fr.tripnjoy.users.api.response.FirebaseTokenResponse;
 import fr.tripnjoy.users.api.response.UserResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -54,6 +55,7 @@ class MatchMakerTest {
     private long anyUser()
     {
         when(userFeignClient.exists(userIdCounter)).thenReturn(new BooleanResponse(true));
+        when(userFeignClient.getFirebaseToken(anyLong())).thenReturn(new FirebaseTokenResponse(null));
         return userIdCounter++;
     }
 
