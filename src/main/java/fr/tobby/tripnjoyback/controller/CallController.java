@@ -1,28 +1,51 @@
 package fr.tobby.tripnjoyback.controller;
 
+import fr.tobby.tripnjoyback.notification.INotificationService;
 import fr.tobby.tripnjoyback.service.CallService;
+import fr.tobby.tripnjoyback.service.IdCheckerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/call")
 public class CallController {
     private static final Logger logger = LoggerFactory.getLogger(CallController.class);
     private final CallService callService;
-    public CallController(CallService callService) {
+
+    private final IdCheckerService idCheckerService;
+    private final INotificationService notificationService;
+
+    public CallController(CallService callService, final IdCheckerService idCheckerService,
+                          final INotificationService notificationService)
+    {
         this.callService = callService;
+        this.idCheckerService = idCheckerService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("rtc/{channelName}/{uid}")
     @Operation(summary = "Returns the token for the RTC call")
     @ApiResponse(responseCode = "200", description = "The token for the RTC call")
-    public String getRtcToken(@PathVariable String channelName, @PathVariable int uid) {
+    public String getRtcToken(@PathVariable String channelName, @PathVariable int uid)
+    {
         return callService.generateToken(channelName, uid);
+    }
+
+    @PostMapping("/start/{groupId}")
+    public void startCall(@PathVariable("groupId") long groupId)
+    {
+        long currentUserId = idCheckerService.getCurrentUserId();
+        String userName = idCheckerService.getCurrentUser().getFirstname();
+        notificationService.sendToGroup(
+                groupId,
+                "tripnjoy_call",
+                userName + " a commencé un appel de groupe",
+                Map.of("groupId", String.valueOf(groupId),
+                        "user", String.valueOf(currentUserId)));
     }
 }
