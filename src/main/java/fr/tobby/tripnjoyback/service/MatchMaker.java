@@ -86,11 +86,18 @@ public class MatchMaker {
         return task.isDone() ? task.get() : new MatchMakingResult(MatchMakingResult.Type.SEARCHING, null);
     }
 
+    private void cancelPreviousMatches(long userId)
+    {
+        userRepository.findById(userId)
+                .ifPresent(user -> user.setWaitingForGroup(false));
+    }
+
     @Transactional
     @Async
     public CompletableFuture<MatchMakingResult> match(@NotNull final MatchMakingUserModel user)
     {
         logger.info("Starting matchmaking for user {}", user.getUserId());
+        cancelPreviousMatches(user.getUserId());
         Optional<GroupEntity> matchedGroup = findMatchingGroup(user);
 
         if (matchedGroup.isPresent())
@@ -173,6 +180,7 @@ public class MatchMaker {
     {
         Collection<MatchMakingUserModel> others = userRepository.findAllByWaitingForGroupIsTrue()
                                                                 .stream()
+                                                                .filter(other -> other.getId() != user.getUserId())
                                                                 .map(other -> {
                                                                     ProfileModel profileModel = profileService.getActiveProfileModel(other.getId()).orElseThrow();
                                                                     return MatchMakingUserModel.from(other, profileModel);
