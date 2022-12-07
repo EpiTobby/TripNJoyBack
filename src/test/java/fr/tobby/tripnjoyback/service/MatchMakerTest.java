@@ -6,6 +6,7 @@ import fr.tobby.tripnjoyback.model.GroupModel;
 import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
+import fr.tobby.tripnjoyback.notification.SavedNotificationService;
 import fr.tobby.tripnjoyback.repository.*;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
@@ -75,7 +76,7 @@ class MatchMakerTest {
         matchMaker = new MatchMaker(profileRepository, userRepository, new MatchMakerScoreComputer(),
                 groupService,
                 groupRepository,
-                profileService);
+                profileService, mock(SavedNotificationService.class), mock(ReportService.class));
     }
 
     /**
@@ -209,7 +210,7 @@ class MatchMakerTest {
         when(profileService.getProfile(1)).thenReturn(profileA);
         when(profileService.getProfile(2)).thenReturn(profileGroup);
 
-        ProfileEntity groupProfileEntity = profileRepository.save(new ProfileEntity(1L, "test", true));
+        ProfileEntity groupProfileEntity = profileRepository.save(new ProfileEntity(1L, "test", true, Instant.now()));
         when(profileService.getProfile(groupProfileEntity)).thenReturn(profileGroup);
 
         ProfileEntity profileEntity = mock(ProfileEntity.class);
@@ -224,6 +225,7 @@ class MatchMakerTest {
                 new Date(),
                 null,
                 null,
+                "",
                 "",
                 new ArrayList<>(),
                 groupProfileEntity,

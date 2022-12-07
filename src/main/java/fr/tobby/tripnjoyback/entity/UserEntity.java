@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.entity;
 
 import lombok.*;
+import org.jetbrains.annotations.Nullable;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -44,6 +45,9 @@ public class UserEntity {
     private String phoneNumber;
     @Setter
     private boolean confirmed;
+    @Setter
+    @Nullable
+    private String firebaseToken;
     @ManyToOne
     @Setter
     @JoinColumn(name = "language_id")

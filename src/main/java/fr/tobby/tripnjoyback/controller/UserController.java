@@ -9,6 +9,7 @@ import fr.tobby.tripnjoyback.model.UserModel;
 import fr.tobby.tripnjoyback.model.request.DeleteUserByAdminRequest;
 import fr.tobby.tripnjoyback.model.request.DeleteUserRequest;
 import fr.tobby.tripnjoyback.model.request.UserUpdateRequest;
+import fr.tobby.tripnjoyback.model.response.FirebaseTokenResponse;
 import fr.tobby.tripnjoyback.service.IdCheckerService;
 import fr.tobby.tripnjoyback.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,7 +42,7 @@ public class UserController {
     @GetMapping("")
     @PreAuthorize("hasAuthority('admin')")
     public List<UserEntity> getAll() {
-        List<UserEntity> userEntities = new ArrayList<UserEntity>();
+        List<UserEntity> userEntities = new ArrayList<>();
         userService.getAll().forEach(userEntities::add);
         return userEntities;
     }
@@ -77,6 +78,24 @@ public class UserController {
     @PreAuthorize("hasAuthority('admin')")
     public void deleteUserByAdmin(@PathVariable("id") final long userId, @RequestBody DeleteUserByAdminRequest deleteUserByAdminRequest) {
         userService.deleteUserByAdmin(userId, deleteUserByAdminRequest);
+    }
+
+    @GetMapping("{id}/firebase")
+    @Operation(summary = "Get the firebase token of this user")
+    @ApiResponse(responseCode = "200", description = "Firebase token returned. May be null")
+    @ApiResponse(responseCode = "422", description = "The user does not exist")
+    public FirebaseTokenResponse getFirebaseToken(@PathVariable("id") final long userId)
+    {
+        return new FirebaseTokenResponse(userService.getFirebaseToken(userId));
+    }
+
+    @PatchMapping("{id}/firebase")
+    @Operation(summary = "Update the firebase token associated to this user. If the token is not provided, it will be unset")
+    @ApiResponse(responseCode = "200", description = "Firebase token updated")
+    @ApiResponse(responseCode = "422", description = "If the user does not exist")
+    public void setFirebaseToken(@PathVariable("id") final long userId, @RequestParam(name = "token", required = false) String token)
+    {
+        userService.setFirebaseToken(userId, token);
     }
 
     @ExceptionHandler(UserNotFoundException.class)

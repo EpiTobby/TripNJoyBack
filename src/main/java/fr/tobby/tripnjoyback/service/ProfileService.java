@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.service;
 
-import fr.tobby.tripnjoyback.entity.AnswersEntity;
+import fr.tobby.tripnjoyback.PromStats;
+import fr.tobby.tripnjoyback.entity.ProfileAnswersEntity;
 import fr.tobby.tripnjoyback.entity.AvailabiltyEntity;
 import fr.tobby.tripnjoyback.entity.ProfileEntity;
 import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
@@ -10,7 +11,7 @@ import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
 import fr.tobby.tripnjoyback.model.request.anwsers.DestinationTypeAnswer;
-import fr.tobby.tripnjoyback.repository.AnswersRepository;
+import fr.tobby.tripnjoyback.repository.ProfileAnswersRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -18,21 +19,24 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ProfileService {
     private final ProfileRepository profileRepository;
-    private final AnswersRepository answersRepository;
+    private final ProfileAnswersRepository profileAnswersRepository;
     private final UserRepository userRepository;
     private final DateFormat dateFormat;
+    private final PromStats promStats;
 
-    public ProfileService(ProfileRepository profileRepository, AnswersRepository answersRepository, final UserRepository userRepository) {
+    public ProfileService(ProfileRepository profileRepository, ProfileAnswersRepository profileAnswersRepository, final UserRepository userRepository, final PromStats promStats) {
         this.profileRepository = profileRepository;
-        this.answersRepository = answersRepository;
+        this.profileAnswersRepository = profileAnswersRepository;
         this.userRepository = userRepository;
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        this.promStats = promStats;
     }
 
     @Transactional
@@ -50,15 +54,18 @@ public class ProfileService {
     {
         ProfileEntity profileEntity = ProfileEntity.builder()
                                                    .name(profileCreationRequest.getName())
-                                                   .active(true).build();
+                                                   .active(true)
+                                                   .createdDate(Instant.now())
+                                                   .build();
         profileEntity = profileRepository.save(profileEntity);
-        AnswersEntity answersEntity = createAnswersEntity(profileCreationRequest, profileEntity.getId());
-        return ProfileModel.of(profileEntity, answersEntity);
+        promStats.getProfileCount().set(profileRepository.count());
+        ProfileAnswersEntity profileAnswersEntity = createAnswersEntity(profileCreationRequest, profileEntity.getId());
+        return ProfileModel.of(profileEntity, profileAnswersEntity);
     }
 
-    AnswersEntity createAnswersEntity(final IProfile profile, final long profileId)
+    ProfileAnswersEntity createAnswersEntity(final IProfile profile, final long profileId)
     {
-        AnswersEntity answersEntity = AnswersEntity.builder()
+        ProfileAnswersEntity profileAnswersEntity = ProfileAnswersEntity.builder()
                                                    .profileId(profileId)
                                                    .availabilities(profile.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList())
                                                    .durationMin(profile.getDuration().getMinValue())
@@ -79,7 +86,7 @@ public class ProfileService {
                                                    .goOutAtNight(profile.getGoOutAtNight().toBoolean())
                                                    .sport(profile.getSport().toBoolean())
                                                    .build();
-        return answersRepository.save(answersEntity);
+        return profileAnswersRepository.save(profileAnswersEntity);
     }
 
     ProfileEntity createProfile(final ProfileModel model)
@@ -87,7 +94,9 @@ public class ProfileService {
         ProfileEntity profileEntity = profileRepository.save(ProfileEntity.builder()
                                                                           .name(model.getName())
                                                                           .active(true)
+                                                                          .createdDate(Instant.now())
                                                                           .build());
+        promStats.getProfileCount().set(profileRepository.count());
         createAnswersEntity(model, profileEntity.getId());
         return profileEntity;
     }
@@ -99,14 +108,14 @@ public class ProfileService {
 
     ProfileModel getProfile(ProfileEntity entity)
     {
-        AnswersEntity answersEntity = answersRepository.findByProfileId(entity.getId());
-        return ProfileModel.of(entity, answersEntity);
+        ProfileAnswersEntity profileAnswersEntity = profileAnswersRepository.findByProfileId(entity.getId());
+        return ProfileModel.of(entity, profileAnswersEntity);
     }
 
     public List<ProfileModel> getUserProfiles(long userId)
     {
         List<ProfileEntity> profileEntities = profileRepository.findByUserId(userId);
-        return profileEntities.stream().map(e -> ProfileModel.of(e, answersRepository.findByProfileId(e.getId()))).toList();
+        return profileEntities.stream().map(e -> ProfileModel.of(e, profileAnswersRepository.findByProfileId(e.getId()))).toList();
     }
 
     @Transactional
@@ -115,15 +124,15 @@ public class ProfileService {
         List<ProfileEntity> profileEntities = profileRepository.findByUserId(userId);
         for (ProfileEntity profileEntity : profileEntities)
         {
-            AnswersEntity answersEntity = answersRepository.findByProfileId(profileEntity.getId());
-            answersRepository.deleteByProfileId(answersEntity.getProfileId());
+            ProfileAnswersEntity profileAnswersEntity = profileAnswersRepository.findByProfileId(profileEntity.getId());
+            profileAnswersRepository.deleteByProfileId(profileAnswersEntity.getProfileId());
         }
     }
 
     public List<ProfileModel> getActiveProfiles()
     {
         List<ProfileEntity> profileEntities = profileRepository.findByActiveIsTrue();
-        return profileEntities.stream().map(e -> ProfileModel.of(e, answersRepository.findByProfileId(e.getId()))).toList();
+        return profileEntities.stream().map(e -> ProfileModel.of(e, profileAnswersRepository.findByProfileId(e.getId()))).toList();
     }
 
     @Transactional
@@ -148,14 +157,16 @@ public class ProfileService {
     }
 
     @Transactional
-    public void deleteProfile(long profileId)
+    public void deleteProfile(long userId, long profileId)
     {
         ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with this id"));
         if (profileEntity.isActive())
             throw new IllegalArgumentException("Cannot delete an active profile");
+        userRepository.getById(userId).getProfiles().remove(profileEntity);
         profileRepository.delete(profileEntity);
-        AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
-        answersRepository.deleteByProfileId(answersEntity.getProfileId());
+        promStats.getProfileCount().set(profileRepository.count());
+        ProfileAnswersEntity profileAnswersEntity = profileAnswersRepository.findByProfileId(profileId);
+        profileAnswersRepository.deleteByProfileId(profileAnswersEntity.getProfileId());
     }
 
     @Transactional
@@ -178,61 +189,61 @@ public class ProfileService {
         {
             profileEntity.setName(profileUpdateRequest.getName());
         }
-        AnswersEntity answersEntity = answersRepository.findByProfileId(profileId);
+        ProfileAnswersEntity profileAnswersEntity = profileAnswersRepository.findByProfileId(profileId);
         if (profileUpdateRequest.getAvailabilities() != null && !profileUpdateRequest.getAvailabilities().isEmpty())
         {
-            answersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList());
+            profileAnswersEntity.setAvailabilities(profileUpdateRequest.getAvailabilities().stream().map(a -> new AvailabiltyEntity(dateFormat.format(a.getStartDate()), dateFormat.format(a.getEndDate()))).toList());
         }
         if (profileUpdateRequest.getDuration() != null)
         {
-            answersEntity.setDurationMin(profileUpdateRequest.getDuration().getMinValue());
-            answersEntity.setDurationMax(profileUpdateRequest.getDuration().getMaxValue());
+            profileAnswersEntity.setDurationMin(profileUpdateRequest.getDuration().getMinValue());
+            profileAnswersEntity.setDurationMax(profileUpdateRequest.getDuration().getMaxValue());
         }
         if (profileUpdateRequest.getBudget() != null)
         {
-            answersEntity.setBudgetMin(profileUpdateRequest.getBudget().getMinValue());
-            answersEntity.setBudgetMax(profileUpdateRequest.getBudget().getMaxValue());
+            profileAnswersEntity.setBudgetMin(profileUpdateRequest.getBudget().getMinValue());
+            profileAnswersEntity.setBudgetMax(profileUpdateRequest.getBudget().getMaxValue());
         }
         if (profileUpdateRequest.getDestinationTypes() != null && !profileUpdateRequest.getDestinationTypes().isEmpty())
         {
-            answersEntity.setDestinationTypes(profileUpdateRequest.getDestinationTypes().stream().map(DestinationTypeAnswer::toString).toList());
+            profileAnswersEntity.setDestinationTypes(profileUpdateRequest.getDestinationTypes().stream().map(DestinationTypeAnswer::toString).toList());
         }
         if (profileUpdateRequest.getAges() != null)
         {
-            answersEntity.setAgeMin(profileUpdateRequest.getAges().getMinValue());
-            answersEntity.setAgeMax(profileUpdateRequest.getAges().getMaxValue());
+            profileAnswersEntity.setAgeMin(profileUpdateRequest.getAges().getMinValue());
+            profileAnswersEntity.setAgeMax(profileUpdateRequest.getAges().getMaxValue());
         }
         if (profileUpdateRequest.getTravelWithPersonFromSameCity() != null)
         {
-            answersEntity.setTravelWithPersonFromSameCity(profileUpdateRequest.getTravelWithPersonFromSameCity().toBoolean());
+            profileAnswersEntity.setTravelWithPersonFromSameCity(profileUpdateRequest.getTravelWithPersonFromSameCity().toBoolean());
         }
         if (profileUpdateRequest.getTravelWithPersonFromSameCountry() != null)
         {
-            answersEntity.setTravelWithPersonFromSameCountry(profileUpdateRequest.getTravelWithPersonFromSameCountry().toBoolean());
+            profileAnswersEntity.setTravelWithPersonFromSameCountry(profileUpdateRequest.getTravelWithPersonFromSameCountry().toBoolean());
         }
         if (profileUpdateRequest.getTravelWithPersonSameLanguage() != null)
         {
-            answersEntity.setTravelWithPersonSameLanguage(profileUpdateRequest.getTravelWithPersonSameLanguage().toBoolean());
+            profileAnswersEntity.setTravelWithPersonSameLanguage(profileUpdateRequest.getTravelWithPersonSameLanguage().toBoolean());
         }
         if (profileUpdateRequest.getGender() != null) {
-            answersEntity.setGender(profileUpdateRequest.getGender().toString());
+            profileAnswersEntity.setGender(profileUpdateRequest.getGender().toString());
         }
         if (profileUpdateRequest.getGroupSize() != null) {
-            answersEntity.setGroupSizeMin(profileUpdateRequest.getGroupSize().getMinValue());
-            answersEntity.setGroupSizeMax(profileUpdateRequest.getGroupSize().getMaxValue());
+            profileAnswersEntity.setGroupSizeMin(profileUpdateRequest.getGroupSize().getMinValue());
+            profileAnswersEntity.setGroupSizeMax(profileUpdateRequest.getGroupSize().getMaxValue());
         }
         if (profileUpdateRequest.getChillOrVisit() != null) {
-            answersEntity.setChillOrVisit(profileUpdateRequest.getChillOrVisit().toString());
+            profileAnswersEntity.setChillOrVisit(profileUpdateRequest.getChillOrVisit().toString());
         }
         if (profileUpdateRequest.getAboutFood() != null) {
-            answersEntity.setAboutFood(profileUpdateRequest.getAboutFood().toString());
+            profileAnswersEntity.setAboutFood(profileUpdateRequest.getAboutFood().toString());
         }
         if (profileUpdateRequest.getGoOutAtNight() != null) {
-            answersEntity.setGoOutAtNight(profileUpdateRequest.getGoOutAtNight().toBoolean());
+            profileAnswersEntity.setGoOutAtNight(profileUpdateRequest.getGoOutAtNight().toBoolean());
         }
         if (profileUpdateRequest.getSport() != null) {
-            answersEntity.setSport(profileUpdateRequest.getSport().toBoolean());
+            profileAnswersEntity.setSport(profileUpdateRequest.getSport().toBoolean());
         }
-        answersRepository.save(answersEntity);
+        profileAnswersRepository.save(profileAnswersEntity);
     }
 }

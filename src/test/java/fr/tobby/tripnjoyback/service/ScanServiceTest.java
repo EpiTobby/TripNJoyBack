@@ -59,6 +59,16 @@ class ScanServiceTest {
     }
 
     @Test
+    void parseLineOcrErrorTest()
+    {
+        var line = scanService.parseLine("- MINUTE MAID\tO,84€A\t");
+
+        assertNotNull(line);
+        assertEquals("- MINUTE MAID", line.left());
+        assertEquals(0.84f, line.right());
+    }
+
+    @Test
     void parseEmptyTest()
     {
         ScanResponse scanResponse = scanService.parseContent(List.of());

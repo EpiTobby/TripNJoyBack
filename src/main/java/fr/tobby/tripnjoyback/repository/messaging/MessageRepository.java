@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface MessageRepository extends CrudRepository<MessageEntity, Long> {
 
@@ -15,4 +16,6 @@ public interface MessageRepository extends CrudRepository<MessageEntity, Long> {
     List<MessageEntity> findAllByChannelIdAndTypeInOrderBySendDateDesc(long channelId, Collection<MessageTypeEntity> types, Pageable pageable);
 
     List<MessageEntity> findAllByChannelIdAndPinnedIsTrueOrderBySendDateDesc(long channelId);
+
+    Optional<MessageEntity> findByTypeAndContent(MessageTypeEntity messageTypeEntity, String content);
 }

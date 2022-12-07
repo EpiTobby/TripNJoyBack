@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.Instant;
 
 @Getter
 @NoArgsConstructor
@@ -31,10 +32,13 @@ public class ReportEntity {
     @Setter
     private String details;
 
-    public ReportEntity(UserEntity submitter, UserEntity reportedUser, String reason, String details) {
+    private Instant createdDate;
+
+    public ReportEntity(UserEntity submitter, UserEntity reportedUser, String reason, String details, Instant createdDate) {
         this.submitter = submitter;
         this.reportedUser = reportedUser;
         this.reason = reason;
         this.details = details;
+        this.createdDate = createdDate;
     }
 }

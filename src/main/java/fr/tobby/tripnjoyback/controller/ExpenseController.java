@@ -77,7 +77,7 @@ public class ExpenseController {
 
     @ExceptionHandler(GroupNotFoundException.class)
     @ResponseBody
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public String getError(GroupNotFoundException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
@@ -91,18 +91,18 @@ public class ExpenseController {
         return exception.getMessage();
     }
 
-    @ExceptionHandler(ExpenseNotFoundException.class)
+    @ExceptionHandler(UnsupportedOperationException.class)
     @ResponseBody
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String getError(ExpenseNotFoundException exception) {
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public String getError(UnsupportedOperationException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }
 
-    @ExceptionHandler(ForbiddenOperationException.class)
+    @ExceptionHandler(ExpenseNotFoundException.class)
     @ResponseBody
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String getError(ForbiddenOperationException exception) {
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String getError(ExpenseNotFoundException exception) {
         logger.debug("Error on request", exception);
         return exception.getMessage();
     }

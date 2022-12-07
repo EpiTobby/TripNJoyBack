@@ -1,30 +1,40 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.PromStats;
 import fr.tobby.tripnjoyback.SpringContext;
 import fr.tobby.tripnjoyback.entity.*;
+import fr.tobby.tripnjoyback.exception.ForbiddenOperationException;
 import fr.tobby.tripnjoyback.exception.UserNotConfirmedException;
 import fr.tobby.tripnjoyback.exception.UserNotFoundException;
 import fr.tobby.tripnjoyback.model.GroupModel;
+import fr.tobby.tripnjoyback.model.JoinGroupWithoutInviteModel;
 import fr.tobby.tripnjoyback.model.State;
 import fr.tobby.tripnjoyback.model.request.CreatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.model.request.UpdatePrivateGroupRequest;
 import fr.tobby.tripnjoyback.repository.*;
+import fr.tobby.tripnjoyback.utils.QRCodeGenerator;
+import io.prometheus.client.Gauge;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.ApplicationContext;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @DataJpaTest
-public class GroupServiceTest {
+class GroupServiceTest {
     private static GenderEntity maleGender;
     private static GenderEntity femaleGender;
     private static GenderEntity otherGender;
@@ -47,6 +57,9 @@ public class GroupServiceTest {
     private GroupMemberRepository groupMemberRepository;
     @Autowired
     private ActivityRepository activityRepository;
+    @Autowired
+    private GroupMemoryRepository groupMemoryRepository;
+
     private ChannelService channelService;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     private GroupService groupService;
@@ -82,7 +95,10 @@ public class GroupServiceTest {
     @BeforeEach
     void initGroupService(){
         channelService = mock(ChannelService.class);
-        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository, mock(ProfileService.class));
+        PromStats promStats = mock(PromStats.class);
+        when(promStats.getGroupCount()).thenReturn(mock(Gauge.class));
+        groupService = new GroupService(groupRepository, userRepository, groupMemberRepository, profileRepository, channelService, activityRepository, mock(ProfileService.class), groupMemoryRepository, mock(QRCodeGenerator.class), "", promStats);
+
         SpringContext.setContext(context);
     }
 
@@ -159,6 +175,7 @@ public class GroupServiceTest {
                                                                                              .startOfTrip(newStartDate)
                                                                                              .endOfTrip(newEndDate)
                                                                                              .picture("group.png")
+                                                                                             .destination("Madrid")
                                                                                              .build();
         CreatePrivateGroupRequest createPrivateGroupRequest = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
         UserEntity owner = anyUser();
@@ -168,6 +185,7 @@ public class GroupServiceTest {
         Assertions.assertEquals("new name", entity.getName());
         Assertions.assertEquals(5, entity.getMaxSize());
         Assertions.assertEquals("group.png", entity.getPicture());
+        Assertions.assertEquals("Madrid", entity.getDestination());
         Assertions.assertEquals(0, entity.getStartOfTrip().compareTo(newStartDate));
         Assertions.assertEquals(0, entity.getEndOfTrip().compareTo(newEndDate));
     }
@@ -185,8 +203,35 @@ public class GroupServiceTest {
         groupService.inviteUserInPrivateGroup(model.getId(), user3.getEmail());
         groupService.joinGroup(model.getId(), user1.getId());
         groupService.joinGroup(model.getId(), user2.getId());
-        Assertions.assertEquals(model.getState(),State.CLOSED);
+        Assertions.assertEquals(State.CLOSED, model.getState());
         Assertions.assertThrows(UserNotFoundException.class, () -> groupService.joinGroup(model.getId(), user3.getId()));
+    }
+
+    @Test
+    void addUserWithoutInviteTest() throws ParseException, NoSuchAlgorithmException {
+        CreatePrivateGroupRequest request = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
+        UserEntity owner = anyUser();
+        GroupModel model = groupService.createPrivateGroup(owner.getId(), request);
+        String stringToHash = String.format("tripnjoy-group-qr:%o;",model.getId());
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        UserEntity user1 = anyUserWithEmail("usermaxsize1@gmail.com");
+        UserEntity user2 = anyUserWithEmail("usermaxsize2@gmail.com");
+        groupService.joinGroupWithoutInvite(model.getId(), user1.getId(),
+                new JoinGroupWithoutInviteModel(Arrays.toString(digest.digest(stringToHash.getBytes(StandardCharsets.UTF_8)))));
+        groupService.joinGroupWithoutInvite(model.getId(), user2.getId(),
+                new JoinGroupWithoutInviteModel(Arrays.toString(digest.digest(stringToHash.getBytes(StandardCharsets.UTF_8)))));
+        Optional<GroupModel> updatedModel = groupService.getGroup(model.getId());
+        updatedModel.ifPresent(groupModel -> Assertions.assertEquals(3, groupModel.getMembers().size()));
+    }
+
+    @Test
+    void addUserWithoutInviteFailureTest() throws ParseException {
+        CreatePrivateGroupRequest request = CreatePrivateGroupRequest.builder().name("grouptest").maxSize(3).build();
+        UserEntity owner = anyUser();
+        GroupModel model = groupService.createPrivateGroup(owner.getId(), request);
+        UserEntity user1 = anyUserWithEmail("usermaxsize1@gmail.com");
+        Assertions.assertThrows(ForbiddenOperationException.class, () -> groupService.joinGroupWithoutInvite(model.getId(), user1.getId(),
+                new JoinGroupWithoutInviteModel("a")));
     }
 
     @Test
@@ -199,7 +244,7 @@ public class GroupServiceTest {
         groupService.joinGroup(model.getId(), user1.getId());
         groupService.removeUserFromGroup(model.getId(), user1.getId());
         GroupEntity entity = groupRepository.findById(model.getId()).get();
-        Assertions.assertFalse(entity.members.stream().anyMatch(m -> m.getUser().getId() == user1.getId()));
+        Assertions.assertFalse(entity.members.stream().anyMatch(m -> m.getUser().getId().equals(user1.getId())));
     }
 
     @Test

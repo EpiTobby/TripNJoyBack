@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS "users" (
                          "created_date"      timestamp,
                          "confirmed"         boolean,
                          "waiting_for_group" boolean default false not null,
-                         "language_id"      int references languages
+                         "language_id"      int references languages,
+                         "firebase_token" varchar
 );
 
 CREATE TABLE IF NOT EXISTS "states"
@@ -53,7 +54,8 @@ CREATE TABLE IF NOT EXISTS "groups"(
                          "created_date"  timestamp,
                          "start_of_trip" timestamp,
                          "end_of_trip"   timestamp,
-                         "picture"       text
+                         "picture"       text,
+                         "destination"   text
 );
 
 CREATE TABLE IF NOT EXISTS "profiles" (
@@ -136,10 +138,15 @@ CREATE TABLE IF NOT EXISTS "surveys" (
                            "id" SERIAL PRIMARY KEY,
                            "channel_id" int references channels,
                            "submitter_id" int references users,
-                           "question" text
+                           "question" text,
+                           "quizz" boolean,
+                           "send_date" timestamp,
+                           "modified_date" timestamp,
+                           "is_multiple_choice_survey" boolean
 );
 
-CREATE TABLE IF NOT EXISTS "survey_answers" (
+CREATE TABLE IF NOT EXISTS "survey_vote" (
+                                  "id" SERIAL PRIMARY KEY,
                                   "voter_id" int,
                                   "survey_id" int references surveys,
                                   "answer_id" int
@@ -148,7 +155,8 @@ CREATE TABLE IF NOT EXISTS "survey_answers" (
 CREATE TABLE IF NOT EXISTS "answers" (
                            "id" SERIAL PRIMARY KEY,
                            "content" varchar,
-                           "survey_id" int references surveys
+                           "survey_id" int references surveys,
+                           "right_answer" boolean
 );
 
 CREATE TABLE IF NOT EXISTS "expenses" (
@@ -229,6 +237,18 @@ CREATE TABLE IF NOT EXISTS group_profiles
         primary key (group_id, profile_id)
 );
 
+CREATE TABLE IF NOT EXISTS group_memories
+(
+    "id"   SERIAL PRIMARY KEY,
+    group_id   int not null
+        constraint group_memories_groups_id_fk
+            references groups
+            on update cascade on delete cascade,
+    memory_url text not null,
+    constraint group_memories_pk
+        unique (group_id, memory_url)
+);
+
 INSERT INTO "genders" (value)
 VALUES ('male');
 
@@ -259,6 +279,8 @@ INSERT INTO public.message_type (id, name)
 VALUES (2, 'IMAGE');
 INSERT INTO public.message_type (id, name)
 VALUES (3, 'FILE');
+INSERT INTO public.message_type (id, name)
+VALUES (4, 'SURVEY');
 
 CREATE TABLE IF NOT EXISTS activities_info
 (
@@ -271,4 +293,14 @@ CREATE TABLE IF NOT EXISTS activities_info
             on update cascade on delete cascade,
     content text not null
 );
+
+alter table survey_vote
+    add constraint survey_answers_voter_id_fkey
+        foreign key (voter_id) references users
+            on delete cascade;
+
+alter table survey_vote
+    add constraint survey_answers_answer_id_fkey
+        foreign key (answer_id) references answers
+            on delete cascade;
 

@@ -35,7 +35,7 @@ public class PlacesRepository {
 
     static final String GEOCODE_ADDRESS_URL = "https://neutrinoapi.net/geocode-address";
 
-    private LocationResponse filterAdresses(GeocodeAddressRequest request, List<LocationResponse> locations){
+    private LocationResponse filterAddresses(GeocodeAddressRequest request, List<LocationResponse> locations){
         String requestedCity = request.getCity();
         String countryCode = request.getCountryCode();
         for(LocationResponse location : locations){
@@ -48,8 +48,6 @@ public class PlacesRepository {
     }
 
     public LocationResponse getCoordinates(GeocodeAddressRequest request){
-        //if DAILY API LIMIT EXCEEDED
-//        return Optional.of(LocationResponse.builder().longitude(2.3548f).latitude(48.8279f).build());
         if (neutrinoApiKey != null && neutrinoUserId != null) {
             request.setUserId(neutrinoUserId);
             request.setApiKey(neutrinoApiKey);
@@ -69,7 +67,7 @@ public class PlacesRepository {
             if (geocodeAddressResponse.getFound() == 1)
                 return geocodeAddressResponse.getLocations().get(0);
             else
-                return filterAdresses(request, geocodeAddressResponse.getLocations());
+                return filterAddresses(request, geocodeAddressResponse.getLocations());
         } catch (RestClientException e) {
             throw new GeocodeAddressException("An error occurred with Geocode Address", e);
         }
@@ -80,6 +78,7 @@ public class PlacesRepository {
                                          .setLimit(10)
                                          .setApiKey(placesApiKey)
                                          .setCircle(new SearchCircle(lon, lat, radiusMeter))
+                                         .setProximity(new SearchProximity(lon, lat))
                                          .build();
     }
 
@@ -132,6 +131,7 @@ final class GeoapifyQueryBuilder {
     private Collection<String> categories = new ArrayList<>();
     private SearchCircle circle;
     private int limit = 10;
+    private SearchProximity proximity;
     private String apiKey;
 
     static final String GEOAPIFY_PLACES_URL = "https://api.geoapify.com/v2/places";
@@ -142,9 +142,10 @@ final class GeoapifyQueryBuilder {
             throw new IllegalStateException();
         StringJoiner joinerCategories = new StringJoiner(",");
         categories.forEach(joinerCategories::add);
-        return String.format(GEOAPIFY_PLACES_URL + "?categories=%s&filter=%s&bias=proximity:2.25,48.8&limit=%d&apiKey=%s",
+        return String.format(GEOAPIFY_PLACES_URL + "?categories=%s&filter=%s&bias=%s&limit=%d&apiKey=%s",
                 joinerCategories,
                 circle.toString(),
+                proximity.toString(),
                 limit,
                 apiKey);
     }
@@ -173,10 +174,25 @@ final class GeoapifyQueryBuilder {
         return this;
     }
 
+    public GeoapifyQueryBuilder setProximity(final SearchProximity searchProximity)
+    {
+        this.proximity = searchProximity;
+        return this;
+    }
+
     public GeoapifyQueryBuilder setApiKey(final String apiKey)
     {
         this.apiKey = apiKey;
         return this;
+    }
+}
+
+final record SearchProximity(double longitude, double latitude)
+{
+    @Override
+    public String toString()
+    {
+        return "proximity:" + longitude + ","+latitude;
     }
 }
 

@@ -21,4 +21,6 @@ public class UpdatePublicGroupRequest {
     private Date endOfTrip;
     @Nullable
     private String picture;
+    @Nullable
+    private String destination;
 }

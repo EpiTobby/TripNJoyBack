@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
+
 @Getter
 @AllArgsConstructor
 @JsonAutoDetect
@@ -25,6 +27,8 @@ public class ReportModel {
     private GroupMemberModel reportedUser;
     @NotNull
     private GroupMemberModel submitter;
+    @NotNull
+    private Instant createdDate;
 
     public static ReportModel of(ReportEntity reportEntity){
         return ReportModel.builder()
@@ -33,6 +37,7 @@ public class ReportModel {
                 .details(reportEntity.getDetails())
                 .submitter(GroupMemberModel.of(reportEntity.getSubmitter()))
                 .reportedUser(GroupMemberModel.of(reportEntity.getReportedUser()))
+                .createdDate(reportEntity.getCreatedDate())
                 .build();
     }
 }

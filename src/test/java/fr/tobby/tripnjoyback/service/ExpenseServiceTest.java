@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.List;
 
 @DataJpaTest
-public class ExpenseServiceTest {
+class ExpenseServiceTest {
     private static GenderEntity maleGender;
     private static GenderRepository genderRepository;
     private static CityRepository cityRepository;
@@ -86,7 +86,7 @@ public class ExpenseServiceTest {
     private GroupEntity anyGroup()
     {
         GroupEntity group = new GroupEntity(null, "test","description", State.OPEN.getEntity(), null, 10, new Date(), null, null,
-                "", new ArrayList<>(), null, new ArrayList<>());
+                "","",new ArrayList<>(), null, new ArrayList<>());
         return groupRepository.save(group);
     }
 
@@ -190,9 +190,9 @@ public class ExpenseServiceTest {
         expenseService.createExpense(groupEntity.getId(),user3.getId(), expenseRequest2);
 
         List<MoneyDueResponse> moneyDueResponses = expenseService.getMoneyUserOwesToEachMemberInGroup(groupEntity.getId(), user1.getId());
-        Assertions.assertEquals(moneyDueResponses.get(0).getTotal(),16);
+        Assertions.assertEquals(16, moneyDueResponses.get(0).getTotal());
         moneyDueResponses = expenseService.getMoneyUserOwesToEachMemberInGroup(groupEntity.getId(), user2.getId());
-        Assertions.assertEquals(moneyDueResponses.get(0).getTotal(),32);
+        Assertions.assertEquals(32, moneyDueResponses.get(0).getTotal());
     }
 
     @Test
@@ -226,8 +226,8 @@ public class ExpenseServiceTest {
         expenseService.createExpense(groupEntity.getId(),user3.getId(), expenseRequest2);
 
         List<MoneyDueResponse> moneyDueResponses = expenseService.getMoneyEachMemberOwesToUserInGroup(groupEntity.getId(), user3.getId());
-        Assertions.assertEquals(moneyDueResponses.get(0).getTotal(),16);
-        Assertions.assertEquals(moneyDueResponses.get(1).getTotal(),32);
+        Assertions.assertEquals(16, moneyDueResponses.get(0).getTotal());
+        Assertions.assertEquals(32, moneyDueResponses.get(1).getTotal());
     }
 
     @Test
@@ -262,7 +262,7 @@ public class ExpenseServiceTest {
 
         List<BalanceResponse> balanceResponses = expenseService.computeBalances(groupEntity.getId());
 
-        Assertions.assertEquals(balanceResponses.get(2).getMoney(),48);
-        Assertions.assertEquals(balanceResponses.stream().mapToDouble(BalanceResponse::getMoney).sum(),0);
+        Assertions.assertEquals(48, balanceResponses.get(2).getMoney());
+        Assertions.assertEquals(0, balanceResponses.stream().mapToDouble(BalanceResponse::getMoney).sum());
     }
 }

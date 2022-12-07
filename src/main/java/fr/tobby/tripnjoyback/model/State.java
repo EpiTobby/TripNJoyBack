@@ -3,7 +3,6 @@ package fr.tobby.tripnjoyback.model;
 import fr.tobby.tripnjoyback.SpringContext;
 import fr.tobby.tripnjoyback.entity.StateEntity;
 import fr.tobby.tripnjoyback.repository.StateRepository;
-import org.apache.catalina.core.ApplicationContext;
 import org.jetbrains.annotations.NotNull;
 
 public enum State {

@@ -6,7 +6,6 @@ import lombok.Getter;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Getter
@@ -31,7 +30,7 @@ public class UserModel {
     {
         Collection<UserRole> roles = entity.getRoles().stream()
                                            .map(role -> UserRole.of(role.getName()))
-                                           .collect(Collectors.toList());
+                                           .toList();
         return new UserModel(
                 entity.getId(),
                 entity.getFirstname(),

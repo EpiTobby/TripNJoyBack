@@ -1,7 +1,7 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.PromStats;
 import fr.tobby.tripnjoyback.auth.TokenManager;
-import fr.tobby.tripnjoyback.entity.CityEntity;
 import fr.tobby.tripnjoyback.entity.ConfirmationCodeEntity;
 import fr.tobby.tripnjoyback.entity.UserEntity;
 import fr.tobby.tripnjoyback.exception.*;
@@ -10,6 +10,7 @@ import fr.tobby.tripnjoyback.mail.UserMailUtils;
 import fr.tobby.tripnjoyback.model.ConfirmationCodeModel;
 import fr.tobby.tripnjoyback.model.GoogleTokenVerificationModel;
 import fr.tobby.tripnjoyback.model.UserModel;
+import fr.tobby.tripnjoyback.model.UserRole;
 import fr.tobby.tripnjoyback.model.request.*;
 import fr.tobby.tripnjoyback.model.request.auth.GoogleRequest;
 import fr.tobby.tripnjoyback.model.response.UserIdResponse;
@@ -41,6 +42,7 @@ import java.util.Optional;
 @Service
 public class AuthService {
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+    public static final String BAD_CONFIRMATION_CODE = "Bad Confirmation Code";
 
     private final UserRepository userRepository;
     private final UserMailUtils userMailUtils;
@@ -54,6 +56,7 @@ public class AuthService {
     private final UserService userService;
     private final UserRoleRepository userRoleRepository;
     private final LanguageRepository languageRepository;
+    private final PromStats promStats;
 
     @Value("${google.secret}")
     private String googleSecret;
@@ -65,7 +68,7 @@ public class AuthService {
                        final CityService cityService, final ConfirmationCodeRepository confirmationCodeRepository,
                        final AuthenticationManager authenticationManager, final TokenManager tokenManager,
                        final UserDetailsService userDetailsService, final UserService userService,
-                       final UserRoleRepository userRoleRepository, LanguageRepository languageRepository) {
+                       final UserRoleRepository userRoleRepository, LanguageRepository languageRepository, PromStats promStats) {
         this.userRepository = userRepository;
         this.userMailUtils = userMailUtils;
         this.encoder = encoder;
@@ -78,6 +81,7 @@ public class AuthService {
         this.userService = userService;
         this.userRoleRepository = userRoleRepository;
         this.languageRepository = languageRepository;
+        this.promStats = promStats;
     }
 
     @Transactional
@@ -99,9 +103,17 @@ public class AuthService {
                 .roles(List.of(userRoleRepository.getByName("default")))
                 .build();
         UserModel created = UserModel.of(createUser(userEntity));
+        promStats.getUserCount().set(userRepository.count());
         generateConfirmationCode(created);
-        logger.debug("Created new user " + created);
+        logger.debug("Created new user {}", created);
         return created;
+    }
+
+    @Transactional
+    public UserModel createAdmin(UserCreationRequest model) throws UserCreationException {
+        UserEntity userEntity = userRepository.getById(createUser(model).getId());
+        userEntity.setRoles(List.of(userRoleRepository.getByName("admin"),userRoleRepository.getByName("default")));
+        return UserModel.of(userEntity);
     }
 
     UserEntity createUser(UserEntity entity) {
@@ -121,10 +133,11 @@ public class AuthService {
             if (response.getStatusCode() != HttpStatus.OK)
                 throw new UserCreationException(errorMessage);
 
-            if (response.getBody() == null)
+            GoogleTokenVerificationModel body = response.getBody();
+            if (body == null)
                 throw new UserCreationException(errorMessage);
 
-            if (!Objects.equals(response.getBody().getEmail(), model.getEmail()) || !Objects.equals(response.getBody().getAud(), googleSecret))
+            if (!Objects.equals(body.getEmail(), model.getEmail()) || !Objects.equals(body.getAud(), googleSecret))
                 throw new UserCreationException(errorMessage);
 
         } catch (RestClientException e) {
@@ -153,7 +166,8 @@ public class AuthService {
                 .build();
 
         UserModel userModel = UserModel.of(userRepository.save(userEntity));
-        logger.debug("Created new user " + userModel);
+        promStats.getUserCount().set(userRepository.count());
+        logger.debug("Created new user {}", userModel);
         return new GoogleUserResponse(userModel, true);
     }
 
@@ -164,6 +178,18 @@ public class AuthService {
         UserModel userModel = userService.findByEmail(username).orElseThrow();
         String token = tokenManager.generateFor(userDetails, userModel.getId());
         logger.debug("User {} logged in. jwt = {}", username, token);
+        return token;
+    }
+
+    public String loginAdmin(@NonNull String username, @NonNull String password) throws AuthenticationException {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UserModel userModel = userService.findByEmail(username).orElseThrow();
+        if (!userModel.getRoles().contains(UserRole.ADMIN))
+            throw new ForbiddenOperationException("You cannot perform this operation.");
+        String token = tokenManager.generateFor(userDetails, userModel.getId());
+        logger.debug("Admin {} logged in. jwt = {}", username, token);
         return token;
     }
 
@@ -183,9 +209,10 @@ public class AuthService {
         return confirmationCodeEntity;
     }
 
+    @Transactional
     public void confirmUser(long userId, ConfirmationCodeModel confirmationCodeModel) {
-        ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(confirmationCodeModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
-        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(confirmationCodeModel.getValue()).orElseThrow(() -> new BadConfirmationCodeException(BAD_CONFIRMATION_CODE));
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         if (userId == confirmationCode.getUserId()) {
             confirmationCodeRepository.delete(confirmationCode);
             if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0) {
@@ -196,26 +223,24 @@ public class AuthService {
                 logger.debug("Confirmation of user account {}", userEntity.getEmail());
             }
         } else
-            throw new BadConfirmationCodeException("Bad Confirmation Code");
+            throw new BadConfirmationCodeException(BAD_CONFIRMATION_CODE);
     }
 
     @Transactional
     public void resendConfirmationCode(long userId) {
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         if (user.isConfirmed())
             throw new UserAlreadyConfirmedException("User is already confirmed");
         Optional<ConfirmationCodeEntity> confirmationCodeEntity = confirmationCodeRepository.findByUserId(userId);
-        if (confirmationCodeEntity.isPresent())
-            confirmationCodeRepository.delete(confirmationCodeEntity.get());
+        confirmationCodeEntity.ifPresent(confirmationCodeRepository::delete);
         generateConfirmationCode(UserModel.of(user));
     }
 
     @Transactional
     public UserModel updateConfirmation(long userId) throws UserNotFoundException {
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         user.setConfirmed(true);
         UserModel userModel = UserModel.of(user);
-        userRepository.save(user);
         userMailUtils.sendConfirmationSuccessMail(userModel);
         return userModel;
     }
@@ -229,10 +254,9 @@ public class AuthService {
 
     @Transactional
     public UserIdResponse validateCodePassword(ValidateCodePasswordRequest validateCodePasswordRequest) {
-        UserEntity userEntity = userRepository.findByEmail(validateCodePasswordRequest.getEmail()).filter(user -> user.isConfirmed())
+        UserEntity userEntity = userRepository.findByEmail(validateCodePasswordRequest.getEmail()).filter(UserEntity::isConfirmed)
                 .orElseThrow(() -> new UserNotFoundException("No user with email " + validateCodePasswordRequest.getEmail()));
-        ;
-        ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(validateCodePasswordRequest.getValue()).orElseThrow(() -> new BadConfirmationCodeException("Bad Confirmation Code"));
+        ConfirmationCodeEntity confirmationCode = confirmationCodeRepository.findByValue(validateCodePasswordRequest.getValue()).orElseThrow(() -> new BadConfirmationCodeException(BAD_CONFIRMATION_CODE));
         if (userEntity.getId() == confirmationCode.getUserId()) {
             confirmationCodeRepository.delete(confirmationCode);
             if (Instant.now().compareTo(confirmationCode.getExpirationDate()) > 0) {
@@ -245,12 +269,12 @@ public class AuthService {
                 return UserIdResponse.builder().userId(userEntity.getId()).build();
             }
         } else
-            throw new BadConfirmationCodeException("Bad confirmation code");
+            throw new BadConfirmationCodeException(BAD_CONFIRMATION_CODE);
     }
 
     @Transactional
     public void updatePassword(long userId, UpdatePasswordRequest updatePasswordRequest) {
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         if (encoder.matches(updatePasswordRequest.getOldPassword(), user.getPassword())) {
             user.setPassword(encoder.encode(updatePasswordRequest.getNewPassword()));
             userMailUtils.sendUpdatePasswordMail(UserModel.of(user));
@@ -260,7 +284,7 @@ public class AuthService {
 
     @Transactional
     public String updateEmail(long userId, UpdateEmailRequest updateEmailRequest) {
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("No user with id " + userId));
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         if (!encoder.matches(updateEmailRequest.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Bad Password");
         }

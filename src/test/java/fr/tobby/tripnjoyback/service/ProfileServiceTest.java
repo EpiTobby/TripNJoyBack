@@ -1,11 +1,13 @@
 package fr.tobby.tripnjoyback.service;
 
+import fr.tobby.tripnjoyback.PromStats;
 import fr.tobby.tripnjoyback.entity.*;
 import fr.tobby.tripnjoyback.exception.ProfileNotFoundException;
 import fr.tobby.tripnjoyback.model.request.ProfileCreationRequest;
 import fr.tobby.tripnjoyback.model.request.ProfileUpdateRequest;
 import fr.tobby.tripnjoyback.model.request.anwsers.*;
 import fr.tobby.tripnjoyback.repository.*;
+import io.prometheus.client.Gauge;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,13 +18,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
 
 @DataJpaTest
-public class ProfileServiceTest {
+class ProfileServiceTest {
     private static GenderEntity maleGender;
     private static GenderEntity femaleGender;
     private static GenderEntity otherGender;
@@ -34,7 +37,7 @@ public class ProfileServiceTest {
     private LanguageRepository languageRepository;
     @Autowired
     private ProfileRepository profileRepository;
-    private AnswersRepository answersRepository = mock(AnswersRepository.class);
+    private ProfileAnswersRepository profileAnswersRepository = mock(ProfileAnswersRepository.class);
     @Autowired
     private UserRepository userRepository;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
@@ -48,13 +51,16 @@ public class ProfileServiceTest {
 
     @BeforeEach
     void initProfileService(){
-        profileService = new ProfileService(profileRepository, answersRepository, userRepository);
+        PromStats promStats = mock(PromStats.class);
+        when(promStats.getProfileCount()).thenReturn(mock(Gauge.class));
+        profileService = new ProfileService(profileRepository, profileAnswersRepository, userRepository, promStats);
     }
 
     private ProfileEntity anyProfile(){
         ProfileEntity profileEntity =  profileRepository.save(ProfileEntity.builder()
                 .active(true)
                 .name("profile1")
+                .createdDate(Instant.now())
                 .build());
         return profileEntity;
     }
@@ -63,7 +69,7 @@ public class ProfileServiceTest {
     private UserEntity anyUserWithProfile() throws ParseException {
         CityEntity city = cityRepository.save(new CityEntity("Paris"));
         LanguageEntity language = languageRepository.save(new LanguageEntity("French"));
-        return userRepository.save(UserEntity.builder()
+        UserEntity userEntity = userRepository.save(UserEntity.builder()
                                              .firstname("Test")
                                              .lastname("1")
                                              .gender(maleGender)
@@ -73,8 +79,10 @@ public class ProfileServiceTest {
                                              .confirmed(true)
                                              .language(language)
                                              .roles(List.of())
-                                             .profiles(new ArrayList(){{ add(anyProfile()); }})
+                                             .profiles(new ArrayList<>())
                                              .build());
+        userEntity.getProfiles().add(anyProfile());
+        return userEntity;
     }
 
     @Test
@@ -84,13 +92,13 @@ public class ProfileServiceTest {
         long profileId = user.getProfiles().iterator().next().getId();
         profileService.updateProfile(user.getId(), profileId, request);
         ProfileEntity profileEntity = profileRepository.findById(profileId).get();
-        Assertions.assertEquals(profileEntity.getName(),"profile1");
+        Assertions.assertEquals("profile1", profileEntity.getName());
     }
 
     @Test
     void testUpdateActiveWhenNewProfileAdded() throws ParseException {
         UserEntity user = anyUserWithProfile();
-        when(answersRepository.save(any())).thenReturn(AnswersEntity.builder()
+        when(profileAnswersRepository.save(any())).thenReturn(ProfileAnswersEntity.builder()
                 .id("2")
                 .availabilities(List.of(new AvailabiltyEntity("01-07-2023", "16-07-2023")))
                 .durationMin(4)
@@ -134,9 +142,9 @@ public class ProfileServiceTest {
     }
 
     @Test
-    public void testDeleteProfile() throws ParseException {
+    void testDeleteProfile() throws ParseException {
         UserEntity user = anyUserWithProfile();
-        AnswersEntity entity = AnswersEntity.builder()
+        ProfileAnswersEntity entity = ProfileAnswersEntity.builder()
                 .id("2")
                 .availabilities(List.of(new AvailabiltyEntity("01-07-2023", "16-07-2023")))
                 .durationMin(4)
@@ -157,12 +165,12 @@ public class ProfileServiceTest {
                 .chillOrVisit("CHILL")
                 .sport(true)
                 .build();
-        when(answersRepository.save(any())).thenReturn(entity);
-        when(answersRepository.findByProfileId(anyLong())).thenReturn(entity);
+        when(profileAnswersRepository.save(any())).thenReturn(entity);
+        when(profileAnswersRepository.findByProfileId(anyLong())).thenReturn(entity);
         ProfileEntity profile = user.getProfiles().stream().findFirst().get();
         profile.setActive(false);
 
-        profileService.deleteProfile(profile.getId());
+        profileService.deleteProfile(user.getId(), profile.getId());
 
         Assertions.assertThrows(ProfileNotFoundException.class, () -> profileService.getProfile(profile.getId()));
     }
@@ -170,7 +178,7 @@ public class ProfileServiceTest {
     @Test
     void testDeleteActiveProfileShouldThrow() throws ParseException {
         UserEntity user = anyUserWithProfile();
-        AnswersEntity entity = AnswersEntity.builder()
+        ProfileAnswersEntity entity = ProfileAnswersEntity.builder()
                 .id("2")
                 .availabilities(List.of(new AvailabiltyEntity("01-07-2023", "16-07-2023")))
                 .durationMin(4)
@@ -191,11 +199,13 @@ public class ProfileServiceTest {
                 .chillOrVisit("CHILL")
                 .sport(true)
                 .build();
-        when(answersRepository.save(any())).thenReturn(entity);
-        when(answersRepository.findByProfileId(anyLong())).thenReturn(entity);
+        when(profileAnswersRepository.save(any())).thenReturn(entity);
+        when(profileAnswersRepository.findByProfileId(anyLong())).thenReturn(entity);
         ProfileEntity profile = user.getProfiles().stream().findFirst().get();
         profile.setActive(true);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> profileService.deleteProfile(profile.getId()));
+        long userId = user.getId();
+        long profileId = profile.getId();
+        Assertions.assertThrows(IllegalArgumentException.class, () -> profileService.deleteProfile(userId, profileId));
     }
 }

@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    public static final String ERROR_RESPONSE_MSG = "Error on request";
 
     private final AuthService authService;
     private final TokenManager tokenManager;
@@ -40,9 +42,18 @@ public class AuthController {
     @Operation(summary = "Create a new account. Will send a confirmation mail to the given address")
     @ApiResponse(responseCode = "200", description = "User is created")
     @ApiResponse(responseCode = "422", description = "If the email is already in use by another user")
-    public AuthTokenResponse create(@RequestBody UserCreationRequest model) {
+    public AuthTokenResponse createAccount(@RequestBody UserCreationRequest model) {
         UserModel user = authService.createUser(model);
         return new AuthTokenResponse(tokenManager.generateFor(user.getEmail(), user.getId()));
+    }
+
+    @PostMapping("register/admin")
+    @PreAuthorize("hasAuthority('admin')")
+    @Operation(summary = "Create a new admin account. Will send a confirmation mail to the given address")
+    @ApiResponse(responseCode = "200", description = "Admin is created")
+    @ApiResponse(responseCode = "422", description = "If the email is already in use by another user")
+    public UserModel createAdminAccount(@RequestBody UserCreationRequest model) {
+        return authService.createAdmin(model);
     }
 
     @PostMapping("{id}/resend")
@@ -59,7 +70,15 @@ public class AuthController {
     @ApiResponse(responseCode = "200", description = "Authentication Succeeded. Use the given jwt in following requests")
     public LoginResponse login(@RequestBody LoginRequest loginRequest) {
         String token = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
+        return new LoginResponse(loginRequest.getUsername(), token);
+    }
 
+    @PostMapping("login/admin")
+    @Operation(summary = "Log a user, to allow authenticated endpoints")
+    @ApiResponse(responseCode = "401", description = "Authentication failed. Wrong username or password")
+    @ApiResponse(responseCode = "200", description = "Authentication Succeeded. Use the given jwt in following requests")
+    public LoginResponse loginAdmin(@RequestBody LoginRequest loginRequest) {
+        String token = authService.loginAdmin(loginRequest.getUsername(), loginRequest.getPassword());
         return new LoginResponse(loginRequest.getUsername(), token);
     }
 
@@ -121,14 +140,23 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String loginFailed(AuthenticationException exception) {
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return "Invalid username or password";
+    }
+
+    @ExceptionHandler(ForbiddenOperationException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String creationError(ForbiddenOperationException exception) {
+        logger.debug(ERROR_RESPONSE_MSG, exception);
+        return exception.getMessage();
     }
 
     @ExceptionHandler(UserCreationException.class)
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String creationError(UserCreationException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -136,7 +164,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String getError(UpdatePasswordException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -144,7 +172,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String getError(UpdateEmailException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -152,7 +180,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String expiredConfirmationCode(ExpiredCodeException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -160,7 +188,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String badCredentials(BadCredentialsException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -168,7 +196,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String badConfirmationCode(BadConfirmationCodeException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -176,7 +204,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public String userNotFoundException(UserNotFoundException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 
@@ -184,7 +212,7 @@ public class AuthController {
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public String userAlreadyConfirmedException(UserAlreadyConfirmedException exception) {
-        logger.debug("Error on request", exception);
+        logger.debug(ERROR_RESPONSE_MSG, exception);
         return exception.getMessage();
     }
 }

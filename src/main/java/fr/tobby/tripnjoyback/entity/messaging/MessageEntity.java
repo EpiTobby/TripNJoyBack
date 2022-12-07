@@ -32,16 +32,6 @@ public class MessageEntity {
     @JoinColumn(name = "type_id")
     private MessageTypeEntity type;
 
-    public MessageEntity(final UserEntity user, final ChannelEntity channel, final String content, MessageTypeEntity type)
-    {
-        this.sender = user;
-        this.channel = channel;
-        this.content = content;
-        this.type = type;
-        this.sendDate = new Date();
-        this.modifiedDate = new Date();
-    }
-
     public MessageEntity(final UserEntity user, final ChannelEntity channel, final String content, MessageTypeEntity type, final Date date)
     {
         this.sender = user;

@@ -10,6 +10,7 @@ import fr.tobby.tripnjoyback.model.MatchMakingUserModel;
 import fr.tobby.tripnjoyback.model.ProfileModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.AvailabilityAnswerModel;
 import fr.tobby.tripnjoyback.model.request.anwsers.RangeAnswerModel;
+import fr.tobby.tripnjoyback.notification.SavedNotificationService;
 import fr.tobby.tripnjoyback.repository.GroupRepository;
 import fr.tobby.tripnjoyback.repository.ProfileRepository;
 import fr.tobby.tripnjoyback.repository.UserRepository;
@@ -38,13 +39,16 @@ public class MatchMaker {
     private final GroupService groupService;
     private final GroupRepository groupRepository;
     private final ProfileService profileService;
+    private final SavedNotificationService notificationService;
+    private final ReportService reportService;
 
     private long taskIndex = 1L;
     private final Map<Long, CompletableFuture<MatchMakingResult>> tasks = new HashMap<>();
 
     public MatchMaker(final ProfileRepository profileRepository, final UserRepository userRepository, final MatchMakerScoreComputer scoreComputer,
                       final GroupService groupService, final GroupRepository groupRepository,
-                      final ProfileService profileService)
+                      final ProfileService profileService, final SavedNotificationService notificationService,
+                      final ReportService reportService)
     {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
@@ -52,6 +56,8 @@ public class MatchMaker {
         this.groupService = groupService;
         this.groupRepository = groupRepository;
         this.profileService = profileService;
+        this.notificationService = notificationService;
+        this.reportService = reportService;
     }
 
     @Transactional
@@ -80,11 +86,18 @@ public class MatchMaker {
         return task.isDone() ? task.get() : new MatchMakingResult(MatchMakingResult.Type.SEARCHING, null);
     }
 
+    private void cancelPreviousMatches(long userId)
+    {
+        userRepository.findById(userId)
+                .ifPresent(user -> user.setWaitingForGroup(false));
+    }
+
     @Transactional
     @Async
     public CompletableFuture<MatchMakingResult> match(@NotNull final MatchMakingUserModel user)
     {
         logger.info("Starting matchmaking for user {}", user.getUserId());
+        cancelPreviousMatches(user.getUserId());
         Optional<GroupEntity> matchedGroup = findMatchingGroup(user);
 
         if (matchedGroup.isPresent())
@@ -93,6 +106,11 @@ public class MatchMaker {
             logger.info("User {} joining group {}", user.getUserId(), group.getId());
             profileService.setActiveProfile(user.getProfile().getId(), false);
             groupService.addUserToPublicGroup(group.getId(), user.getUserId(), user.getProfile().getId());
+            notificationService.sendToGroup(group.getId(),
+                    "Nouveau membre",
+                    String.format("%s a rejoint l'aventure !", userRepository.findById(user.getUserId()).orElseThrow().getFirstname()),
+                    Map.of("newMemberId", String.valueOf(user.getUserId()),
+                            "groupId", String.valueOf(group.getId())));
             return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.JOINED, GroupModel.of(group)));
         }
 
@@ -119,6 +137,13 @@ public class MatchMaker {
             matchedEntity.setWaitingForGroup(false);
             profileService.setActiveProfile(matched.getProfile().getId(), false);
             profileService.setActiveProfile(user.getProfile().getId(), false);
+            if (matchedEntity.getFirebaseToken() != null)
+            {
+                notificationService.sendToUser(matchedEntity.getId(),
+                        "Groupe trouvé",
+                        "Un nouveau groupe de voyage a été créé",
+                        Map.of("groupId", String.valueOf(created.getId())));
+            }
             return CompletableFuture.completedFuture(new MatchMakingResult(MatchMakingResult.Type.CREATED, created));
         }
         else
@@ -143,6 +168,7 @@ public class MatchMaker {
                      .filter(pair -> scoreComputer.isUserCompatible(pair.right(), user))
                      .map(pair -> {
                          float score = scoreComputer.computeMatchingScore(user.getProfile(), pair.right());
+                         score -= reportService.getReportCountForUser(user.getUserId());
                          return new Pair<>(pair.left(), score);
                      })
                      .filter(pair -> pair.right() > MINIMAL_MATCHING_SCORE)
@@ -154,6 +180,7 @@ public class MatchMaker {
     {
         Collection<MatchMakingUserModel> others = userRepository.findAllByWaitingForGroupIsTrue()
                                                                 .stream()
+                                                                .filter(other -> other.getId() != user.getUserId())
                                                                 .map(other -> {
                                                                     ProfileModel profileModel = profileService.getActiveProfileModel(other.getId()).orElseThrow();
                                                                     return MatchMakingUserModel.from(other, profileModel);
@@ -165,6 +192,8 @@ public class MatchMaker {
                      .filter(other -> scoreComputer.isUserCompatible(user.getProfile(), other) && scoreComputer.isUserCompatible(other.getProfile(), user))
                      .map(other -> {
                          float score = scoreComputer.computeMatchingScore(user.getProfile(), other.getProfile());
+                         score -= reportService.getReportCountForUser(user.getUserId());
+                         score -= reportService.getReportCountForUser(other.getUserId());
                          return new Pair<>(other, score);
                      })
                      .filter(pair -> pair.right() > MINIMAL_MATCHING_SCORE)
