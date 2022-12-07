@@ -25,7 +25,7 @@ public class GroupModel {
     private String description;
     private State state;
     @Nullable
-    private UserModel owner;
+    private MemberModel owner;
     private int maxSize;
     @Nullable
     private Date startOfTrip;
@@ -50,7 +50,7 @@ public class GroupModel {
                          .name(groupEntity.getName())
                          .description(groupEntity.getDescription())
                          .state(State.valueOf(groupEntity.getStateEntity().getValue()))
-                         .owner(groupEntity.getOwner() == null ? null : UserModel.of(groupEntity.getOwner()))
+                         .owner(groupEntity.getOwner() == null ? null : MemberModel.of(groupEntity.getOwner()))
                          .maxSize(groupEntity.getMaxSize())
                          .startOfTrip(groupEntity.getStartOfTrip())
                          .endOfTrip(groupEntity.getEndOfTrip())

@@ -1,6 +1,7 @@
 package fr.tobby.tripnjoyback.model.request;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import fr.tobby.tripnjoyback.model.State;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Nullable;
@@ -23,4 +24,6 @@ public class UpdatePublicGroupRequest {
     private String picture;
     @Nullable
     private String destination;
+    @Nullable
+    private State newState;
 }

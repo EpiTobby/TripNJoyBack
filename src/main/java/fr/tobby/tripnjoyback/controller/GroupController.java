@@ -121,18 +121,18 @@ public class GroupController {
     @ApiResponse(responseCode = "200", description = "The group is updated")
     @ApiResponse(responseCode = "403", description = "The client is not the owner of the group")
     @ApiResponse(responseCode = "422", description = "Group or User does not exist")
-    public void updatePrivateGroup(@PathVariable("group") final long groupId, @RequestBody UpdatePrivateGroupRequest updatePrivateGroupRequest) {
+    public GroupModel updatePrivateGroup(@PathVariable("group") final long groupId, @RequestBody UpdatePrivateGroupRequest updatePrivateGroupRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         checkOwnership(groupId, authentication);
-        groupService.updatePrivateGroup(groupId, updatePrivateGroupRequest);
+        return groupService.updatePrivateGroup(groupId, updatePrivateGroupRequest);
     }
 
     @PatchMapping("{group}")
     @Operation(summary = "Update the public group")
     @ApiResponse(responseCode = "200", description = "The group is updated")
     @ApiResponse(responseCode = "422", description = "Group does not exist")
-    public void updatePublicGroup(@PathVariable("group") final long groupId, @RequestBody UpdatePublicGroupRequest request) {
-        groupService.updatePublicGroup(groupId, request);
+    public GroupModel updatePublicGroup(@PathVariable("group") final long groupId, @RequestBody UpdatePublicGroupRequest request) {
+        return groupService.updatePublicGroup(groupId, request);
     }
 
     @DeleteMapping("private/{group}")

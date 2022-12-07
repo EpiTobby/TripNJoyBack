@@ -16,6 +16,8 @@ import fr.tobby.tripnjoyback.model.response.GroupMemoriesResponse;
 import fr.tobby.tripnjoyback.repository.*;
 import fr.tobby.tripnjoyback.utils.QRCodeGenerator;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -163,7 +165,7 @@ public class GroupService {
     }
 
     @Transactional
-    public void updatePrivateGroup(long groupId, UpdatePrivateGroupRequest updatePrivateGroupRequest) {
+    public GroupModel updatePrivateGroup(long groupId, UpdatePrivateGroupRequest updatePrivateGroupRequest) {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         if (updatePrivateGroupRequest.getName() != null) {
             groupEntity.setName(updatePrivateGroupRequest.getName());
@@ -203,10 +205,11 @@ public class GroupService {
             } else
                 throw new UpdateGroupException("The new owner does not exist or is not in this private group");
         }
+        return GroupModel.of(groupEntity);
     }
 
     @Transactional
-    public void updatePublicGroup(long groupId, UpdatePublicGroupRequest request) throws GroupNotFoundException {
+    public GroupModel updatePublicGroup(long groupId, UpdatePublicGroupRequest request) throws GroupNotFoundException {
         GroupEntity groupEntity = groupRepository.findById(groupId).orElseThrow(() -> new GroupNotFoundException(groupId));
         if (request.getName() != null)
             groupEntity.setName(request.getName());
@@ -225,6 +228,25 @@ public class GroupService {
             if (request.getEndOfTrip() != null)
                 groupEntity.setEndOfTrip(request.getEndOfTrip());
         }
+        if (request.getNewState() != null) {
+            switch(request.getNewState()) {
+                case CLOSED:
+                    if (groupEntity.getOwner() == null) {
+                        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                        UserEntity userEntity = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new UserNotFoundException("User not found"));
+                        groupEntity.setOwner(userEntity);
+                        groupEntity.setStateEntity(State.CLOSED.getEntity());
+                    }
+                    break;
+                case OPEN:
+                    groupEntity.setStateEntity(State.OPEN.getEntity());
+                    break;
+                case ARCHIVED:
+                    groupEntity.setStateEntity(State.ARCHIVED.getEntity());
+                    break;
+            }
+        }
+        return GroupModel.of(groupEntity);
     }
 
     @Transactional
