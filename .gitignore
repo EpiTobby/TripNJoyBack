@@ -34,3 +34,6 @@ build/
 
 ### Docker compose ###
 .env
+
+### Firebase ###
+firebase-service-account.json

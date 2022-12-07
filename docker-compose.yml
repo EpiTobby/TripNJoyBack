@@ -28,6 +28,8 @@ services:
       - "spring.data.mongodb.host=mongo"
       - "spring.profiles.active=${PROFILE:-default}"
       - "spring.boot.admin.client.url=http://admin:8084"
+      - "agora.app.id=${AGORA_APP_ID}"
+      - "agora.app.certificate${AGORA_APP_CERT}"
 
   db:
     image: "postgres:13.6"
