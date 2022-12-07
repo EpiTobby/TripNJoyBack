@@ -147,7 +147,7 @@ public class GroupService {
         if (groupEntity.members.stream().anyMatch(m -> m.getUser().getId().equals(userEntity.getId())))
             throw new UserAlreadyInGroupException("User already in group");
         ProfileEntity profileEntity = profileRepository.findById(profileId).orElseThrow(() -> new ProfileNotFoundException("No profile with id " + profileId));
-        groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, profileEntity, true));
+        groupMemberRepository.save(new GroupMemberEntity(groupEntity, userEntity, profileEntity, false));
     }
 
     @Transactional
