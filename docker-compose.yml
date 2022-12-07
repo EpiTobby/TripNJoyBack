@@ -13,7 +13,8 @@ volumes:
 
 services:
   app:
-    image: gabray/tripnjoy_back:latest
+#    image: gabray/tripnjoy_back:latest
+    build: ./
     networks:
       - internal
       - external
