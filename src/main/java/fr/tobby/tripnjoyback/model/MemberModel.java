@@ -20,6 +20,7 @@ public class MemberModel {
     private Instant createdDate;
     private String phoneNumber;
     private boolean confirmed;
+    private String firebaseToken;
 
     public static MemberModel of(final UserEntity entity)
     {
@@ -34,7 +35,8 @@ public class MemberModel {
                 CityModel.of(entity.getCity()),
                 entity.getCreatedDate(),
                 entity.getPhoneNumber(),
-                entity.isConfirmed()
+                entity.isConfirmed(),
+                entity.getFirebaseToken()
         );
     }
 }
